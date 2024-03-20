@@ -1,4 +1,5 @@
 ﻿using System;
+using Client.Services;
 
 namespace Client
 {
