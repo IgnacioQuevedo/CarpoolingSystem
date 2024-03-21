@@ -8,14 +8,14 @@ namespace Client
     {
         public static void Main(string[] args)
         {
-            string optionSelected = "";
             bool appFunctional = true;
+            bool userLogged = false;
             
             
             while (appFunctional)
             {
                 MainMenuOptions();
-                optionSelected = Console.ReadLine();
+                var optionSelected = Console.ReadLine();
                 
                 switch (optionSelected)
                 {
@@ -37,9 +37,15 @@ namespace Client
                         WrongDigitInserted();
                         break;
                 }
+                
+                if (userLogged)
+                {
+                    //All the new functionalities to be done.
+                }
             }
         }
 
+        #region Main Menu Options
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
@@ -47,7 +53,6 @@ namespace Client
             ShowMessageWithDelay(goBackMessage, 1000);
             Console.WriteLine("");
         }
-
         private static bool CloseAppOption()
         {
             bool appFunctional = false;
@@ -70,14 +75,12 @@ namespace Client
                 Console.Write(dots);
             }
         }
-
         private static void AboutUsOption()
         {
             Console.WriteLine("lorem ipsum dolor");
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadLine();
         }
-
         private static void RegisterOption()
         {
             Console.WriteLine("Your username will be:");
@@ -88,7 +91,6 @@ namespace Client
             string repeatedPassword = Console.ReadLine();
             //ServiceMethod that will create the user.
         }
-
         private static void LoginOption()
         {
             Console.WriteLine("Username:");
@@ -97,7 +99,6 @@ namespace Client
             string password = Console.ReadLine();
             //ServiceMethod that will login the user into the app
         }
-
         private static void MainMenuOptions()
         {
             Console.WriteLine("Welcome to Triportunity App");
@@ -108,5 +109,6 @@ namespace Client
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
         }
+        #endregion
     }
 }
