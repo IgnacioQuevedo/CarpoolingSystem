@@ -34,13 +34,18 @@ namespace Client
                         appFunctional = CloseAppOption();
                         break;
                     default:
-                        Console.WriteLine("Insert a valid digit, please.");
-                        string goBackMessage = "Returning to main menu";
-                        ShowMessageWithDelay(goBackMessage, 1000);
-                        Console.WriteLine("");
+                        WrongDigitInserted();
                         break;
                 }
             }
+        }
+
+        private static void WrongDigitInserted()
+        {
+            Console.WriteLine("Insert a valid digit, please.");
+            string goBackMessage = "Returning to main menu";
+            ShowMessageWithDelay(goBackMessage, 1000);
+            Console.WriteLine("");
         }
 
         private static bool CloseAppOption()
@@ -53,7 +58,6 @@ namespace Client
             Console.WriteLine("Closed App with success!");
             return appFunctional;
         }
-
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
