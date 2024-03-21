@@ -13,10 +13,10 @@ namespace Client
             bool appFunctional = true;
             bool userLogged = false;
 
-
             while (appFunctional)
             {
                 MainMenuOptions();
+
                 var optionSelected = Console.ReadLine();
 
                 switch (optionSelected)
@@ -94,7 +94,7 @@ namespace Client
                         string startDirectory = directoryInfo?.Parent.Parent.FullName;
                         string subrouteOfFile = "AboutUs/CompanyInfo.txt";
                         var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
-            
+
                         Console.WriteLine(File.ReadAllText(fileRoute));
                     }
                 }
@@ -102,8 +102,8 @@ namespace Client
 
             Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
-            Console.Read();
-            ShowMessageWithDelay("Going back to Main Menu",500);
+            Console.ReadLine();
+            ShowMessageWithDelay("Going back to Main Menu", 0);
         }
 
         private static void RegisterOption()
@@ -135,7 +135,7 @@ namespace Client
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
-            
+
         }
 
         #endregion
