@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using Client.Services;
 
@@ -10,13 +12,13 @@ namespace Client
         {
             bool appFunctional = true;
             bool userLogged = false;
-            
-            
+
+
             while (appFunctional)
             {
                 MainMenuOptions();
                 var optionSelected = Console.ReadLine();
-                
+
                 switch (optionSelected)
                 {
                     case "1":
@@ -26,7 +28,7 @@ namespace Client
                     case "2":
                         RegisterOption();
                         break;
-                    
+
                     case "3":
                         AboutUsOption();
                         break;
@@ -37,7 +39,7 @@ namespace Client
                         WrongDigitInserted();
                         break;
                 }
-                
+
                 if (userLogged)
                 {
                     //All the new functionalities to be done.
@@ -46,6 +48,7 @@ namespace Client
         }
 
         #region Main Menu Options
+
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
@@ -53,34 +56,56 @@ namespace Client
             ShowMessageWithDelay(goBackMessage, 1000);
             Console.WriteLine("");
         }
+
         private static bool CloseAppOption()
         {
             bool appFunctional = false;
             string closingMessage = "Closing";
-            
+
             ShowMessageWithDelay(closingMessage, 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
             return appFunctional;
         }
+
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
             string dots = "";
-            
+
             for (int i = 0; i < 4; i++)
             {
                 Thread.Sleep(delayTime);
-                dots +=  ".";
+                dots += ".";
                 Console.Write(dots);
             }
+            Console.WriteLine("");
         }
+
         private static void AboutUsOption()
         {
-            Console.WriteLine("lorem ipsum dolor");
+            var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
+            if (directoryInfo != null)
+            {
+                if (directoryInfo?.Parent != null)
+                {
+                    if (directoryInfo?.Parent.Parent != null)
+                    {
+                        string startDirectory = directoryInfo?.Parent.Parent.FullName;
+                        string subrouteOfFile = "AboutUs/CompanyInfo.txt";
+                        var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
+            
+                        Console.WriteLine(File.ReadAllText(fileRoute));
+                    }
+                }
+            }
+
+            Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
-            Console.ReadLine();
+            Console.Read();
+            ShowMessageWithDelay("Going back to Main Menu",500);
         }
+
         private static void RegisterOption()
         {
             Console.WriteLine("Your username will be:");
@@ -91,6 +116,7 @@ namespace Client
             string repeatedPassword = Console.ReadLine();
             //ServiceMethod that will create the user.
         }
+
         private static void LoginOption()
         {
             Console.WriteLine("Username:");
@@ -99,16 +125,19 @@ namespace Client
             string password = Console.ReadLine();
             //ServiceMethod that will login the user into the app
         }
+
         private static void MainMenuOptions()
         {
             Console.WriteLine("Welcome to Triportunity App");
             Console.WriteLine("Digit the number of your query");
-            
+
             Console.WriteLine("1- Sign In");
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
+            
         }
+
         #endregion
     }
 }
