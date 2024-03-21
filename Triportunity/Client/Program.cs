@@ -35,8 +35,8 @@ namespace Client
                         break;
                     default:
                         Console.WriteLine("Insert a valid digit, please.");
-                        Console.WriteLine("Returning to main menu...");
-                        Thread.Sleep(1000);
+                        string goBackMessage = "Returning to main menu";
+                        ShowMessageWithDelay(goBackMessage, 1000);
                         Console.WriteLine("");
                         break;
                 }
@@ -49,21 +49,21 @@ namespace Client
             string closingMessage = "Closing";
             
             ShowMessageWithDelay(closingMessage, 300);
+            Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
             return appFunctional;
         }
 
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
-            Console.WriteLine(closingMessage);
+            Console.Write(closingMessage);
             string dots = "";
             
             for (int i = 0; i < 4; i++)
             {
                 Thread.Sleep(delayTime);
                 dots +=  ".";
-                closingMessage += ".";
-                Console.WriteLine(closingMessage);
+                Console.Write(dots);
             }
         }
 
