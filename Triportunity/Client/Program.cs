@@ -35,6 +35,9 @@ namespace Client
                         break;
                     default:
                         Console.WriteLine("Insert a valid digit, please.");
+                        Console.WriteLine("Returning to main menu...");
+                        Thread.Sleep(1000);
+                        Console.WriteLine("");
                         break;
                 }
             }
