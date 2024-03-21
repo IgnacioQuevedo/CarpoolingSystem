@@ -42,14 +42,20 @@ namespace Client
 
         private static bool CloseAppOption()
         {
-            bool closeApp;
-            Console.WriteLine("Closing");
-            for (int i = 0; i < 8; i++)
+            bool appFunctional = false;
+            string closingMessage = "Closing";
+            string dots = "";
+                
+            Console.WriteLine(closingMessage);
+            for (int i = 0; i < 4; i++)
             {
                 Thread.Sleep(300);
-                Console.WriteLine(".");
+                dots = dots + ".";
+                closingMessage = closingMessage + ".";
+                Console.WriteLine(closingMessage);
             }
-            return false;
+            Console.WriteLine("Closed App with success!");
+            return appFunctional;
         }
 
         private static void AboutUsOption()
