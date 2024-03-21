@@ -14,24 +14,24 @@ namespace Client
             
             while (appFunctional)
             {
-                MainMenuMsgs();
+                MainMenuOptions();
                 optionSelected = Console.ReadLine();
                 
                 switch (optionSelected)
                 {
                     case "1":
-                        LoginMsgs();
+                        LoginOption();
                         break;
 
                     case "2":
-                        RegisterMsgs();
+                        RegisterOption();
                         break;
                     
                     case "3":
-                        AboutUsMsgs();
+                        AboutUsOption();
                         break;
                     case "4":
-                        appFunctional = CloseApp();
+                        appFunctional = CloseAppOption();
                         break;
                     default:
                         Console.WriteLine("Insert a valid digit, please.");
@@ -40,7 +40,7 @@ namespace Client
             }
         }
 
-        private static bool CloseApp()
+        private static bool CloseAppOption()
         {
             bool closeApp;
             Console.WriteLine("Closing");
@@ -52,13 +52,13 @@ namespace Client
             return false;
         }
 
-        private static void AboutUsMsgs()
+        private static void AboutUsOption()
         {
             Console.WriteLine("lorem ipsum dolor");
             Console.WriteLine("Press 1 to go back to main menu");
         }
 
-        private static void RegisterMsgs()
+        private static void RegisterOption()
         {
             Console.WriteLine("Your username will be:");
             string usernameRegister = Console.ReadLine();
@@ -69,7 +69,7 @@ namespace Client
             //ServiceMethod that will create the user.
         }
 
-        private static void LoginMsgs()
+        private static void LoginOption()
         {
             Console.WriteLine("Username:");
             string username = Console.ReadLine();
@@ -78,7 +78,7 @@ namespace Client
             //ServiceMethod that will login the user into the app
         }
 
-        private static void MainMenuMsgs()
+        private static void MainMenuOptions()
         {
             Console.WriteLine("Welcome to Triportunity App");
             Console.WriteLine("Digit the number of your query");
