@@ -61,7 +61,8 @@ namespace Client
         private static void AboutUsOption()
         {
             Console.WriteLine("lorem ipsum dolor");
-            Console.WriteLine("Press 1 to go back to main menu");
+            Console.WriteLine("Enter any key to go back to the main menu");
+            Console.ReadLine();
         }
 
         private static void RegisterOption()
