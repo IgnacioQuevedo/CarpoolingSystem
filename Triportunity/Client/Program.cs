@@ -47,18 +47,24 @@ namespace Client
         {
             bool appFunctional = false;
             string closingMessage = "Closing";
-            string dots = "";
-                
-            Console.WriteLine(closingMessage);
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(300);
-                dots = dots + ".";
-                closingMessage = closingMessage + ".";
-                Console.WriteLine(closingMessage);
-            }
+            
+            ShowMessageWithDelay(closingMessage, 300);
             Console.WriteLine("Closed App with success!");
             return appFunctional;
+        }
+
+        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
+        {
+            Console.WriteLine(closingMessage);
+            string dots = "";
+            
+            for (int i = 0; i < 4; i++)
+            {
+                Thread.Sleep(delayTime);
+                dots +=  ".";
+                closingMessage += ".";
+                Console.WriteLine(closingMessage);
+            }
         }
 
         private static void AboutUsOption()
