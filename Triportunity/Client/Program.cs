@@ -79,20 +79,30 @@ namespace Client
                 dots += ".";
                 Console.Write(dots);
             }
+            Console.WriteLine("");
         }
 
         private static void AboutUsOption()
         {
+            var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
+            if (directoryInfo != null)
+            {
+                if (directoryInfo?.Parent != null)
+                {
+                    if (directoryInfo?.Parent.Parent != null)
+                    {
+                        string startDirectory = directoryInfo?.Parent.Parent.FullName;
+                        string subrouteOfFile = "AboutUs/CompanyInfo.txt";
+                        var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
             
-                        
-            string startDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            string subrouteOfFile = "AboutUs/CompanyInfo.txt";
-            var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
-            
-            Console.WriteLine(File.ReadAllText(fileRoute));
+                        Console.WriteLine(File.ReadAllText(fileRoute));
+                    }
+                }
+            }
+
             Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
-            Console.ReadLine();
+            Console.Read();
             ShowMessageWithDelay("Going back to Main Menu",500);
         }
 
