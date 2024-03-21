@@ -103,7 +103,10 @@ namespace Client
             Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
-            ShowMessageWithDelay(" Going back to Main Menu", 500);
+            Console.WriteLine();
+            Console.WriteLine();
+            ShowMessageWithDelay("Going back to Main Menu", 500);
+            Console.WriteLine();
 
         }
 
