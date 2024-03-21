@@ -102,8 +102,9 @@ namespace Client
 
             Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
-            Console.ReadLine();
-            ShowMessageWithDelay("Going back to Main Menu", 0);
+            Console.ReadKey();
+            ShowMessageWithDelay(" Going back to Main Menu", 500);
+
         }
 
         private static void RegisterOption()
