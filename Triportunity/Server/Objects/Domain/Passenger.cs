@@ -1,12 +1,12 @@
 namespace Server.Objects.Domain
 {
-    public class Passenger
+    public class Passenger : Client
     {
         public Ride RideJoined { get; set; }
         public int SeatNumber { get; set; }
 
 
-        public Passenger(Ride rideJoined, int seatNumber)
+        public Passenger(string username,string password,Ride rideJoined, int seatNumber) : base(username,password)
         {
             RideJoined = rideJoined;
             SeatNumber = seatNumber;
