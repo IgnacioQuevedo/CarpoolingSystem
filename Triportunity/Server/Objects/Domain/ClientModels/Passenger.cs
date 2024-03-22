@@ -1,3 +1,5 @@
+using Serverg.Objects.Domain.ClientModels;
+
 namespace Server.Objects.Domain.ClientModels
 {
     public class Passenger : Client

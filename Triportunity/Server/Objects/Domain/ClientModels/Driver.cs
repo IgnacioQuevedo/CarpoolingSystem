@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Serverg.Objects.Domain.ClientModels;
 
 namespace Server.Objects.Domain.ClientModels
 {

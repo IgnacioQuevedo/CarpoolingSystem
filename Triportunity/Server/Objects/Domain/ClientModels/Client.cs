@@ -1,6 +1,6 @@
 using System;
 
-namespace Server.Objects.Domain.ClientModels
+namespace Serverg.Objects.Domain.ClientModels
 {
     public abstract class Client
     {
