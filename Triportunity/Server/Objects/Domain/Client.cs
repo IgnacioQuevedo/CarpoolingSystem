@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Server.Objects.Domain
 {
-    public class Client
+    public abstract class Client
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
