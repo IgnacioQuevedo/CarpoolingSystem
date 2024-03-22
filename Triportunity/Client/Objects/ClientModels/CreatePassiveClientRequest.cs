@@ -1,4 +1,4 @@
-namespace Client.Objects
+namespace Client.Objects.ClientModels
 {
     public class CreatePassiveClientRequest
     {

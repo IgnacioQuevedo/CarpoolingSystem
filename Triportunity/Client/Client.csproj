@@ -42,6 +42,7 @@
     <ItemGroup>
         <Compile Include="Objects\ClientModels\Client.cs" />
         <Compile Include="Objects\ClientModels\CreatePassiveClientRequest.cs" />
+        <Compile Include="Objects\ClientModels\LoginPassiveClientRequest.cs" />
         <Compile Include="Objects\Ride.cs" />
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
