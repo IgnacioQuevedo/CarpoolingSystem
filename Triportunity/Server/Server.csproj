@@ -42,6 +42,7 @@
     <ItemGroup>
         <Compile Include="Controllers\RideController.cs" />
         <Compile Include="DataContext\MemoryDatabase.cs" />
+        <Compile Include="Objects\Domain\Client.cs" />
         <Compile Include="Objects\Domain\Ride.cs" />
         <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
         <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
