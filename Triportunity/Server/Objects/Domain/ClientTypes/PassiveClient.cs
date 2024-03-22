@@ -1,4 +1,4 @@
-namespace Server.Objects.Domain
+namespace Server.Objects.Domain.ClientTypes
 {
     public class PassiveClient : Client
     {

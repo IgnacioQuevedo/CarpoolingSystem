@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 
-namespace Server.Objects.Domain
+namespace Server.Objects.Domain.ClientTypes
 {
     public class Driver : Client
     {
