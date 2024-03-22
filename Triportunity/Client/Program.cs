@@ -13,10 +13,10 @@ namespace Client
             bool appFunctional = true;
             bool userLogged = false;
 
-
             while (appFunctional)
             {
                 MainMenuOptions();
+
                 var optionSelected = Console.ReadLine();
 
                 switch (optionSelected)
@@ -85,25 +85,27 @@ namespace Client
         private static void AboutUsOption()
         {
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
+
             if (directoryInfo != null)
             {
-                if (directoryInfo?.Parent != null)
-                {
-                    if (directoryInfo?.Parent.Parent != null)
-                    {
-                        string startDirectory = directoryInfo?.Parent.Parent.FullName;
-                        string subrouteOfFile = "AboutUs/CompanyInfo.txt";
-                        var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
-            
-                        Console.WriteLine(File.ReadAllText(fileRoute));
-                    }
-                }
+                string startDirectory = directoryInfo?.Parent.Parent.FullName;
+                string subrouteOfFile = "AboutUs/CompanyInfo.txt";
+                var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
+                Console.WriteLine(File.ReadAllText(fileRoute));
+            }
+            else
+            {
+                Console.WriteLine("Triportinuty is a travel web app");
             }
 
             Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
-            Console.Read();
-            ShowMessageWithDelay("Going back to Main Menu",500);
+            Console.ReadKey();
+            Console.WriteLine();
+            Console.WriteLine();
+            ShowMessageWithDelay("Going back to Main Menu", 500);
+            Console.WriteLine();
+
         }
 
         private static void RegisterOption()
@@ -135,7 +137,7 @@ namespace Client
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
-            
+
         }
 
         #endregion
