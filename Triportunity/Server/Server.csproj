@@ -50,6 +50,7 @@
         <Compile Include="Objects\Domain\ClientModels\PassiveClient.cs" />
         <Compile Include="Objects\Domain\Vehicle.cs" />
         <Compile Include="Objects\DTOs\Client\CreateClientRequestDto.cs" />
+        <Compile Include="Objects\DTOs\Client\LoginClientPassiveRequestDto.cs" />
         <Compile Include="Objects\DTOs\Client\PassiveClientDto.cs" />
         <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
         <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
