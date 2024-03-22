@@ -10,8 +10,10 @@ namespace Server.Objects.Domain
         public IEnumerable<Review> Reviews { get; set; }
         
         
-        public Driver(string username, string password) : base(username, password)
+        public Driver(string username, string password,double puntuation) : base(username, password)
         {
+            Puntuation = puntuation;
+            Reviews = new List<Review>();
         }
     }
 }
