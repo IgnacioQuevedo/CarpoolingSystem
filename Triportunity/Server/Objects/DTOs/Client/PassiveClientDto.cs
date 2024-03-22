@@ -8,9 +8,9 @@ namespace Server.Objects.DTOs.Client
         public string Username { get; set; }
         public string Password { get; set; }
 
-        public PassiveClientDto(Guid id, string username, string password)
+        public PassiveClientDto(string username, string password)
         {
-            Id = id;
+            Id = new Guid();
             Username = username;
             Password = password;
         }
