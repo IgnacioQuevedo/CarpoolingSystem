@@ -45,6 +45,7 @@
         <Compile Include="Objects\Domain\Client.cs" />
         <Compile Include="Objects\Domain\Driver.cs" />
         <Compile Include="Objects\Domain\Passenger.cs" />
+        <Compile Include="Objects\Domain\PassiveClient.cs" />
         <Compile Include="Objects\Domain\Review.cs" />
         <Compile Include="Objects\Domain\Ride.cs" />
         <Compile Include="Objects\Domain\Vehicle.cs" />
