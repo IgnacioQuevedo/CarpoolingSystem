@@ -85,19 +85,17 @@ namespace Client
         private static void AboutUsOption()
         {
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
+
             if (directoryInfo != null)
             {
-                if (directoryInfo?.Parent != null)
-                {
-                    if (directoryInfo?.Parent.Parent != null)
-                    {
-                        string startDirectory = directoryInfo?.Parent.Parent.FullName;
-                        string subrouteOfFile = "AboutUs/CompanyInfo.txt";
-                        var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
-
-                        Console.WriteLine(File.ReadAllText(fileRoute));
-                    }
-                }
+                string startDirectory = directoryInfo?.Parent.Parent.FullName;
+                string subrouteOfFile = "AboutUs/CompanyInfo.txt";
+                var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
+                Console.WriteLine(File.ReadAllText(fileRoute));
+            }
+            else
+            {
+                Console.WriteLine("Triportinuty is a travel web app");
             }
 
             Console.WriteLine("");
