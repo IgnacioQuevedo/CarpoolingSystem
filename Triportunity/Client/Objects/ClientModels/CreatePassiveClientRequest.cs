@@ -1,15 +1,13 @@
 namespace Client.Objects
 {
-    public class Client
+    public class CreatePassiveClientRequest
     {
-        public string Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
 
 
-        public Client(string id,string username,string password)
+        public CreatePassiveClientRequest(string username, string password)
         {
-            Id = id;
             Username = username;
             Password = password;
         }
