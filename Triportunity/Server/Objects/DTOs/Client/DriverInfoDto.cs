@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Server.Objects.Domain;
+using Server.Objects.DTOs.Review;
 
 namespace Server.Objects.DTOs.Client
 {

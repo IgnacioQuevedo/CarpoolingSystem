@@ -51,7 +51,7 @@
         <Compile Include="Objects\DTOs\Client\DriverInfoDto.cs" />
         <Compile Include="Objects\DTOs\Client\LoginClientRequestDto.cs" />
         <Compile Include="Objects\DTOs\Client\ClientDto.cs" />
-        <Compile Include="Objects\DTOs\ReviewDto\ReviewDto.cs" />
+        <Compile Include="Objects\DTOs\Review\ReviewDto.cs" />
         <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
         <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
         <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />

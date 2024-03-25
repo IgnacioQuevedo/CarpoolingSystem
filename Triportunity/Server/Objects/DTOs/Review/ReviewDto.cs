@@ -1,4 +1,4 @@
-namespace Server.Objects.DTOs.ReviewDto
+namespace Server.Objects.DTOs.Review
 {
     public class ReviewDto
     {
