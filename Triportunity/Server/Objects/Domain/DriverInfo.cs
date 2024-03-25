@@ -13,7 +13,6 @@ namespace Server.Objects.Domain
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Vehicle> Vehicles { get; set; }
 
-
         public DriverInfo(int ci,ICollection<Vehicle> driverVehicles)
         {
             Ci = ci;
