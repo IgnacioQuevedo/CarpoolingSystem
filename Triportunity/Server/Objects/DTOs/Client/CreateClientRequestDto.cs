@@ -8,13 +8,13 @@ namespace Server.Objects.DTOs.Client
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public ICollection<VehicleDto>? Vehicles { get; set; }
+        public CreateDriverInfoRequestDto? DriverAspects { get; set; }
 
-        public CreateClientRequestDto(string username,string password, ICollection<VehicleDto> clientVehicles)
+        public CreateClientRequestDto(string username,string password, CreateDriverInfoRequestDto? driverAspects)
         {
             Username = username;
             Password = password;
-            Vehicles = clientVehicles;
+            DriverAspects = driverAspects;
         }
     }
 }

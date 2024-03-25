@@ -15,7 +15,6 @@ namespace Server.Objects.DTOs.Client
         {
             Ci = ci;
             Vehicles = vehicles;
-            
             Puntuation = 5.0;
             Reviews = new List<ReviewDto>();
         }
