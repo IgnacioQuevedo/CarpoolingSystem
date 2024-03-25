@@ -6,17 +6,18 @@ namespace Server.Objects.DTOs.Client
 {
     public class DriverInfoDto
     {
-        public Guid Id { get; set; }
+        public int Ci { get; set; }
         public double Puntuation { get; set; }
         public ICollection<VehicleDto> Vehicles { get; set; }
         public ICollection<ReviewDto> Reviews { get; set; }
 
-        public DriverInfoDto(Guid id, double puntuation, ICollection<VehicleDto> vehicles, ICollection<ReviewDto> reviews)
+        public DriverInfoDto(int ci, ICollection<VehicleDto> vehicles)
         {
-            Id = id;
-            Puntuation = puntuation;
+            Ci = ci;
             Vehicles = vehicles;
-            Reviews = reviews;
+            
+            Puntuation = 5.0;
+            Reviews = new List<ReviewDto>();
         }
     }
 }
