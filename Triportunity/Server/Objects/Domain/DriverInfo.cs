@@ -7,7 +7,7 @@ namespace Server.Objects.Domain
 {
     public class DriverInfo
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = new Guid();
         public int Ci { get; set; }
         public double Puntuation { get; set; }
         public ICollection<Review> Reviews { get; set; }
