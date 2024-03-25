@@ -1,4 +1,5 @@
 using System;
+using Server.Objects.Domain;
 
 namespace Server.Objects.DTOs.Client
 {
@@ -7,12 +8,15 @@ namespace Server.Objects.DTOs.Client
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public DriverInfoDto DriverAspectsDto { get; set; }
 
-        public ClientDto(string username, string password)
+        public ClientDto(Guid id,string username, string password,DriverInfoDto driverAspectsDto)
         {
-            Id = new Guid();
+            Id = id;
             Username = username;
             Password = password;
+            DriverAspectsDto = driverAspectsDto;
+
         }
     }
 }
