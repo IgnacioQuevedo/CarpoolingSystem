@@ -1,4 +1,5 @@
 using System;
+using Server.Objects.Domain;
 
 namespace Serverg.Objects.Domain.ClientModels
 {
