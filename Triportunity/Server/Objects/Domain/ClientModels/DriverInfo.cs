@@ -25,5 +25,13 @@ namespace Server.Objects.Domain
             }
 
         }
+
+        public void DriverInfoValidations()
+        {
+            if (string.IsNullOrEmpty(Ci.ToString()))
+            {
+                throw new Exception();
+            }
+        }
     }
 }
