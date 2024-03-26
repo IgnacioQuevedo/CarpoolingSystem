@@ -1,12 +1,14 @@
+using Serverg.Objects.Domain.ClientModels;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Remoting.Channels;
 
 namespace Server.Objects.Domain
 {
     public class Ride
     {
-        //public Client Dirver { get; set; }
-        //public List<Client> Passengers { get; set; }
+        public Client Dirver { get; set; }
+        public List<Client> Passengers { get; set; }
         public string InitialLocation { get; set; }
         public string EndingLocation { get; set; }
         public DateTime RideDate { get; set; }
