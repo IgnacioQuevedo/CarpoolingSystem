@@ -10,6 +10,7 @@ namespace Server.DataContext
         public ICollection<Ride> Rides { get; set; }
 
         private static MemoryDatabase _database;
+        private static readonly object padlock = new object();
 
         private MemoryDatabase()
         {
@@ -18,14 +19,16 @@ namespace Server.DataContext
         }
         public static MemoryDatabase GetInstance()
         {
-            if (_database is null)
+            lock (padlock)
             {
-                _database = new MemoryDatabase();
-            }
+                if (_database is null)
+                {
+                    _database = new MemoryDatabase();
+                }
 
-            return _database;
+                return _database;
+            }
+          
         }
-        
-        
     }
 }
