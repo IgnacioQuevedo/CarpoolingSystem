@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Text.RegularExpressions;
 using Server.Exceptions;
 using Server.Objects.Domain;
 
@@ -28,7 +29,25 @@ namespace Serverg.Objects.Domain.ClientModels
 
             if (Username.Length < validLengthForUsername)
             {
-                throw new ClientException("Username length must be greater than 3 digits!");
+                throw new ClientException("Username length must be greater than: " + Password.Length + "digits!");
+            }
+        }
+
+        private void PasswordValidation()
+        {
+            const int validLengthForPassword = 6;
+
+            if (Password.Length < 6)
+            {
+                throw new ClientException("Password must be greater than: " + Password.Length + "digits");
+            }
+            
+            // Expresión regular que busca al menos 4 números y un símbolo especial
+            string patron = @"^(?=.*\d{4,})(?=.*[^\w\d\s])";
+
+            if (!Regex.IsMatch(Password, patron))
+            {
+                throw new ClientException("Password must contain 4 digits and an special character!");
             }
         }
     }
