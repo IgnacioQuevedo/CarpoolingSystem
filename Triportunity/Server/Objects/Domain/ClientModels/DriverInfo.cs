@@ -26,6 +26,11 @@ namespace Server.Objects.Domain
 
         public void DriverInfoValidations()
         {
+            CheckIfCiIsEmpty();
+        }
+
+        private void CheckIfCiIsEmpty()
+        {
             if (string.IsNullOrEmpty(Ci.ToString()))
             {
                 throw new DriverInfoException("Ci must be declared.");
