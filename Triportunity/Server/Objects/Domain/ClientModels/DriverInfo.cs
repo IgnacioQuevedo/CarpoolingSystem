@@ -27,6 +27,11 @@ namespace Server.Objects.Domain
         public void DriverInfoValidations()
         {
             CheckIfCiIsEmpty();
+
+            if (Vehicles.Count == 0)
+            {
+                throw new DriverInfoException("At least one vehicle must be declared");g
+            }
         }
 
         private void CheckIfCiIsEmpty()
