@@ -43,6 +43,7 @@
     <ItemGroup>
         <Compile Include="Controllers\RideController.cs" />
         <Compile Include="DataContext\MemoryDatabase.cs" />
+        <Compile Include="Exceptions\ClientException.cs" />
         <Compile Include="Objects\Domain\ClientModels\Client.cs" />
         <Compile Include="Objects\Domain\ClientModels\DriverInfo.cs" />
         <Compile Include="Objects\Domain\Review.cs" />

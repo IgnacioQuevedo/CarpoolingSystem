@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using Server.Exceptions;
 using Server.Objects.Domain;
 
 namespace Serverg.Objects.Domain.ClientModels
@@ -17,17 +18,18 @@ namespace Serverg.Objects.Domain.ClientModels
             Username = username;
             Password = password;
             DriverAspects = driverAspects;
+            
+            UsernameValidation();
         }
 
         private void UsernameValidation()
         {
-            int ValidLengthForUsername = 3;
-            
-            if (Username.Length < ValidLengthForUsername)
+            const int validLengthForUsername = 3;
+
+            if (Username.Length < validLengthForUsername)
             {
-                throw new Exception();
+                throw new ClientException("Username length must be greater than 3 digits!");
             }
-            
         }
     }
 }
