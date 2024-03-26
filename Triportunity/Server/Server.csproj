@@ -40,19 +40,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\RideController.cs" />
+    <Compile Include="Controllers\VehicleController.cs" />
     <Compile Include="DataContext\MemoryDatabase.cs" />
     <Compile Include="Objects\Domain\Ride.cs" />
-    <Compile Include="Objects\Domain\Vehicle.cs" />
-    <Compile Include="Objects\Domain\VehicleImage.cs" />
+    <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
+    <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
     <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
     <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
+    <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageRequestDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleImage\VehicleImageDto.cs" />
+    <Compile Include="Objects\DTOs\Vehicle\CreateVehicleRequestDto.cs" />
+    <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\RideRepository.cs" />
+    <Compile Include="Repositories\VehicleRepository.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Objects\DTOs\Vehicle\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
