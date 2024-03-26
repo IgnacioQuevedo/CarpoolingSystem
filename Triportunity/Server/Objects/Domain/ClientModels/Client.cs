@@ -21,6 +21,7 @@ namespace Serverg.Objects.Domain.ClientModels
             DriverAspects = driverAspects;
             
             UsernameValidation();
+            PasswordValidation();
         }
 
         private void UsernameValidation()
