@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Server.Exceptions;
 
 namespace Server.Objects.Domain
 {
@@ -23,6 +24,7 @@ namespace Server.Objects.Domain
             {
                 Vehicles.Add(driverVehicles.ElementAtOrDefault(i));
             }
+            DriverInfoValidations();
 
         }
 
@@ -30,7 +32,7 @@ namespace Server.Objects.Domain
         {
             if (string.IsNullOrEmpty(Ci.ToString()))
             {
-                throw new Exception();
+                throw new DriverInfoException("Ci must be declared.");
             }
         }
     }
