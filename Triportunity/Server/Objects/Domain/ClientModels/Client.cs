@@ -37,13 +37,14 @@ namespace Serverg.Objects.Domain.ClientModels
         {
             const int validLengthForPassword = 6;
             const int amountOfNumbersOnPassword = 4;
-            string pattern = $@"^(?=(?:\D*\d){{{amountOfNumbersOnPassword},}})(?=.*[^\w\d\s])";
+            string passwordRegularExpression = $@"^(?=(?:\D*\d){{{amountOfNumbersOnPassword},}})(?=.*[^\w\d\s])";
             
-            if (Password.Length < validLengthForPassword ||!Regex.IsMatch(Password, pattern );
+            if (Password.Length < validLengthForPassword ||
+                !Regex.IsMatch(Password, passwordRegularExpression))
             {
                 throw new ClientException("Error on password. Password must be greater than: " + 
                                           amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword + 
-                                          "digits and at least one special character!");
+                                          "numbers, and at least one special character!");
             }
         }
     }
