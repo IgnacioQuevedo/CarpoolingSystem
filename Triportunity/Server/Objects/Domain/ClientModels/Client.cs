@@ -37,23 +37,13 @@ namespace Serverg.Objects.Domain.ClientModels
         {
             const int validLengthForPassword = 6;
             const int amountOfNumbersOnPassword = 4;
-            if (Password.Length < 6)
-            {
-                throw new ClientException("Password must be greater than: " + Password.Length + "digits");
-            }
+            string pattern = $@"^(?=(?:\D*\d){{{amountOfNumbersOnPassword},}})(?=.*[^\w\d\s])";
             
-            // Expresión regular que busca al menos 4 números y un símbolo especial
-            ValidatePasswordContainsXNumbersAndSpecialCharacter(amountOfNumbersOnPassword);
-        }
-
-        private void ValidatePasswordContainsXNumbersAndSpecialCharacter(int amountOfNumbers)
-        {
-            string pattern = $@"^(?=(?:\D*\d){{{amountOfNumbers},}})(?=.*[^\w\d\s])";
-            
-            if (!Regex.IsMatch(Password, pattern))
+            if (Password.Length < validLengthForPassword ||!Regex.IsMatch(Password, pattern );
             {
-                throw new ClientException("Password must contain: " + amountOfNumbers + 
-                                          "digits and at least an special character!");
+                throw new ClientException("Error on password. Password must be greater than: " + 
+                                          amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword + 
+                                          "digits and at least one special character!");
             }
         }
     }
