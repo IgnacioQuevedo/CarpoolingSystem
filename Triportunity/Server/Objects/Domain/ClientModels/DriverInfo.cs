@@ -18,12 +18,8 @@ namespace Server.Objects.Domain
             Ci = ci;
             Puntuation = 5.0;
             Reviews = new List<Review>();
-            Vehicles = new List<Vehicle>();
-
-            for (int i = 0; i < driverVehicles.Count(); i++)
-            {
-                Vehicles.Add(driverVehicles.ElementAtOrDefault(i));
-            }
+            Vehicles = driverVehicles;
+            
             DriverInfoValidations();
 
         }
