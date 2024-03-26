@@ -43,6 +43,11 @@ namespace Serverg.Objects.Domain.ClientModels
             }
             
             // Expresión regular que busca al menos 4 números y un símbolo especial
+            ValidateStringContains4DigitsAndSpecialCharacter();
+        }
+
+        private void ValidateStringContains4DigitsAndSpecialCharacter()
+        {
             string patron = @"^(?=.*\d{4,})(?=.*[^\w\d\s])";
 
             if (!Regex.IsMatch(Password, patron))
