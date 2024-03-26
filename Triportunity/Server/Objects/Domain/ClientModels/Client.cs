@@ -19,9 +19,11 @@ namespace Serverg.Objects.Domain.ClientModels
             DriverAspects = driverAspects;
         }
 
-        private void checkIfUsernameIsValid()
+        private void UsernameValidation()
         {
-            if (Username.Length < 3)
+            int ValidLengthForUsername = 3;
+            
+            if (Username.Length < ValidLengthForUsername)
             {
                 throw new Exception();
             }
