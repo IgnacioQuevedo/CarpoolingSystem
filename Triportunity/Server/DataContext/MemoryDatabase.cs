@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
-using Serverg.Objects.Domain.ClientModels;
+using Server.Objects.Domain.ClientModels;
 
 namespace Server.DataContext
 {
