@@ -18,5 +18,14 @@ namespace Serverg.Objects.Domain.ClientModels
             Password = password;
             DriverAspects = driverAspects;
         }
+
+        private void checkIfUsernameIsValid()
+        {
+            if (Username.Length < 3)
+            {
+                throw new Exception();
+            }
+            
+        }
     }
 }
