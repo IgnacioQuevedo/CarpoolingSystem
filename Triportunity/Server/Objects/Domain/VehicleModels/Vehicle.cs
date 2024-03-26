@@ -11,6 +11,7 @@ namespace Server.Objects.Domain
 
         public Vehicle(VehicleImage picture)
         {
+            Id = new Guid();
             Picture = picture;
         }
     }
