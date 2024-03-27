@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,16 +43,21 @@
     <Compile Include="Controllers\RideController.cs" />
     <Compile Include="Controllers\VehicleController.cs" />
     <Compile Include="DataContext\MemoryDatabase.cs" />
+    <Compile Include="Objects\Domain\ClientModels\Client.cs" />
+    <Compile Include="Objects\Domain\ClientModels\DriverInfo.cs" />
+    <Compile Include="Objects\Domain\Review.cs" />
     <Compile Include="Objects\Domain\Ride.cs" />
-    <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
-    <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
+    <Compile Include="Objects\Domain\Vehicle.cs" />
+    <Compile Include="Objects\DTOs\Client\CreateClientRequestDto.cs" />
+    <Compile Include="Objects\DTOs\Client\CreateDriverInfoRequestDto.cs" />
+    <Compile Include="Objects\DTOs\Client\DriverInfoDto.cs" />
+    <Compile Include="Objects\DTOs\Client\LoginClientRequestDto.cs" />
+    <Compile Include="Objects\DTOs\Client\ClientDto.cs" />
+    <Compile Include="Objects\DTOs\Review\ReviewDto.cs" />
     <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
+    <Compile Include="Objects\DTOs\Ride\JoinRideRequestDTO.cs" />
+    <Compile Include="Objects\DTOs\Ride\ModifyRideRequestDTO.cs" />
     <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
-    <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageRequestDto.cs" />
-    <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageResponseDto.cs" />
-    <Compile Include="Objects\DTOs\VehicleImage\VehicleImageDto.cs" />
-    <Compile Include="Objects\DTOs\Vehicle\CreateVehicleRequestDto.cs" />
-    <Compile Include="Objects\DTOs\Vehicle\CreateVehicleResponseDto.cs" />
     <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
