@@ -50,6 +50,8 @@
         <Compile Include="Objects\Domain\Review.cs" />
         <Compile Include="Objects\Domain\Ride.cs" />
         <Compile Include="Objects\Domain\Vehicle.cs" />
+        <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
+        <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
         <Compile Include="Objects\DTOs\Client\CreateClientRequestDto.cs" />
         <Compile Include="Objects\DTOs\Client\CreateDriverInfoRequestDto.cs" />
         <Compile Include="Objects\DTOs\Client\DriverInfoDto.cs" />
@@ -58,10 +60,22 @@
         <Compile Include="Objects\DTOs\Review\ReviewDto.cs" />
         <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
         <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
+        <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageRequestDto.cs" />
+        <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageResponseDto.cs" />
+        <Compile Include="Objects\DTOs\VehicleImage\VehicleImageDto.cs" />
+        <Compile Include="Objects\DTOs\Vehicle\CreateVehicleRequestDto.cs" />
+        <Compile Include="Objects\DTOs\Vehicle\CreateVehicleResponseDto.cs" />
         <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Repositories\RideRepository.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

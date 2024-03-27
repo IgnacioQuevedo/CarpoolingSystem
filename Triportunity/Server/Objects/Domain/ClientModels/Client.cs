@@ -3,7 +3,6 @@ using System;
 using System.Text.RegularExpressions;
 using Server.Exceptions;
 
-
 namespace Server.Objects.Domain.ClientModels
 {
     public class Client
