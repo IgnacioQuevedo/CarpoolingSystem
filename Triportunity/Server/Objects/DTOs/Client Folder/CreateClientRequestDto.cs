@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
 
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class CreateClientRequestDto
     {
@@ -10,7 +10,7 @@ namespace Server.Objects.DTOs.Client
         public string Password { get; set; }
         public CreateDriverInfoRequestDto? DriverAspects { get; set; }
 
-        public CreateClientRequestDto(string username,string password, CreateDriverInfoRequestDto? driverAspects)
+        public CreateClientRequestDto(string username, string password, CreateDriverInfoRequestDto? driverAspects)
         {
             Username = username;
             Password = password;

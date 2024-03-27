@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 
 namespace Server.Objects.DTOs.Vehicle
 {
-    public class VehicleDto
+    public class CreateVehicleResponseDto
     {
-        public Guid Id { get; set; }
+        public CreateVehicleImageResponseDto Picture { get; set; }
 
-        public VehicleImageDto Picture { get; set; }
-
-        public VehicleDto(Guid id, VehicleImageDto picture)
+        public CreateVehicleResponseDto(CreateVehicleImageResponseDto picture)
         {
-            Id = id;
             Picture = picture;
         }
     }
