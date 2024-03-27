@@ -42,7 +42,6 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Controllers\RideController.cs" />
-        <Compile Include="Controllers\VehicleController.cs" />
         <Compile Include="DataContext\MemoryDatabase.cs" />
         <Compile Include="Exceptions\ClientException.cs" />
         <Compile Include="Exceptions\DriverInfoException.cs" />
@@ -50,6 +49,7 @@
         <Compile Include="Objects\Domain\ClientModels\DriverInfo.cs" />
         <Compile Include="Objects\Domain\Review.cs" />
         <Compile Include="Objects\Domain\Ride.cs" />
+        <Compile Include="Objects\Domain\Vehicle.cs" />
         <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
         <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
         <Compile Include="Objects\DTOs\Client\CreateClientRequestDto.cs" />
