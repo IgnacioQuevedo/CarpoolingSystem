@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Server.DataContext;
 using Server.Objects.Domain.ClientModels;
@@ -21,9 +22,9 @@ namespace Server.Repositories
 
         private bool UsernameRegistered(string username)
         {
-            var clientWithThatUsername = MemoryDatabase.GetInstance().Clients.Where(x => x.Username.Equals(username));
+            var clientWithThatUsername = FindClientViaUsername(username);
 
-            if (clientWithThatUsername.Any())
+            if (clientWithThatUsername != null)
             {
                 return false;
             }
@@ -32,18 +33,22 @@ namespace Server.Repositories
         }
         private bool Login(string username,string password)
         {
-            var possibleLogin = MemoryDatabase.GetInstance().Clients.
-                Where(x => x.Username == username);
+            var possibleLogin = FindClientViaUsername(username);
 
-            if (possibleLogin.First().Password.Equals(password))
+            if (possibleLogin.Password.Equals(password))
             {
                 return true;
             }
             return false;
         }
-        
-        
 
+        public Client FindClientViaUsername(string usernameOfClient)
+        {
+            var clientFound = MemoryDatabase.GetInstance().Clients.
+                FirstOrDefault(x => x.Username.Equals(usernameOfClient));
+            
+            return clientFound;
+        }
       
     }
 }
