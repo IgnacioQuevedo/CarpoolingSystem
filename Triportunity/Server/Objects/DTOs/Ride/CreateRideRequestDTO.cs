@@ -10,7 +10,6 @@ public class CreateRideRequestDTO
     public List<Client> Passengers { get; set; }
     public string InitialLocation { get; set; }
     public string EndingLocation { get; set; }
-    public DateTime RideDate { get; set; }
     public DateTime DepartureTime { get; set; }
     public int AvailableSeats { get; set; }
     public int TotalSeats { get; set; }
@@ -18,7 +17,7 @@ public class CreateRideRequestDTO
     public bool PetsAllowed { get; set; }
     public string PhotoPath { get; set; }
 
-    public CreateRideRequestDTO(Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime rideDate,
+    public CreateRideRequestDTO(Client driver, List<Client> passengers, string initialLocation, string endingLocation,
         DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
     {
         Driver = driver;
