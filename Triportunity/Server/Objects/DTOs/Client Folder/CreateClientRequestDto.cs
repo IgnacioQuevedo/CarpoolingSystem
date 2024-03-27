@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
 
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class CreateClientRequestDto
     {

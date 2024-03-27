@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Server.Objects.DTOs.Review;
 
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class DriverInfoDto
     {

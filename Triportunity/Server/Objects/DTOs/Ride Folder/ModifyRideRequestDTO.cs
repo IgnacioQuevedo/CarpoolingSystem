@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Serverg.Objects
+namespace Serverg.Objects.DTOs.Ride_Folder
 {
 
     public class ModifyRideRequestDTO
