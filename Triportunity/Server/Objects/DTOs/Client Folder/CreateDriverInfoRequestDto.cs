@@ -1,7 +1,8 @@
+using Server.Objects.DTOs.Vehicle_Folder;
 using System;
 using System.Collections.Generic;
 
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class CreateDriverInfoRequestDto
     {
