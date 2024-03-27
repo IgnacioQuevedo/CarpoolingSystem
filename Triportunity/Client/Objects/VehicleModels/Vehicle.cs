@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Server.Objects.Domain
+namespace Client.Objects.VehicleModels
 {
     public class Vehicle
     {
+
         public Guid Id { get; set; }
 
         public VehicleImage Picture { get; set; }

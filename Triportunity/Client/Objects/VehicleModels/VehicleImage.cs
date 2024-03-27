@@ -4,20 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Objects.DTOs.VehicleImage
+namespace Client.Objects.VehicleModels
 {
-    public class CreateVehicleImageRequestDto
+    public class VehicleImage
     {
-        public string Url { get; set; }
-
         public string FileName { get; set; }
 
         public string FileExtension { get; set; }
 
-        public CreateVehicleImageRequestDto(string url, string fileExtension, string fileName) {
-            Url = url;
+        public string Url { get; set; }
+
+        public VehicleImage(string fileName, string fileExtension, string url)
+        {
             FileName = fileName;
             FileExtension = fileExtension;
+            Url = url;
         }
     }
 }

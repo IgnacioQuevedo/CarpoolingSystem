@@ -1,12 +1,12 @@
-using Serverg.Objects.Domain.ClientModels;
 using System;
 using System.Collections.Generic;
+using Serverg.Objects.Domain.ClientModels;
 
-namespace Server.Objects.Domain
+namespace Serverg.Objects.DTOs.Ride_Folder
 {
-    public class Ride
+
+    public class CreateRideRequestDTO
     {
-        public Guid Id { get; set; }
         public Client Driver { get; set; }
         public List<Client> Passengers { get; set; }
         public string InitialLocation { get; set; }
@@ -18,9 +18,9 @@ namespace Server.Objects.Domain
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public Ride(Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public CreateRideRequestDTO(Client driver, List<Client> passengers, string initialLocation, string endingLocation,
+            DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
-            Id = new Guid();
             Driver = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
@@ -29,9 +29,7 @@ namespace Server.Objects.Domain
             AvailableSeats = availableSeats;
             TotalSeats = totalSeats;
             PricePerPerson = pricePerPerson;
-            PetsAllowed = petsAllowed;
             PhotoPath = photoPath;
         }
-
     }
 }

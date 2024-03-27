@@ -2,7 +2,7 @@
 using System;
 using Server.Objects.Domain;
 
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class ClientDto
     {
@@ -11,7 +11,7 @@ namespace Server.Objects.DTOs.Client
         public string Password { get; set; }
         public DriverInfoDto? DriverAspectsDto { get; set; }
 
-        public ClientDto(Guid id,string username, string password,DriverInfoDto? driverAspectsDto)
+        public ClientDto(Guid id, string username, string password, DriverInfoDto? driverAspectsDto)
         {
             Id = id;
             Username = username;

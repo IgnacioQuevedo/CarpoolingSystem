@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Controllers
+namespace Server.Repositories
 {
-    public class VehicleController
-    {        
+    public class VehicleRepository
+    {
     }
 }
-

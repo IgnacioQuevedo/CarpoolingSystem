@@ -1,4 +1,4 @@
-namespace Server.Objects.DTOs.Client
+namespace Server.Objects.DTOs.Client_Folder
 {
     public class LoginClientRequestDto
     {
