@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Serverg.Objects.Domain.ClientModels;
 
-namespace Serverg.Objects
+namespace Serverg.Objects.DTOs.Ride_Folder
 {
 
     public class CreateRideRequestDTO

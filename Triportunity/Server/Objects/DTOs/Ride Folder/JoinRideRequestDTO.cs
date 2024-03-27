@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serverg.Objects.Domain.ClientModels;
 
-namespace Server.Objects.DTOs.Ride
+namespace Server.Objects.DTOs.Ride_Folder
 {
 
     public class JoinRideRequestDTO
