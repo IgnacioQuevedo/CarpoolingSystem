@@ -8,12 +8,12 @@ namespace Server.Objects.Domain
 {
     public class DriverInfo
     {
-        public int Ci { get; set; }
+        public string Ci { get; set; }
         public double Puntuation { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Vehicle> Vehicles { get; set; }
 
-        public DriverInfo(int ci,ICollection<Vehicle> driverVehicles)
+        public DriverInfo(string ci,ICollection<Vehicle> driverVehicles)
         {
             Ci = ci;
             Puntuation = 5.0;
@@ -40,10 +40,30 @@ namespace Server.Objects.Domain
 
         private void CheckIfCiIsEmpty()
         {
-            if (string.IsNullOrEmpty(Ci.ToString()))
+            int minimalLengthForCi = 6;
+            
+            if (string.IsNullOrEmpty(Ci))
             {
                 throw new DriverInfoException("Ci must be declared.");
             }
+
+            if (Ci.Length < minimalLengthForCi || !NumericFormatIsCorrect())
+            {
+                throw new DriverInfoException("Ci must be in a correct format. It must be at least of" +
+                                              minimalLengthForCi + "and without special characters");
+            }
+        }
+
+        private bool NumericFormatIsCorrect()
+        {
+            foreach (char c in Ci)
+            {
+                if (!char.IsDigit(c))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
