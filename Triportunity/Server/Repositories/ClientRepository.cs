@@ -31,7 +31,8 @@ namespace Server.Repositories
 
             return true;
         }
-        private bool Login(string username,string password)
+
+        private bool Login(string username, string password)
         {
             var possibleLogin = FindClientViaUsername(username);
 
@@ -39,16 +40,28 @@ namespace Server.Repositories
             {
                 return true;
             }
+
             return false;
         }
 
         public Client FindClientViaUsername(string usernameOfClient)
         {
-            var clientFound = MemoryDatabase.GetInstance().Clients.
-                FirstOrDefault(x => x.Username.Equals(usernameOfClient));
-            
+            var clientFound = MemoryDatabase.GetInstance().Clients
+                .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
+
             return clientFound;
         }
-      
+
+        public void UpdateClient(Client clientWithUpdates)
+        {
+            foreach (var client in MemoryDatabase.GetInstance().Clients)
+            {
+                if (client.Username.Equals(clientWithUpdates.Username))
+                {
+                    client.Password = clientWithUpdates.Password;
+                    client.DriverAspects = clientWithUpdates.DriverAspects;
+                }
+            }
+        }
     }
 }
