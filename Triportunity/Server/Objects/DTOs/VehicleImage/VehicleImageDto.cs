@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Server.Objects.DTOs.VehicleImage
 {
     public class VehicleImageDto
     {
-
         public string FileName { get; set; }
 
         public string FileExtension { get; set; }

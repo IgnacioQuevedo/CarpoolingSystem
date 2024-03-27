@@ -17,3 +17,4 @@ namespace Server.Objects.DTOs.Vehicle
         }
     }
 }
+
