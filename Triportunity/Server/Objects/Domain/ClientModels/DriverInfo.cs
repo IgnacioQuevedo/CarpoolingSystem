@@ -24,7 +24,7 @@ namespace Server.Objects.Domain
 
         }
 
-        public void DriverInfoValidations()
+        private void DriverInfoValidations()
         {
             CheckIfCiIsEmpty();
             ValidateThatExistsVehicles();
