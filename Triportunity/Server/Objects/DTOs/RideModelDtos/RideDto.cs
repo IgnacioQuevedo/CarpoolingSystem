@@ -1,10 +1,10 @@
-using Serverg.Objects.Domain.ClientModels;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Server.Objects.Domain.ClientModels;
 
-namespace Server.Objects.DTOs
+namespace Server.Objects.DTOs.RideModelDtos
 {
-    public class RideDTO
+    public class RideDto
     {
         public Guid Id { get; set; }
         public Client Driver { get; set; }
@@ -18,7 +18,7 @@ namespace Server.Objects.DTOs
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public RideDTO(Guid id, Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public RideDto(Guid id, Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Id = id;
             Driver = driver;

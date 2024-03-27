@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Serverg.Objects.DTOs.Ride_Folder
+namespace Server.Objects.DTOs.RideModelDtos
 {
 
-    public class ModifyRideRequestDTO
+    public class ModifyRideRequestDto
     {
         public string InitialLocation { get; set; }
         public string EndingLocation { get; set; }
@@ -12,7 +12,7 @@ namespace Serverg.Objects.DTOs.Ride_Folder
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public ModifyRideRequestDTO(string initialLocation, string endingLocation, DateTime rideDate,
+        public ModifyRideRequestDto(string initialLocation, string endingLocation, DateTime rideDate,
             DateTime departureTime, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             InitialLocation = initialLocation;

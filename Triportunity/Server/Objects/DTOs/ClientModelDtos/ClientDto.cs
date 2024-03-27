@@ -1,8 +1,7 @@
 #nullable enable
 using System;
-using Server.Objects.Domain;
 
-namespace Server.Objects.DTOs.Client_Folder
+namespace Server.Objects.DTOs.ClientModelDtos
 {
     public class ClientDto
     {
