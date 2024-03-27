@@ -48,8 +48,10 @@
     <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
     <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
     <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageRequestDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageResponseDto.cs" />
     <Compile Include="Objects\DTOs\VehicleImage\VehicleImageDto.cs" />
     <Compile Include="Objects\DTOs\Vehicle\CreateVehicleRequestDto.cs" />
+    <Compile Include="Objects\DTOs\Vehicle\CreateVehicleResponseDto.cs" />
     <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
