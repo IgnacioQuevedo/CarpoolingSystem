@@ -1,8 +1,7 @@
 ﻿using System;
 using Server.Objects.Domain.ClientModels;
 
-
-namespace Server.Objects.DTOs.Ride_Folder
+namespace Server.Objects.DTOs.RideModelDtos
 {
 
     public class JoinRideRequestDto

@@ -1,8 +1,5 @@
 #nullable enable
-using System.Collections.Generic;
-using Server.Objects.Domain;
-
-namespace Server.Objects.DTOs.Client_Folder
+namespace Server.Objects.DTOs.ClientModelDtos
 {
     public class CreateClientRequestDto
     {

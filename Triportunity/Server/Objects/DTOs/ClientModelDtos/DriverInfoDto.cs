@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Server.Objects.DTOs.Review_Folder;
-using Server.Objects.DTOs.Vehicle;
+using Server.Objects.DTOs.ReviewModelDtos;
+using Server.Objects.DTOs.VehicleModelDto;
 
 namespace Server.Objects.DTOs.ClientModelDtos
 {

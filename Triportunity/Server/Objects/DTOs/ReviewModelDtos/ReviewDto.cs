@@ -1,4 +1,4 @@
-namespace Server.Objects.DTOs.Review_Folder
+namespace Server.Objects.DTOs.ReviewModelDtos
 {
     public class ReviewDto
     {

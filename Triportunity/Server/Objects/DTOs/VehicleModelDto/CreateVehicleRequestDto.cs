@@ -1,11 +1,6 @@
 ﻿using Server.Objects.DTOs.VehicleImage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Server.Objects.DTOs.Vehicle
+namespace Server.Objects.DTOs.VehicleModelDto
 {
     public class CreateVehicleRequestDto
     {
