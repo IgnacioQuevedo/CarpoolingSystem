@@ -18,9 +18,9 @@ namespace Server.Objects.DTOs
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public RideDTO(Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public RideDTO(Guid id, Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
-            Id = new Guid();
+            Id = id;
             Driver = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
