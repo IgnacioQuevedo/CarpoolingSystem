@@ -30,7 +30,7 @@ namespace Server.Repositories
 
             return true;
         }
-        private bool ClientIsLogged(string username,string password)
+        private bool Login(string username,string password)
         {
             var possibleLogin = MemoryDatabase.GetInstance().Clients.
                 Where(x => x.Username == username);
@@ -41,5 +41,9 @@ namespace Server.Repositories
             }
             return false;
         }
+        
+        
+
+      
     }
 }
