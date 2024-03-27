@@ -22,5 +22,4 @@ namespace Server.Objects.DTOs.VehicleImage
             }
         }
     }
-}
 

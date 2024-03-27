@@ -1,8 +1,8 @@
-using Serverg.Objects.Domain.ClientModels;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Server.Objects.Domain.ClientModels;
 
-namespace Server.Objects.DTOs
+namespace Server.Objects.DTOs.Ride_Folder
 {
     public class RideDTO
     {

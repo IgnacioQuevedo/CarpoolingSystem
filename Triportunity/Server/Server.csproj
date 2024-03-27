@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
             Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
     <PropertyGroup>
+        <!-- Configuración de compilación -->
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{6DDAAA96-AA48-47C3-A69C-80167EB244ED}</ProjectGuid>
@@ -14,13 +14,14 @@
         <FileAlignment>512</FileAlignment>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <LangVersion>latest</LangVersion>
+        <!-- Configuración del directorio de salida -->
+        <OutputPath>bin\$(Configuration)\</OutputPath>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -29,53 +30,21 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <!-- Referencias -->
         <Reference Include="System"/>
         <Reference Include="System.Core"/>
         <Reference Include="System.Data"/>
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Controllers\RideController.cs" />
-        <Compile Include="DataContext\MemoryDatabase.cs" />
-        <Compile Include="Exceptions\ClientException.cs" />
-        <Compile Include="Exceptions\DriverInfoException.cs" />
-        <Compile Include="Objects\Domain\ClientModels\Client.cs" />
-        <Compile Include="Objects\Domain\ClientModels\DriverInfo.cs" />
-        <Compile Include="Objects\Domain\Review.cs" />
-        <Compile Include="Objects\Domain\Ride.cs" />
-        <Compile Include="Objects\Domain\Vehicle.cs" />
-        <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
-        <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
-        <Compile Include="Objects\DTOs\Client\CreateClientRequestDto.cs" />
-        <Compile Include="Objects\DTOs\Client\CreateDriverInfoRequestDto.cs" />
-        <Compile Include="Objects\DTOs\Client\DriverInfoDto.cs" />
-        <Compile Include="Objects\DTOs\Client\LoginClientRequestDto.cs" />
-        <Compile Include="Objects\DTOs\Client\ClientDto.cs" />
-        <Compile Include="Objects\DTOs\Review\ReviewDto.cs" />
-        <Compile Include="Objects\DTOs\Ride\CreateRideRequestDTO.cs" />
-        <Compile Include="Objects\DTOs\Ride\RideDTO.cs" />
-        <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageRequestDto.cs" />
-        <Compile Include="Objects\DTOs\VehicleImage\CreateVehicleImageResponseDto.cs" />
-        <Compile Include="Objects\DTOs\VehicleImage\VehicleImageDto.cs" />
-        <Compile Include="Objects\DTOs\Vehicle\CreateVehicleRequestDto.cs" />
-        <Compile Include="Objects\DTOs\Vehicle\CreateVehicleResponseDto.cs" />
-        <Compile Include="Objects\DTOs\Vehicle\VehicleDto.cs" />
-        <Compile Include="Program.cs"/>
-        <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Repositories\RideRepository.cs" />
+        <!-- Incluir todos los archivos fuente de todos los directorios y subdirectorios -->
+        <Compile Include="**\*.cs" />
+        <!-- También puedes incluir archivos adicionales aquí, si es necesario -->
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
 </Project>

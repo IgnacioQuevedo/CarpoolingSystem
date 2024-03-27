@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Serverg.Objects.Domain.ClientModels;
+using Server.Objects.Domain.ClientModels;
 
-namespace Serverg.Objects.DTOs.Ride_Folder
+namespace Server.Objects.DTOs.Ride_Folder
 {
 
-    public class CreateRideRequestDTO
+    public class CreateRideRequestDto
     {
         public Client Driver { get; set; }
         public List<Client> Passengers { get; set; }
@@ -18,7 +18,7 @@ namespace Serverg.Objects.DTOs.Ride_Folder
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public CreateRideRequestDTO(Client driver, List<Client> passengers, string initialLocation, string endingLocation,
+        public CreateRideRequestDto(Client driver, List<Client> passengers, string initialLocation, string endingLocation,
             DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Driver = driver;

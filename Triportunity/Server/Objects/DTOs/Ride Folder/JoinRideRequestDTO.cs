@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Serverg.Objects.Domain.ClientModels;
+using Server.Objects.Domain.ClientModels;
+
 
 namespace Server.Objects.DTOs.Ride_Folder
 {
