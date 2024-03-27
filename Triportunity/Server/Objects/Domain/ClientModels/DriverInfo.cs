@@ -1,10 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Server.Exceptions;
 
-namespace Server.Objects.Domain
+namespace Server.Objects.Domain.ClientModels
 {
     public class DriverInfo
     {
@@ -21,7 +18,6 @@ namespace Server.Objects.Domain
             Vehicles = driverVehicles;
             
             DriverInfoValidations();
-
         }
 
         private void DriverInfoValidations()
@@ -53,7 +49,6 @@ namespace Server.Objects.Domain
                                               minimalLengthForCi + "and without special characters");
             }
         }
-
         private bool NumericFormatIsCorrect()
         {
             foreach (char c in Ci)

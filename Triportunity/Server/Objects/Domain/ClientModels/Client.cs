@@ -2,11 +2,10 @@
 using System;
 using System.Text.RegularExpressions;
 using Server.Exceptions;
-using Server.Objects.Domain;
 
-namespace Serverg.Objects.Domain.ClientModels
+namespace Server.Objects.Domain.ClientModels
 {
-    public abstract class Client
+    public class Client
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
