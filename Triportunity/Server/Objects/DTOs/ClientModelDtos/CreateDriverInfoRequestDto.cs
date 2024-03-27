@@ -1,6 +1,6 @@
-using Server.Objects.DTOs.Vehicle_Folder;
 using System;
 using System.Collections.Generic;
+using Server.Objects.DTOs.Vehicle;
 
 namespace Server.Objects.DTOs.Client_Folder
 {
