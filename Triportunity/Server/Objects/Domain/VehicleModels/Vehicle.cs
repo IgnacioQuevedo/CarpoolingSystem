@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Server.Exceptions;
+using System;
 
 namespace Server.Objects.Domain.VehicleModels
 {
@@ -10,7 +11,12 @@ namespace Server.Objects.Domain.VehicleModels
 
         public Vehicle(VehicleImage picture)
         {
-            Id = new Guid();
+            if (picture == null)
+            {
+                throw new VehicleException("The picture cannot be null.");
+            }
+
+            Id = Guid.NewGuid();
             Picture = picture;
         }
     }
