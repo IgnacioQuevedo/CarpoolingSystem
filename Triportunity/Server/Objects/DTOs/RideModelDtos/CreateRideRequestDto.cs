@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Server.Objects.Domain.ClientModels;
+using Server.Objects.DTOs.ClientModelDtos;
 
 namespace Server.Objects.DTOs.RideModelDtos
 {
@@ -8,7 +9,7 @@ namespace Server.Objects.DTOs.RideModelDtos
     public class CreateRideRequestDto
     {
         public Client Driver { get; set; }
-        public List<Client> Passengers { get; set; }
+        public List<ClientDto> Passengers { get; set; }
         public string InitialLocation { get; set; }
         public string EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
@@ -18,7 +19,7 @@ namespace Server.Objects.DTOs.RideModelDtos
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public CreateRideRequestDto(Client driver, List<Client> passengers, string initialLocation, string endingLocation,
+        public CreateRideRequestDto(Client driver, List<ClientDto> passengers, string initialLocation, string endingLocation,
             DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Driver = driver;
