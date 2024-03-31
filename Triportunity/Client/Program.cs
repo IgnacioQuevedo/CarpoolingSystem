@@ -1,15 +1,18 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Threading;
+using Client.Objects.ClientModels;
+using Client.Objects.VehicleModels;
 using Client.Services;
 
 namespace Client
 {
     internal class Program
     {
+        readonly UserService _userService = new UserService();
         public static void Main(string[] args)
         {
+            
             bool appFunctional = true;
             bool userLogged = false;
 
@@ -116,7 +119,20 @@ namespace Client
             string passwordRegister = Console.ReadLine();
             Console.WriteLine("Insert the same password as above:");
             string repeatedPassword = Console.ReadLine();
+            Console.WriteLine("Do you want to be register as a driver?");
+            Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
+            if (Console.ReadLine().Equals('Y'))
+            {
+                Console.WriteLine("Insert your Ci for the registration");
+                string ci = Console.ReadLine();
+                Console.WriteLine("Insert a image of your Vehicle");
+                string vehicleImage = Console.ReadLine();
+            }
+            ShowMessageWithDelay("Registering",500);
+            RegisterClientRequest clientToRegister =
+                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword);
             //ServiceMethod that will create the user.
+
         }
 
         private static void LoginOption()
