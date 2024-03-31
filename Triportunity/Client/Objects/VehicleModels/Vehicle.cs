@@ -15,7 +15,7 @@ namespace Client.Objects.VehicleModels
 
         public Vehicle(VehicleImage picture)
         {
-            Id = new Guid();
+            Id = Guid.NewGuid();
             Picture = picture;
         }
     }
