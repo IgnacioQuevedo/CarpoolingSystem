@@ -41,6 +41,8 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Objects\Ride.cs" />
+        <Compile Include="Objects\VehicleModels\Vehicle.cs" />
+        <Compile Include="Objects\VehicleModels\VehicleImage.cs" />
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Services\UserService.cs" />
