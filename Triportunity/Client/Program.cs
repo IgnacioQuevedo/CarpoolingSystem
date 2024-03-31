@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Client.Objects.ClientModels;
@@ -10,9 +11,9 @@ namespace Client
     internal class Program
     {
         readonly UserService _userService = new UserService();
+
         public static void Main(string[] args)
         {
-            
             bool appFunctional = true;
             bool userLogged = false;
 
@@ -82,6 +83,7 @@ namespace Client
                 dots += ".";
                 Console.Write(dots);
             }
+
             Console.WriteLine("");
         }
 
@@ -108,11 +110,13 @@ namespace Client
             Console.WriteLine();
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
-
         }
 
         private static void RegisterOption()
         {
+            ICollection<Vehicle> vehicles = new List<Vehicle>();
+            string addAnewVehicle = "Y";
+
             Console.WriteLine("Your username will be:");
             string usernameRegister = Console.ReadLine();
             Console.WriteLine("Register your password:");
@@ -121,18 +125,30 @@ namespace Client
             string repeatedPassword = Console.ReadLine();
             Console.WriteLine("Do you want to be register as a driver?");
             Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
+
             if (Console.ReadLine().Equals('Y'))
             {
                 Console.WriteLine("Insert your Ci for the registration");
                 string ci = Console.ReadLine();
-                Console.WriteLine("Insert a image of your Vehicle");
-                string vehicleImage = Console.ReadLine();
+                
+                while (addAnewVehicle.Equals("Y"))
+                {
+                    Console.WriteLine("Insert a image of your Vehicle");
+                    //This must be fixed in a future.
+                    VehicleImage vehicleImage = null;
+                    Vehicle newVehicle = new Vehicle(vehicleImage);
+                    vehicles.Add(newVehicle);
+                    Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
+                    Console.WriteLine("If yes - Enter 'Y'");
+                    Console.WriteLine("If not - Enter 'N'");
+                    addAnewVehicle = Console.ReadLine();
+                }
             }
-            ShowMessageWithDelay("Registering",500);
-            RegisterClientRequest clientToRegister =
-                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword);
-            //ServiceMethod that will create the user.
 
+            ShowMessageWithDelay("Registering", 500);
+            RegisterClientRequest clientToRegister =
+                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, ve);
+            //ServiceMethod that will create the user.
         }
 
         private static void LoginOption()
@@ -153,7 +169,6 @@ namespace Client
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
-
         }
 
         #endregion
