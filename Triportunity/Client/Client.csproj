@@ -45,6 +45,7 @@
         <Compile Include="Objects\ClientModels\DriverInfo.cs" />
         <Compile Include="Objects\ClientModels\LoginClientRequest.cs" />
         <Compile Include="Objects\ClientModels\RegisterClientRequest.cs" />
+        <Compile Include="Objects\ClientModels\UpdateClientRequestModel.cs" />
         <Compile Include="Objects\ReviewModels\Review.cs" />
         <Compile Include="Objects\Ride.cs" />
         <Compile Include="Program.cs"/>
