@@ -43,6 +43,7 @@
     <ItemGroup>
         <Compile Include="Objects\ClientModels\Client.cs" />
         <Compile Include="Objects\ClientModels\DriverInfo.cs" />
+        <Compile Include="Objects\ClientModels\LoginClientRequest.cs" />
         <Compile Include="Objects\ClientModels\RegisterClientRequest.cs" />
         <Compile Include="Objects\ReviewModels\Review.cs" />
         <Compile Include="Objects\Ride.cs" />
