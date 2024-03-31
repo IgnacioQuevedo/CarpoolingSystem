@@ -13,6 +13,7 @@
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -41,6 +42,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Objects\ClientModels\Client.cs" />
+        <Compile Include="Objects\ClientModels\DriverInfo.cs" />
         <Compile Include="Objects\Ride.cs" />
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
