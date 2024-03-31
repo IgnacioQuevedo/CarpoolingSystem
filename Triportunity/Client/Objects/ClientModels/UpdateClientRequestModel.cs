@@ -4,6 +4,8 @@ using Client.Objects.VehicleModels;
 
 namespace Client.Objects.ClientModels
 {
+    // This class is made for when the client wants to register as a driver.
+    // So, at backend level it would generate for the client the specific DriverInfo
     public class UpdateClientRequestModel
     {
         public Guid Id { get; set; }
