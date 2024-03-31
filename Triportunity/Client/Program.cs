@@ -138,6 +138,7 @@ namespace Client
                     VehicleImage vehicleImage = null;
                     Vehicle newVehicle = new Vehicle(vehicleImage);
                     vehicles.Add(newVehicle);
+                    
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
@@ -147,7 +148,7 @@ namespace Client
 
             ShowMessageWithDelay("Registering", 500);
             RegisterClientRequest clientToRegister =
-                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, ve);
+                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, vehicles);
             //ServiceMethod that will create the user.
         }
 
