@@ -114,45 +114,55 @@ namespace Client
 
         private static void RegisterOption()
         {
-            ICollection<Vehicle> vehicles = new List<Vehicle>();
-            string addAnewVehicle = "Y";
-            string ci = "";
-
-            Console.WriteLine("Your username will be:");
-            string usernameRegister = Console.ReadLine();
-            Console.WriteLine("Register your password:");
-            string passwordRegister = Console.ReadLine();
-            Console.WriteLine("Insert the same password as above:");
-            string repeatedPassword = Console.ReadLine();
-            Console.WriteLine("Do you want to be register as a driver?");
-            Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
-
-            if (Console.ReadLine().Equals('Y'))
+            try
             {
-                Console.WriteLine("Insert your Ci for the registration");
-                ci = Console.ReadLine();
-                
-                while (addAnewVehicle.Equals("Y"))
-                {
-                    Console.WriteLine("Insert a image of your Vehicle");
-                    //This must be fixed in a future.
-                    VehicleImage vehicleImage = null;
-                    Vehicle newVehicle = new Vehicle(vehicleImage);
-                    vehicles.Add(newVehicle);
-                    
-                    Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
-                    Console.WriteLine("If yes - Enter 'Y'");
-                    Console.WriteLine("If not - Enter 'N'");
-                    addAnewVehicle = Console.ReadLine();
-                }
-            }
+                ICollection<Vehicle> vehicles = new List<Vehicle>();
+                string addAnewVehicle = "Y";
+                string ci = "";
 
-            ShowMessageWithDelay("Registering", 500);
-            RegisterClientRequest clientToRegister =
-                new RegisterClientRequest(ci,usernameRegister, passwordRegister, repeatedPassword, vehicles);
-            
-            //ServiceMethod that will create the user.
-            UserService.RegisterClient(clientToRegister);
+                Console.WriteLine("Your username will be:");
+                string usernameRegister = Console.ReadLine();
+                Console.WriteLine("Register your password:");
+                string passwordRegister = Console.ReadLine();
+                Console.WriteLine("Insert the same password as above:");
+                string repeatedPassword = Console.ReadLine();
+                Console.WriteLine("Do you want to be register as a driver?");
+                Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
+
+                if (Console.ReadLine().Equals('Y'))
+                {
+                    Console.WriteLine("Insert your Ci for the registration");
+                    ci = Console.ReadLine();
+
+                    while (addAnewVehicle.Equals("Y"))
+                    {
+                        Console.WriteLine("Insert a image of your Vehicle");
+                        //This must be fixed in a future.
+                        VehicleImage vehicleImage = null;
+                        Vehicle newVehicle = new Vehicle(vehicleImage);
+                        vehicles.Add(newVehicle);
+
+                        Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
+                        Console.WriteLine("If yes - Enter 'Y'");
+                        Console.WriteLine("If not - Enter 'N'");
+                        addAnewVehicle = Console.ReadLine();
+                    }
+                }
+
+                ShowMessageWithDelay("Registering", 500);
+                RegisterClientRequest clientToRegister =
+                    new RegisterClientRequest(ci, usernameRegister, passwordRegister, repeatedPassword, vehicles);
+
+                //ServiceMethod that will create the user.
+                UserService.RegisterClient(clientToRegister);
+
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                Console.WriteLine("Redo all again but without the above error.");
+                RegisterOption();
+            }
         }
 
         private static void LoginOption()
