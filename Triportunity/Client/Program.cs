@@ -157,14 +157,23 @@ namespace Client
 
         private static void LoginOption()
         {
-            Console.WriteLine("Username:");
-            string username = Console.ReadLine();
-            Console.WriteLine("Password:");
-            string password = Console.ReadLine();
+            try
+            {
+                Console.WriteLine("Username:");
+                string username = Console.ReadLine();
+                Console.WriteLine("Password:");
+                string password = Console.ReadLine();
             
-            //ServiceMethod that will login the user into the app
-            LoginClientRequest loginRequest = new LoginClientRequest(username, password);
-            UserService.LoginClient(loginRequest);
+                //ServiceMethod that will login the user into the app
+                LoginClientRequest loginRequest = new LoginClientRequest(username, password);
+                UserService.LoginClient(loginRequest);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                LoginOption();
+            }
+            
         }
 
         private static void MainMenuOptions()
