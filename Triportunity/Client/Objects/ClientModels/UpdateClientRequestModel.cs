@@ -8,8 +8,15 @@ namespace Client.Objects.ClientModels
     // So, at backend level it would generate for the client the specific DriverInfo
     public class UpdateClientRequestModel
     {
-        public Guid Id { get; set; }
-        public int Ci { get; set; }
-        public ICollection<Vehicle> Vehicles { get; set; }
+        public Guid ClientId { get; set; }
+
+        public DriverInfo DriverAspects { get; set; }
+
+        public UpdateClientRequestModel(Guid clientId, DriverInfo driverAspects)
+        {
+            ClientId = clientId;
+            DriverAspects = driverAspects;
+
+        }
     }
 }

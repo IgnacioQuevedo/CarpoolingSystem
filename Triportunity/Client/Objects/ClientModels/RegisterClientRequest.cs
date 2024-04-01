@@ -9,11 +9,11 @@ namespace Client.Objects.ClientModels
         public string Username { get; set; }
         public string Password { get; set; }
         public string RepeatedPassword { get; set; }
-        public DriverInfo DriverAspects { get; set; }
+        public DriverInfo? DriverAspects { get; set; }
 
 
         public RegisterClientRequest
-            (string username,string password,string repeatedPassword,ICollection<Vehicle>? vehicles,DriverInfo driverAspects)
+            (string ci, string username, string password, string repeatedPassword, DriverInfo? driverAspects)
         {
             Username = username;
             Password = password;

@@ -111,12 +111,13 @@ namespace Client
         
         private static void RegisterOption()
         {
+            ICollection<Vehicle> vehicles = new List<Vehicle>();
+            string addAnewVehicle = "Y";
+            string ci = "";
+            DriverInfo driverAspects = null;
+            
             try
             {
-                ICollection<Vehicle> vehicles = new List<Vehicle>();
-                string addAnewVehicle = "Y";
-                string ci = "";
-
                 Console.WriteLine("Your username will be:");
                 string usernameRegister = Console.ReadLine();
                 Console.WriteLine("Register your password:");
@@ -144,12 +145,13 @@ namespace Client
                         Console.WriteLine("If not - Enter 'N'");
                         addAnewVehicle = Console.ReadLine();
                     }
+
+                    driverAspects = new DriverInfo(ci, vehicles);
                 }
 
                 ShowMessageWithDelay("Registering", 500);
                 RegisterClientRequest clientToRegister =
-                    new RegisterClientRequest(ci, usernameRegister, passwordRegister, repeatedPassword, vehicles);
-
+                    new RegisterClientRequest(ci, usernameRegister, passwordRegister, repeatedPassword, driverAspects);
                 //ServiceMethod that will create the user.
                 UserService.RegisterClient(clientToRegister);
 
