@@ -13,7 +13,7 @@ namespace Client.Objects.ClientModels
 
 
         public RegisterClientRequest
-            (string ci, string username, string password, string repeatedPassword, DriverInfo? driverAspects)
+            (string username, string password, string repeatedPassword, DriverInfo? driverAspects)
         {
             Username = username;
             Password = password;

@@ -46,7 +46,7 @@ namespace Client
 
                 if (userLogged)
                 {
-                    //All the new functionalities to be done.
+                    
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace Client
 
                 ShowMessageWithDelay("Registering", 500);
                 RegisterClientRequest clientToRegister =
-                    new RegisterClientRequest(ci, usernameRegister, passwordRegister, repeatedPassword, driverAspects);
+                    new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, driverAspects);
                 //ServiceMethod that will create the user.
                 UserService.RegisterClient(clientToRegister);
 
