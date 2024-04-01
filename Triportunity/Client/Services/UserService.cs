@@ -9,6 +9,11 @@ namespace Client.Services
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
         }
+
+        public static void LoginClient(LoginClientRequest loginClientRequest)
+        {
+            // Invoke the necessary methods to being possible to communicate with the UserController of backend
+        }
         
         
         
