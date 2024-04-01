@@ -1,3 +1,4 @@
+using Server.Exceptions;
 using Server.Objects.Domain.ClientModels;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,23 @@ namespace Server.Objects.Domain
             PricePerPerson = pricePerPerson;
             PetsAllowed = petsAllowed;
             PhotoPath = photoPath;
+
+            RideValidations();
+        }
+
+        private void RideValidations()
+        {
+            LocationValidator();
+        }
+
+        private void LocationValidator()
+        {
+            int minSumOfLocationsToBeFilled = 2;
+            if (EndingLocation.Length + InitialLocation.Length < minSumOfLocationsToBeFilled)
+            {
+                throw new RideException("Both locations must be filled");
+            }
+
         }
 
     }
