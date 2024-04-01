@@ -40,13 +40,14 @@ namespace Server.Objects.Domain
         {
             LocationValidator();
             SeatsValidator();
+
         }
 
         private void LocationValidator()
         {
-            int minSumOfLocationsToBeFilled = 2;
+            int minLengthOfLocation = 1;
 
-            if (EndingLocation.Length + InitialLocation.Length < minSumOfLocationsToBeFilled)
+            if (EndingLocation.Length < minLengthOfLocation || InitialLocation.Length < minLengthOfLocation)
             {
                 throw new RideException("Both locations must be filled");
             }
@@ -54,11 +55,11 @@ namespace Server.Objects.Domain
 
         private void SeatsValidator()
         {
-            int minAvailableSeatsRequired = 1;
+            int minSeatsRequired = 1;
 
-            if (AvailableSeats < minAvailableSeatsRequired)
+            if (AvailableSeats < minSeatsRequired || TotalSeats < minSeatsRequired)
             {
-                throw new RideException("You must have at least " + minAvailableSeatsRequired + " seat available");
+                throw new RideException("You must have at least " + minSeatsRequired + " seat available");
             }
         }
 
