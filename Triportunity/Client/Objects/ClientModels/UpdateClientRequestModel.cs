@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Client.Objects.VehicleModels;
+using ClientUI.Objects.VehicleModels;
 
-namespace Client.Objects.ClientModels
+namespace ClientUI.Objects.ClientModels
 {
     // This class is made for when the client wants to register as a driver.
     // So, at backend level it would generate for the client the specific DriverInfo

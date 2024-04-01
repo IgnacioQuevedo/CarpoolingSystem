@@ -2,9 +2,9 @@
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using Client.Services;
+using ClientUI.Services;
 
-namespace Client
+namespace ClientUI
 {
     internal class Program
     {

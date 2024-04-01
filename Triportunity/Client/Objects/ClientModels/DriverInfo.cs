@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Client.Objects.ReviewModels;
 using Client.Objects.VehicleModels;
 
-namespace Client.Objects.ClientModels
+namespace ClientUI.Objects.ClientModels
 {
     public class DriverInfo
     {
