@@ -161,8 +161,10 @@ namespace Client
             string username = Console.ReadLine();
             Console.WriteLine("Password:");
             string password = Console.ReadLine();
+            
             //ServiceMethod that will login the user into the app
             LoginClientRequest loginRequest = new LoginClientRequest(username, password);
+            UserService.LoginClient(loginRequest);
         }
 
         private static void MainMenuOptions()
