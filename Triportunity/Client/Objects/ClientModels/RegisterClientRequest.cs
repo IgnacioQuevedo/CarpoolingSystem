@@ -6,6 +6,7 @@ namespace Client.Objects.ClientModels
 {
     public class RegisterClientRequest
     {
+        public string? Ci { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string RepeatedPassword { get; set; }
@@ -13,8 +14,9 @@ namespace Client.Objects.ClientModels
 
 
         public RegisterClientRequest
-            (string username,string password,string repeatedPassword,ICollection<Vehicle>? vehicles)
+            (string ci,string username,string password,string repeatedPassword,ICollection<Vehicle>? vehicles)
         {
+            Ci = ci;
             Username = username;
             Password = password;
             RepeatedPassword = repeatedPassword;

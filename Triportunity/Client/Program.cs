@@ -116,6 +116,7 @@ namespace Client
         {
             ICollection<Vehicle> vehicles = new List<Vehicle>();
             string addAnewVehicle = "Y";
+            string ci = "";
 
             Console.WriteLine("Your username will be:");
             string usernameRegister = Console.ReadLine();
@@ -129,7 +130,7 @@ namespace Client
             if (Console.ReadLine().Equals('Y'))
             {
                 Console.WriteLine("Insert your Ci for the registration");
-                string ci = Console.ReadLine();
+                ci = Console.ReadLine();
                 
                 while (addAnewVehicle.Equals("Y"))
                 {
@@ -148,8 +149,10 @@ namespace Client
 
             ShowMessageWithDelay("Registering", 500);
             RegisterClientRequest clientToRegister =
-                new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, vehicles);
+                new RegisterClientRequest(ci,usernameRegister, passwordRegister, repeatedPassword, vehicles);
+            
             //ServiceMethod that will create the user.
+            UserService.RegisterClient(clientToRegister);
         }
 
         private static void LoginOption()
