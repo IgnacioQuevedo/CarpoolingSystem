@@ -40,7 +40,7 @@ namespace Server.Objects.Domain
         {
             LocationValidator();
             SeatsValidator();
-
+            PhotoPathValidator();
         }
 
         private void LocationValidator()
@@ -60,6 +60,14 @@ namespace Server.Objects.Domain
             if (AvailableSeats < minSeatsRequired || TotalSeats < minSeatsRequired)
             {
                 throw new RideException("You must have at least " + minSeatsRequired + " seat available");
+            }
+        }
+
+        private void PhotoPathValidator()
+        {
+            if (PhotoPath.Length < 1)
+            {
+                throw new RideException("You must add a photo of your car");
             }
         }
 
