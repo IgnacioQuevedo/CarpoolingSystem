@@ -60,7 +60,6 @@ namespace Client
             ShowMessageWithDelay(goBackMessage, 1000);
             Console.WriteLine("");
         }
-
         private static bool CloseAppOption()
         {
             bool appFunctional = false;
@@ -71,7 +70,6 @@ namespace Client
             Console.WriteLine("Closed App with success!");
             return appFunctional;
         }
-
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
@@ -86,7 +84,6 @@ namespace Client
 
             Console.WriteLine("");
         }
-
         private static void AboutUsOption()
         {
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
@@ -111,7 +108,7 @@ namespace Client
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }
-
+        
         private static void RegisterOption()
         {
             try
@@ -164,7 +161,6 @@ namespace Client
                 RegisterOption();
             }
         }
-
         private static void LoginOption()
         {
             try
