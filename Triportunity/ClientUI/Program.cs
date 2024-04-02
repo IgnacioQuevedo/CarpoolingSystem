@@ -22,70 +22,75 @@ namespace ClientUI
 
                 _optionSelected = Console.ReadLine();
 
-                switch (_optionSelected)
+                if (_clientLogged is null)
                 {
-                    case "1":
-                        LoginOption();
-                        break;
-
-                    case "2":
-                        RegisterOption();
-                        break;
-
-                    case "3":
-                        AboutUsOption();
-                        break;
-                    case "4":
-                        CloseAppOption();
-                        break;
-                    default:
-                        WrongDigitInserted();
-                        break;
-                }
-
-                if (_clientLogged != null)
-                {
-                    if (_clientLogged.DriverAspects == null)
-                    {
-                        Console.WriteLine("Select 0 if you want to be registered as a driver too");
-                    }
-
-                    Console.WriteLine("Select 1- To create a Ride");
-                    Console.WriteLine("Select 2- To join a Ride");
-                    Console.WriteLine("Select 3- To view all your created rides");
-                    Console.WriteLine("Select 4- To close the app");
-
-                    _optionSelected = Console.ReadLine();
-
                     switch (_optionSelected)
                     {
-                        case "0":
-                            DriverInfo driverAspects = CreateDriver();
-                            UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
-                                (_clientLogged.Id, driverAspects);
-
-                            UserService.UpdateClient(clientWithUpdates);
-                            break;
-
                         case "1":
-                            //  ride method
+                            LoginOption();
                             break;
 
                         case "2":
-                            // Join ride
-                            break;
-                        case "3":
-                            // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
-                            // And so on let the client update their published rides and furthermore delete them
-                            break;
-                        case "4":
-                            // Close the app
-                            CloseAppOption();
+                            RegisterOption();
                             break;
 
+                        case "3":
+                            AboutUsOption();
+                            break;
+                        case "4":
+                            CloseAppOption();
+                            break;
                         default:
                             WrongDigitInserted();
                             break;
+                    }
+                }
+
+                else
+                {
+                    {
+                        if (_clientLogged.DriverAspects == null)
+                        {
+                            Console.WriteLine("Select 0 if you want to be registered as a driver too");
+                        }
+
+                        Console.WriteLine("Select 1- To create a Ride");
+                        Console.WriteLine("Select 2- To join a Ride");
+                        Console.WriteLine("Select 3- To view all your created rides");
+                        Console.WriteLine("Select 4- To close the app");
+
+                        _optionSelected = Console.ReadLine();
+
+                        switch (_optionSelected)
+                        {
+                            case "0":
+                                DriverInfo driverAspects = CreateDriver();
+                                UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
+                                    (_clientLogged.Id, driverAspects);
+
+                                UserService.UpdateClient(clientWithUpdates);
+                                break;
+
+                            case "1":
+                                //  ride method
+                                break;
+
+                            case "2":
+                                // Join ride
+                                break;
+                            case "3":
+                                // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
+                                // And so on let the client update their published rides and furthermore delete them
+                                break;
+                            case "4":
+                                // Close the app
+                                CloseAppOption();
+                                break;
+
+                            default:
+                                WrongDigitInserted();
+                                break;
+                        }
                     }
                 }
             }
@@ -166,7 +171,7 @@ namespace ClientUI
 
                 Console.WriteLine("Do you want to be register as a driver?");
                 Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
-                if (Console.ReadLine().Equals('Y'))
+                if (Console.ReadLine().Equals("Y"))
                 {
                     driverAspectsOfClient = CreateDriver();
                 }
