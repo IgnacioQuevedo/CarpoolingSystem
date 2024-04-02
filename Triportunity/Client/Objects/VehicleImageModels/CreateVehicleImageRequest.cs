@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client.Objects.VehicleModels
+namespace Client.Objects.VehicleImageModels
 {
-    public class VehicleImage
+    public class CreateVehicleImageRequest
     {
         public Guid Id { get; set; }
-
         public double Size { get; set; }
         public string FileName { get; set; }
 
@@ -17,9 +17,9 @@ namespace Client.Objects.VehicleModels
 
         public string Url { get; set; }
 
-        public VehicleImage(Guid id, double size, string fileName, string fileExtension, string url)
+        public CreateVehicleImageRequest(Guid id, double size, string fileName, string fileExtension, string url)
         {
-            Id = id; 
+            Id = id;
             Size = size;
             FileName = fileName;
             FileExtension = fileExtension;
