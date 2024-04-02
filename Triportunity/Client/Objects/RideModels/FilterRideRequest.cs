@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client.Objects.RideModels
+namespace ClientUI.Objects.RideModels
 {
     public class FilterRideRequest
     {
