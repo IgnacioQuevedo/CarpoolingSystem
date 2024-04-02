@@ -10,20 +10,21 @@ namespace ClientUI
 {
     internal class Program
     {
-        static Client.Objects.ClientModels.Client _clientLogged = null;
-
+        private static Client.Objects.ClientModels.Client _clientLogged = null;
+        private static bool _appFunctional = true;
+        private static string  _optionSelected = "";
         public static void Main(string[] args)
         {
-            bool appFunctional = true;
-            string optionSelected;
+            
+            
 
-            while (appFunctional)
+            while (_appFunctional)
             {
                 MainMenuOptions();
 
-                 optionSelected = Console.ReadLine();
+                _optionSelected = Console.ReadLine();
 
-                switch (optionSelected)
+                switch (_optionSelected)
                 {
                     case "1":
                         LoginOption();
@@ -37,7 +38,7 @@ namespace ClientUI
                         AboutUsOption();
                         break;
                     case "4":
-                        appFunctional = CloseAppOption();
+                        CloseAppOption();
                         break;
                     default:
                         WrongDigitInserted();
@@ -56,9 +57,9 @@ namespace ClientUI
                         Console.WriteLine("Select 3- To view all your created rides");
                         Console.WriteLine("Select 4- To close the app");
 
-                        optionSelected = Console.ReadLine();
+                        _optionSelected = Console.ReadLine();
                         
-                        switch (optionSelected)
+                        switch (_optionSelected)
                         {
                             case "0":
                                 DriverInfo driverAspects = CreateDriver();
@@ -105,15 +106,14 @@ namespace ClientUI
             Console.WriteLine("");
         }
 
-        private static bool CloseAppOption()
+        private static void CloseAppOption()
         {
-            bool appFunctional = false;
             string closingMessage = "Closing";
 
             ShowMessageWithDelay(closingMessage, 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            return appFunctional;
+            _appFunctional = false;
         }
 
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
@@ -181,7 +181,7 @@ namespace ClientUI
                 RegisterClientRequest clientToRegister =
                     new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword,
                         driverAspectsOfClient);
-                //ServiceMethod that will create the user.
+                
                 UserService.RegisterClient(clientToRegister);
             }
             catch (Exception exception)
@@ -228,9 +228,9 @@ namespace ClientUI
                 string username = Console.ReadLine();
                 Console.WriteLine("Password:");
                 string password = Console.ReadLine();
-
-                //ServiceMethod that will login the user into the app
+                
                 LoginClientRequest loginRequest = new LoginClientRequest(username, password);
+                
                 _clientLogged = UserService.LoginClient(loginRequest);
             }
             catch (Exception exception)
