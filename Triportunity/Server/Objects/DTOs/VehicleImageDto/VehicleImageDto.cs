@@ -9,6 +9,9 @@ namespace Server.Objects.DTOs.VehicleImage
 {
     public class VehicleImageDto
     {
+        public Guid Id { get; set; }
+
+        public double Size { get; set; }
         public string FileName { get; set; }
 
         public string FileExtension { get; set; }
