@@ -97,7 +97,7 @@ namespace ClientUI
 
         #region Main Menu Options
 
-        private static void gWrongDigitInserted()
+        private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
             string goBackMessage = "Returning to main menu";

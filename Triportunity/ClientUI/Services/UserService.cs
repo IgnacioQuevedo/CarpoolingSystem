@@ -14,6 +14,12 @@ namespace Client.Services
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             return null;
         }
+
+        public static void UpdateClient(UpdateClientRequestModel clientWithUpdates)
+        {
+            // Invoke the necessary methods to being possible to communicate with the UserController of backend
+            
+        }
         
         
         
