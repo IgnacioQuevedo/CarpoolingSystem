@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Server.Objects.Domain.Enums;
+using Server.Objects.DTOs.EnumsDtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +10,11 @@ namespace Server.Objects.DTOs.RideModelDtos
 {
     public class FilterRideRequestDto
     {
-        public string EndingLocation { get; set; }
+        public CitiesEnumDto EndingLocation { get; set; }
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }
 
-        public FilterRideRequestDto(string endingLocation, double pricePerPerson, bool petsAllowed)
+        public FilterRideRequestDto(CitiesEnumDto endingLocation, double pricePerPerson, bool petsAllowed)
         {
             EndingLocation = endingLocation;
             PricePerPerson = pricePerPerson;
