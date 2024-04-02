@@ -1,3 +1,4 @@
+using System;
 using Client.Objects.ClientModels;
 
 namespace Client.Services
@@ -7,22 +8,19 @@ namespace Client.Services
         public static void RegisterClient(RegisterClientRequest registerClientRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
+            throw new NotImplementedException();
         }
 
         public static Objects.ClientModels.Client LoginClient(LoginClientRequest loginClientRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
-            return null;
+            throw new NotImplementedException();
         }
 
-        public static void UpdateClient(UpdateClientRequestModel clientWithUpdates)
+        public static Objects.ClientModels.Client UpdateClient(UpdateClientRequestModel clientWithUpdates)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
-            
+            throw new NotImplementedException();
         }
-        
-        
-        
-        
     }
 }

@@ -18,12 +18,13 @@ namespace ClientUI
         {
             while (_appFunctional)
             {
-                MainMenuOptions();
-
-                _optionSelected = Console.ReadLine();
-
                 if (_clientLogged is null)
                 {
+                    MainMenuOptions();
+
+                    _optionSelected = Console.ReadLine();
+
+
                     switch (_optionSelected)
                     {
                         case "1":
@@ -49,26 +50,25 @@ namespace ClientUI
                 else
                 {
                     {
-                        if (_clientLogged.DriverAspects == null)
+                        if (_clientLogged.DriverAspects is null)
                         {
-                            Console.WriteLine("Select 0 if you want to be registered as a driver too");
+                            Console.WriteLine("Select 0- If you want to be registered as a driver");
                         }
 
                         Console.WriteLine("Select 1- To create a Ride");
                         Console.WriteLine("Select 2- To join a Ride");
                         Console.WriteLine("Select 3- To view all your created rides");
                         Console.WriteLine("Select 4- To close the app");
-
                         _optionSelected = Console.ReadLine();
 
                         switch (_optionSelected)
                         {
                             case "0":
-                                DriverInfo driverAspects = CreateDriver();
-                                UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
+                                var driverAspects = CreateDriver();
+                                var clientWithUpdates = new UpdateClientRequestModel
                                     (_clientLogged.Id, driverAspects);
 
-                                UserService.UpdateClient(clientWithUpdates);
+                                _clientLogged = UserService.UpdateClient(clientWithUpdates);
                                 break;
 
                             case "1":
@@ -163,11 +163,11 @@ namespace ClientUI
             try
             {
                 Console.WriteLine("Your username will be:");
-                string usernameRegister = Console.ReadLine();
+                var usernameRegister = Console.ReadLine();
                 Console.WriteLine("Register your password:");
-                string passwordRegister = Console.ReadLine();
+                var passwordRegister = Console.ReadLine();
                 Console.WriteLine("Insert the same password as above:");
-                string repeatedPassword = Console.ReadLine();
+                var repeatedPassword = Console.ReadLine();
 
                 Console.WriteLine("Do you want to be register as a driver?");
                 Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
@@ -178,11 +178,18 @@ namespace ClientUI
 
                 ShowMessageWithDelay("Registering", 500);
 
-                RegisterClientRequest clientToRegister =
+                var clientToRegister =
                     new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword,
                         driverAspectsOfClient);
 
                 UserService.RegisterClient(clientToRegister);
+                Console.WriteLine("Want to login?");
+                if (Console.ReadLine().Equals("Y"))
+                {
+                    var loginClient =
+                        new LoginClientRequest(clientToRegister.Username, clientToRegister.Password);
+                    _clientLogged = UserService.LoginClient(loginClient);
+                }
             }
             catch (Exception exception)
             {
@@ -194,7 +201,7 @@ namespace ClientUI
 
         private static DriverInfo CreateDriver()
         {
-            string ci;
+            string ci = "";
             string addNewVehicle = "Y";
             ICollection<Vehicle> vehicles = new List<Vehicle>();
 
@@ -206,7 +213,7 @@ namespace ClientUI
                 Console.WriteLine("Insert a image of your Vehicle");
                 //This must be fixed in a future.
                 VehicleImage vehicleImage = null;
-                Vehicle newVehicle = new Vehicle(vehicleImage);
+                var newVehicle = new Vehicle(vehicleImage);
 
                 vehicles.Add(newVehicle);
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
@@ -216,7 +223,7 @@ namespace ClientUI
                 addNewVehicle = Console.ReadLine();
             }
 
-            DriverInfo driverAspectsOfClient = new DriverInfo(ci, vehicles);
+            var driverAspectsOfClient = new DriverInfo(ci, vehicles);
             return driverAspectsOfClient;
         }
 
@@ -225,11 +232,11 @@ namespace ClientUI
             try
             {
                 Console.WriteLine("Username:");
-                string username = Console.ReadLine();
+                var username = Console.ReadLine();
                 Console.WriteLine("Password:");
-                string password = Console.ReadLine();
+                var password = Console.ReadLine();
 
-                LoginClientRequest loginRequest = new LoginClientRequest(username, password);
+                var loginRequest = new LoginClientRequest(username, password);
 
                 _clientLogged = UserService.LoginClient(loginRequest);
             }
