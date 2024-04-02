@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Objects.Domain.Enums
+namespace Server.Objects.DTOs.EnumsDtos
 {
-    public enum CitiesEnum
+    public enum CitiesEnumDto
     {
         Montevideo,
         Salto,

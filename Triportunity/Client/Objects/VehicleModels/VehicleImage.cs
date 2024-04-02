@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client.Objects.VehicleModels
+namespace ClientUI.Objects.VehicleModels
 {
     public class VehicleImage
     {

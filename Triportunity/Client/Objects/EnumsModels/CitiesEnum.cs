@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Objects.Domain.Enums
+namespace ClientUI.Objects.EnumsModels
 {
     public enum CitiesEnum
     {
