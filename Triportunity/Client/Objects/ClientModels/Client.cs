@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace Client.Objects.ClientModels
+namespace ClientUI.Objects.ClientModels
 {
     public class Client
     {
