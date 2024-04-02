@@ -11,12 +11,12 @@ namespace ClientUI
     internal class Program
     {
         static Client.Objects.ClientModels.Client _clientLogged = null;
-        
+
         public static void Main(string[] args)
         {
             bool appFunctional = true;
-            
-            
+
+
             while (appFunctional)
             {
                 MainMenuOptions();
@@ -46,12 +46,18 @@ namespace ClientUI
 
                 if (_clientLogged != null)
                 {
-                    
+                    //Indicates that the user has been logged
+                    //Here we need to display
+                    if (_clientLogged.DriverAspects == null)
+                    {
+                        Console.WriteLine("Select 0 if you want to be registered as a driver too");
+                    }
                 }
             }
         }
 
         #region Main Menu Options
+
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
@@ -59,6 +65,7 @@ namespace ClientUI
             ShowMessageWithDelay(goBackMessage, 1000);
             Console.WriteLine("");
         }
+
         private static bool CloseAppOption()
         {
             bool appFunctional = false;
@@ -69,6 +76,7 @@ namespace ClientUI
             Console.WriteLine("Closed App with success!");
             return appFunctional;
         }
+
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
@@ -83,6 +91,7 @@ namespace ClientUI
 
             Console.WriteLine("");
         }
+
         private static void AboutUsOption()
         {
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
@@ -107,12 +116,9 @@ namespace ClientUI
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }
-        
+
         private static void RegisterOption()
         {
-            ICollection<Vehicle> vehicles = new List<Vehicle>();
-            string addNewVehicle = "Y";
-            string ci = "";
             DriverInfo driverAspectsOfClient = null;
             
             try
@@ -123,37 +129,21 @@ namespace ClientUI
                 string passwordRegister = Console.ReadLine();
                 Console.WriteLine("Insert the same password as above:");
                 string repeatedPassword = Console.ReadLine();
+
                 Console.WriteLine("Do you want to be register as a driver?");
                 Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
-
                 if (Console.ReadLine().Equals('Y'))
                 {
-                    Console.WriteLine("Insert your Ci for the registration");
-                    ci = Console.ReadLine();
-
-                    while (addNewVehicle.Equals("Y"))
-                    {
-                        Console.WriteLine("Insert a image of your Vehicle");
-                        //This must be fixed in a future.
-                        VehicleImage vehicleImage = null;
-                        Vehicle newVehicle = new Vehicle(vehicleImage);
-                        vehicles.Add(newVehicle);
-
-                        Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
-                        Console.WriteLine("If yes - Enter 'Y'");
-                        Console.WriteLine("If not - Enter 'N'");
-                        addNewVehicle = Console.ReadLine();
-                    }
-
-                    driverAspectsOfClient = new DriverInfo(ci, vehicles);
+                    driverAspectsOfClient = CreateDriver();
                 }
 
                 ShowMessageWithDelay("Registering", 500);
+
                 RegisterClientRequest clientToRegister =
-                    new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, driverAspectsOfClient);
+                    new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword,
+                        driverAspectsOfClient);
                 //ServiceMethod that will create the user.
                 UserService.RegisterClient(clientToRegister);
-
             }
             catch (Exception exception)
             {
@@ -162,6 +152,35 @@ namespace ClientUI
                 RegisterOption();
             }
         }
+
+        private static DriverInfo CreateDriver()
+        {
+            string ci;
+            string addNewVehicle = "Y";
+            ICollection<Vehicle> vehicles = new List<Vehicle>();
+
+            Console.WriteLine("Insert your Ci for the registration");
+            ci = Console.ReadLine();
+
+            while (addNewVehicle.Equals("Y"))
+            {
+                Console.WriteLine("Insert a image of your Vehicle");
+                //This must be fixed in a future.
+                VehicleImage vehicleImage = null;
+                Vehicle newVehicle = new Vehicle(vehicleImage);
+
+                vehicles.Add(newVehicle);
+                Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
+                Console.WriteLine("If yes - Enter 'Y'");
+                Console.WriteLine("If not - Enter 'N'");
+
+                addNewVehicle = Console.ReadLine();
+            }
+
+            DriverInfo driverAspectsOfClient = new DriverInfo(ci, vehicles);
+            return driverAspectsOfClient;
+        }
+
         private static void LoginOption()
         {
             try
@@ -170,18 +189,16 @@ namespace ClientUI
                 string username = Console.ReadLine();
                 Console.WriteLine("Password:");
                 string password = Console.ReadLine();
-            
+
                 //ServiceMethod that will login the user into the app
                 LoginClientRequest loginRequest = new LoginClientRequest(username, password);
                 _clientLogged = UserService.LoginClient(loginRequest);
-                
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
                 LoginOption();
             }
-            
         }
 
         private static void MainMenuOptions()
