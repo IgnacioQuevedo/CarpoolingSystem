@@ -15,13 +15,13 @@ namespace ClientUI
         public static void Main(string[] args)
         {
             bool appFunctional = true;
-
+            string optionSelected;
 
             while (appFunctional)
             {
                 MainMenuOptions();
 
-                var optionSelected = Console.ReadLine();
+                 optionSelected = Console.ReadLine();
 
                 switch (optionSelected)
                 {
@@ -51,6 +51,45 @@ namespace ClientUI
                     if (_clientLogged.DriverAspects == null)
                     {
                         Console.WriteLine("Select 0 if you want to be registered as a driver too");
+                        Console.WriteLine("Select 1- To create a Ride");
+                        Console.WriteLine("Select 2- To join a Ride");
+                        Console.WriteLine("Select 3- To view all your created rides");
+                        Console.WriteLine("Select 4- To close the app");
+
+                        optionSelected = Console.ReadLine();
+                        
+                        switch (optionSelected)
+                        {
+                            case "0":
+                                DriverInfo driverAspects = CreateDriver();
+                                UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
+                                    (_clientLogged.Id,driverAspects);
+                                
+                                UserService.UpdateClient(clientWithUpdates);
+                                break;
+
+                            case "1":
+                                //  ride method
+                                break;
+
+                            case "2":
+                                // Join ride
+                                break;
+                            case "3":
+                                // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
+                                // And so on let the client update their published rides and furthermore delete them
+                                break;
+                            case "4":
+                                // Close the app
+                                CloseAppOption();
+                                break;
+                            
+                            default:
+                                WrongDigitInserted();
+                                break;
+                        }
+                        
+                        
                     }
                 }
             }
@@ -58,7 +97,7 @@ namespace ClientUI
 
         #region Main Menu Options
 
-        private static void WrongDigitInserted()
+        private static void gWrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
             string goBackMessage = "Returning to main menu";
