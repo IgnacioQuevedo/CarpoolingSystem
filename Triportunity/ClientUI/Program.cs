@@ -12,12 +12,10 @@ namespace ClientUI
     {
         private static Client.Objects.ClientModels.Client _clientLogged = null;
         private static bool _appFunctional = true;
-        private static string  _optionSelected = "";
+        private static string _optionSelected = "";
+
         public static void Main(string[] args)
         {
-            
-            
-
             while (_appFunctional)
             {
                 MainMenuOptions();
@@ -47,50 +45,47 @@ namespace ClientUI
 
                 if (_clientLogged != null)
                 {
-                    //Indicates that the user has been logged
-                    //Here we need to display
                     if (_clientLogged.DriverAspects == null)
                     {
                         Console.WriteLine("Select 0 if you want to be registered as a driver too");
-                        Console.WriteLine("Select 1- To create a Ride");
-                        Console.WriteLine("Select 2- To join a Ride");
-                        Console.WriteLine("Select 3- To view all your created rides");
-                        Console.WriteLine("Select 4- To close the app");
+                    }
 
-                        _optionSelected = Console.ReadLine();
-                        
-                        switch (_optionSelected)
-                        {
-                            case "0":
-                                DriverInfo driverAspects = CreateDriver();
-                                UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
-                                    (_clientLogged.Id,driverAspects);
-                                
-                                UserService.UpdateClient(clientWithUpdates);
-                                break;
+                    Console.WriteLine("Select 1- To create a Ride");
+                    Console.WriteLine("Select 2- To join a Ride");
+                    Console.WriteLine("Select 3- To view all your created rides");
+                    Console.WriteLine("Select 4- To close the app");
 
-                            case "1":
-                                //  ride method
-                                break;
+                    _optionSelected = Console.ReadLine();
 
-                            case "2":
-                                // Join ride
-                                break;
-                            case "3":
-                                // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
-                                // And so on let the client update their published rides and furthermore delete them
-                                break;
-                            case "4":
-                                // Close the app
-                                CloseAppOption();
-                                break;
-                            
-                            default:
-                                WrongDigitInserted();
-                                break;
-                        }
-                        
-                        
+                    switch (_optionSelected)
+                    {
+                        case "0":
+                            DriverInfo driverAspects = CreateDriver();
+                            UpdateClientRequestModel clientWithUpdates = new UpdateClientRequestModel
+                                (_clientLogged.Id, driverAspects);
+
+                            UserService.UpdateClient(clientWithUpdates);
+                            break;
+
+                        case "1":
+                            //  ride method
+                            break;
+
+                        case "2":
+                            // Join ride
+                            break;
+                        case "3":
+                            // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
+                            // And so on let the client update their published rides and furthermore delete them
+                            break;
+                        case "4":
+                            // Close the app
+                            CloseAppOption();
+                            break;
+
+                        default:
+                            WrongDigitInserted();
+                            break;
                     }
                 }
             }
@@ -159,7 +154,7 @@ namespace ClientUI
         private static void RegisterOption()
         {
             DriverInfo driverAspectsOfClient = null;
-            
+
             try
             {
                 Console.WriteLine("Your username will be:");
@@ -181,7 +176,7 @@ namespace ClientUI
                 RegisterClientRequest clientToRegister =
                     new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword,
                         driverAspectsOfClient);
-                
+
                 UserService.RegisterClient(clientToRegister);
             }
             catch (Exception exception)
@@ -228,9 +223,9 @@ namespace ClientUI
                 string username = Console.ReadLine();
                 Console.WriteLine("Password:");
                 string password = Console.ReadLine();
-                
+
                 LoginClientRequest loginRequest = new LoginClientRequest(username, password);
-                
+
                 _clientLogged = UserService.LoginClient(loginRequest);
             }
             catch (Exception exception)
