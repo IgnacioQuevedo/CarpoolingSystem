@@ -42,7 +42,42 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Incluir todos los archivos fuente de todos los directorios y subdirectorios -->
-    <Compile Include="**\*.cs" />
+    <Compile Include="Controllers\RideController.cs" />
+    <Compile Include="Controllers\VehicleController.cs" />
+    <Compile Include="DataContext\MemoryDatabase.cs" />
+    <Compile Include="Exceptions\ClientException.cs" />
+    <Compile Include="Exceptions\DriverInfoException.cs" />
+    <Compile Include="Exceptions\RideException.cs" />
+    <Compile Include="Exceptions\VehicleException.cs" />
+    <Compile Include="Objects\Domain\ClientModels\Client.cs" />
+    <Compile Include="Objects\Domain\ClientModels\DriverInfo.cs" />
+    <Compile Include="Objects\Domain\Enums\CitiesEnum.cs" />
+    <Compile Include="Objects\Domain\Review.cs" />
+    <Compile Include="Objects\Domain\Ride.cs" />
+    <Compile Include="Objects\Domain\VehicleModels\Vehicle.cs" />
+    <Compile Include="Objects\Domain\VehicleModels\VehicleImage.cs" />
+    <Compile Include="Objects\DTOs\ClientModelDtos\ClientDto.cs" />
+    <Compile Include="Objects\DTOs\ClientModelDtos\CreateDriverInfoRequestDto.cs" />
+    <Compile Include="Objects\DTOs\ClientModelDtos\DriverInfoDto.cs" />
+    <Compile Include="Objects\DTOs\ClientModelDtos\LoginClientRequestDto.cs" />
+    <Compile Include="Objects\DTOs\ClientModelDtos\RegisterClientRequestDto.cs" />
+    <Compile Include="Objects\DTOs\ReviewModelDtos\ReviewDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\ConsultRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\CreateRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\FilterRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\JoinRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\ModifyRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\QuitRideRequestDto.cs" />
+    <Compile Include="Objects\DTOs\RideModelDtos\RideDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleImageDto\CreateVehicleImageRequestDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleImageDto\VehicleImageDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleModelDto\CreateVehicleRequestDto.cs" />
+    <Compile Include="Objects\DTOs\VehicleModelDto\VehicleDto.cs" />
+    <Compile Include="obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\RideRepository.cs" />
+    <Compile Include="Repositories\VehicleRepository.cs" />
     <!-- También puedes incluir archivos adicionales aquí, si es necesario -->
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
