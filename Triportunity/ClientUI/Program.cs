@@ -188,6 +188,7 @@ namespace ClientUI
                 {
                     var loginClient =
                         new LoginClientRequest(clientToRegister.Username, clientToRegister.Password);
+                    
                     _clientLogged = UserService.LoginClient(loginClient);
                 }
             }
