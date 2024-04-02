@@ -6,17 +6,17 @@ using Client.Objects.ClientModels;
 using Client.Objects.VehicleModels;
 using Client.Services;
 
-namespace Client
+namespace ClientUI
 {
     internal class Program
     {
-        readonly UserService _userService = new UserService();
-
+        static Client.Objects.ClientModels.Client _clientLogged = null;
+        
         public static void Main(string[] args)
         {
             bool appFunctional = true;
-            bool userLogged = false;
-
+            
+            
             while (appFunctional)
             {
                 MainMenuOptions();
@@ -44,7 +44,7 @@ namespace Client
                         break;
                 }
 
-                if (userLogged)
+                if (_clientLogged != null)
                 {
                     
                 }
@@ -52,7 +52,6 @@ namespace Client
         }
 
         #region Main Menu Options
-
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
@@ -112,9 +111,9 @@ namespace Client
         private static void RegisterOption()
         {
             ICollection<Vehicle> vehicles = new List<Vehicle>();
-            string addAnewVehicle = "Y";
+            string addNewVehicle = "Y";
             string ci = "";
-            DriverInfo driverAspects = null;
+            DriverInfo driverAspectsOfClient = null;
             
             try
             {
@@ -132,7 +131,7 @@ namespace Client
                     Console.WriteLine("Insert your Ci for the registration");
                     ci = Console.ReadLine();
 
-                    while (addAnewVehicle.Equals("Y"))
+                    while (addNewVehicle.Equals("Y"))
                     {
                         Console.WriteLine("Insert a image of your Vehicle");
                         //This must be fixed in a future.
@@ -143,15 +142,15 @@ namespace Client
                         Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                         Console.WriteLine("If yes - Enter 'Y'");
                         Console.WriteLine("If not - Enter 'N'");
-                        addAnewVehicle = Console.ReadLine();
+                        addNewVehicle = Console.ReadLine();
                     }
 
-                    driverAspects = new DriverInfo(ci, vehicles);
+                    driverAspectsOfClient = new DriverInfo(ci, vehicles);
                 }
 
                 ShowMessageWithDelay("Registering", 500);
                 RegisterClientRequest clientToRegister =
-                    new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, driverAspects);
+                    new RegisterClientRequest(usernameRegister, passwordRegister, repeatedPassword, driverAspectsOfClient);
                 //ServiceMethod that will create the user.
                 UserService.RegisterClient(clientToRegister);
 
@@ -174,7 +173,8 @@ namespace Client
             
                 //ServiceMethod that will login the user into the app
                 LoginClientRequest loginRequest = new LoginClientRequest(username, password);
-                UserService.LoginClient(loginRequest);
+                _clientLogged = UserService.LoginClient(loginRequest);
+                
             }
             catch (Exception exception)
             {
