@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client.Objects.EnumsModels
+namespace ClientUI.Objects.EnumsModels
 {
     public enum CitiesEnum
     {
         Montevideo,
         Salto,
         Paysandu,
-        Melo,
+        CerroLargo,
         Rivera,
         Maldonado,
         Artigas,

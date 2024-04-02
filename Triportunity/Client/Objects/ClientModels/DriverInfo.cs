@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Client.Objects.ReviewModels;
-using Client.Objects.VehicleModels;
+using ClientUI.Objects.ReviewModels;
+using ClientUI.Objects.VehicleModels;
 
 namespace ClientUI.Objects.ClientModels
 {

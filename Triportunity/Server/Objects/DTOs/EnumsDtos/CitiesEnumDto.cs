@@ -11,7 +11,7 @@ namespace Server.Objects.DTOs.EnumsDtos
         Montevideo,
         Salto,
         Paysandu,
-        Melo,
+        CerroLargo,
         Rivera,
         Maldonado,
         Artigas,
