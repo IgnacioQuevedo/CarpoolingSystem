@@ -17,7 +17,7 @@ namespace Server
             // MemoryDatabase database = MemoryDatabase.GetInstance();
 
             var localEndPoint = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 4000
+                IPAddress.Parse("127.0.0.1"),5000 
             );
 
             var receptorSocket = new Socket(
@@ -33,16 +33,14 @@ namespace Server
             //This is how much users could be in a waiting state before entering the system
             receptorSocket.Listen(1000); 
             Console.WriteLine("Waiting for clients...");
-
-            
-            Console.ReadKey();
             int users = 1;
-            while ( _listenToNewClients)
-            {
-
+            
+            while ( _listenToNewClients )
+            { 
                 Socket transmittorSocket = receptorSocket.Accept();
-                int n = users;
-                new Thread(() => ManageUser(transmittorSocket, users));
+                Console.WriteLine(transmittorSocket);
+                int actualUser = users;
+                new Thread(() => ManageUser(transmittorSocket, actualUser)).Start();
                 users++;
             }
         }
@@ -50,9 +48,10 @@ namespace Server
         private static void ManageUser(Socket transmittorSocket, int actualUser)
         {
             Console.WriteLine($@"The user {actualUser} is connected");
-            byte[] buffer = Array.Empty<byte>();
+            
+            var buffer = new byte[10];
             int bytesReceived = transmittorSocket.Receive(buffer);
-
+            
             if (bytesReceived == 0)
             {
                 Console.WriteLine("The user has been disconnected");
