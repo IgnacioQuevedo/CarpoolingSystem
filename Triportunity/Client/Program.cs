@@ -2,10 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading;
-using Client.Services;
 
 namespace Client
 {
@@ -14,38 +12,36 @@ namespace Client
         public static void Main(string[] args)
         {
             IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 4000
+                IPAddress.Parse("127.0.0.1"), 0
             );
             IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"),5000
+                IPAddress.Parse("127.0.0.1"), 5000
             );
 
-            var transmittorSocket = new Socket(
+            var transmitterSocket = new Socket(
                 AddressFamily.InterNetwork, // IPV4
                 SocketType.Stream, //TCP
                 ProtocolType.Tcp
             );
-            
+
             // Assign the Ipv4 and port to the socket (local)
-            transmittorSocket.Bind(local);
-            
-            // Defining that the transmittor socket will 
-            transmittorSocket.Connect( server );
-            
+            transmitterSocket.Bind(local);
+
+            // Defining that the transmitter socket will request to connect with the receptor socket
+            transmitterSocket.Connect(server);
+
             Console.WriteLine("Let a message for the server:");
             string message = Console.ReadLine();
             byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
-            transmittorSocket.Send(messageInBytes);
-            transmittorSocket.Shutdown( SocketShutdown.Both);
-            transmittorSocket.Close();
             
+            // The transmitter socket sends the data in bytes to the receptor socket
+            transmitterSocket.Send(messageInBytes);
             
-            
-            
-            
-            
-            
-            
+            //After sent, we close the connection
+            transmitterSocket.Shutdown(SocketShutdown.Both);
+            transmitterSocket.Close();
+
+
             bool appFunctional = true;
             bool userLogged = false;
 
@@ -115,6 +111,7 @@ namespace Client
                 dots += ".";
                 Console.Write(dots);
             }
+
             Console.WriteLine("");
         }
 
@@ -141,7 +138,6 @@ namespace Client
             Console.WriteLine();
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
-
         }
 
         private static void RegisterOption()
@@ -173,7 +169,6 @@ namespace Client
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
-
         }
 
         #endregion
