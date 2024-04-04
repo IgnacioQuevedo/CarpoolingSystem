@@ -12,7 +12,7 @@ namespace Client
         public static void Main(string[] args)
         {
             IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 0
+                IPAddress.Parse("127.0.0.1"), 4000
             );
             IPEndPoint server = new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"), 5000
@@ -29,14 +29,21 @@ namespace Client
 
             // Defining that the transmitter socket will request to connect with the receptor socket
             transmitterSocket.Connect(server);
+            while (true)
+            {
 
-            Console.WriteLine("Let a message for the server:");
-            string message = Console.ReadLine();
-            byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
-            
-            // The transmitter socket sends the data in bytes to the receptor socket
-            transmitterSocket.Send(messageInBytes);
-            
+
+                Console.WriteLine("Let a message for the server:");
+                string message = Console.ReadLine();
+                if (message.Equals(""))
+                {
+                    break;
+                }
+                byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
+                // The transmitter socket sends the data in bytes to the receptor socket
+                transmitterSocket.Send(messageInBytes);
+            }
+
             //After sent, we close the connection
             transmitterSocket.Shutdown(SocketShutdown.Both);
             transmitterSocket.Close();

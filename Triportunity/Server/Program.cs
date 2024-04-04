@@ -10,7 +10,9 @@ namespace Server
     internal class Program
     {
         private static bool _listenToNewClients = true;
-        private static int maxUsersInWaitingState = 1000;
+        private static bool _clientWantsToContinueSendingData = true;
+        private static int _maxUsersInBackLog = 1000;
+
         public static void Main(string[] args)
         {
             // //For bringing up the db just use this method:
@@ -31,7 +33,7 @@ namespace Server
             //This will connect the socket with the IP and Port define above
             receptorSocket.Bind(localEndPoint);
             //This is how much users could be in a waiting state before entering the system
-            receptorSocket.Listen(maxUsersInWaitingState);
+            receptorSocket.Listen(_maxUsersInBackLog);
             Console.WriteLine("Waiting for clients...");
             int users = 1;
 
@@ -50,18 +52,29 @@ namespace Server
         {
             Console.WriteLine($@"The user {actualUser} is connected");
 
-            var buffer = new byte[10];
-            // Waits for the client to send the data (It gets in suspended state)
-            int bytesReceived = transmittorSocket.Receive(buffer);
+            while (_clientWantsToContinueSendingData)
+            {
+                var buffer = new byte[10];
+                try
+                {
+                    // Waits for the client to send the data (It gets in suspended state)
+                    int bytesReceived = transmittorSocket.Receive(buffer);
 
-            if (bytesReceived == 0)
-            {
-                Console.WriteLine("The user has been disconnected");
-            }
-            else
-            {
-                string message = Encoding.UTF8.GetString(buffer);
-                Console.WriteLine($@"The user {actualUser} : {message}");
+                    if (bytesReceived == 0)
+                    {
+                        Console.WriteLine("The user has been disconnected");
+                        break;
+                    }
+
+                    string message = Encoding.UTF8.GetString(buffer);
+                    Console.WriteLine($@"The user {actualUser} : {message}");
+                }
+
+                catch (SocketException e)
+                {
+                    Console.WriteLine("Error" + e.Message);
+                    break;
+                }
             }
 
             transmittorSocket.Shutdown(SocketShutdown.Both);
