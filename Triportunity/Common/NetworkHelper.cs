@@ -24,6 +24,11 @@ namespace Common
             return transmitterSocket;
         }
 
+        public static byte[] EncodeMsg(string message)
+        {
+            
+        }
+
         
     }
 }

@@ -85,7 +85,7 @@ namespace Client
             }
             else
             {
-                Console.WriteLine("Triportinuty is a travel web app");
+                Console.WriteLine("Triportunity is a travel web app");
             }
 
             Console.WriteLine("");
@@ -107,7 +107,7 @@ namespace Client
             string repeatedPassword = Console.ReadLine();
 
             string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
-            _messageInBytes = Encoding.UTF8.GetBytes(registerInfo);
+            _messageInBytes = NetworkHelper.EncodeMsg(registerInfo);
             _transmitterSocket.Send(_messageInBytes);
             //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
         }
@@ -120,7 +120,7 @@ namespace Client
             string password = Console.ReadLine();
 
             string loginInfo = username + ";" + password;
-            _messageInBytes = Encoding.UTF8.GetBytes(loginInfo);
+            _messageInBytes = NetworkHelper.EncodeMsg(loginInfo);
             _transmitterSocket.Send(_messageInBytes);
             //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }
