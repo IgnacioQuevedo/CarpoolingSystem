@@ -9,50 +9,14 @@ namespace Client
 {
     internal class Program
     {
+        private static readonly Socket _transmitterSocket = ConnectWithServer();
+        private static byte[] _messageInBytes;
+        private static bool _userLogged = false;
+        private static bool _closeApp;
+
         public static void Main(string[] args)
         {
-            IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 4000
-            );
-            IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
-            );
-
-            var transmitterSocket = new Socket(
-                AddressFamily.InterNetwork, // IPV4
-                SocketType.Stream, //TCP
-                ProtocolType.Tcp
-            );
-
-            // Assign the Ipv4 and port to the socket (local)
-            transmitterSocket.Bind(local);
-
-            // Defining that the transmitter socket will request to connect with the receptor socket
-            transmitterSocket.Connect(server);
-            while (true)
-            {
-
-
-                Console.WriteLine("Let a message for the server:");
-                string message = Console.ReadLine();
-                if (message.Equals(""))
-                {
-                    break;
-                }
-                byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
-                // The transmitter socket sends the data in bytes to the receptor socket
-                transmitterSocket.Send(messageInBytes);
-            }
-
-            //After sent, we close the connection
-            transmitterSocket.Shutdown(SocketShutdown.Both);
-            transmitterSocket.Close();
-
-
-            bool appFunctional = true;
-            bool userLogged = false;
-
-            while (appFunctional)
+            while (!_closeApp)
             {
                 MainMenuOptions();
 
@@ -72,19 +36,42 @@ namespace Client
                         AboutUsOption();
                         break;
                     case "4":
-                        appFunctional = CloseAppOption();
+                        CloseAppOption();
                         break;
                     default:
                         WrongDigitInserted();
                         break;
                 }
 
-                if (userLogged)
+                if (_userLogged)
                 {
                     //All the new functionalities to be done.
                 }
             }
         }
+
+        #region Initializing Transmitter Socket
+
+        private static Socket ConnectWithServer()
+        {
+            IPEndPoint local = new IPEndPoint(
+                IPAddress.Parse("127.0.0.1"), 0
+            );
+            IPEndPoint server = new IPEndPoint(
+                IPAddress.Parse("127.0.0.1"), 5000
+            );
+
+            Socket transmitterSocket = new Socket(
+                AddressFamily.InterNetwork,
+                SocketType.Stream,
+                ProtocolType.Tcp
+            );
+            transmitterSocket.Bind(local);
+            transmitterSocket.Connect(server);
+            return transmitterSocket;
+        }
+
+        #endregion
 
         #region Main Menu Options
 
@@ -96,15 +83,16 @@ namespace Client
             Console.WriteLine("");
         }
 
-        private static bool CloseAppOption()
+        private static void CloseAppOption()
         {
-            bool appFunctional = false;
             string closingMessage = "Closing";
-
             ShowMessageWithDelay(closingMessage, 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            return appFunctional;
+
+            _transmitterSocket.Shutdown(SocketShutdown.Both);
+            _transmitterSocket.Close();
+            _closeApp = true;
         }
 
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
@@ -164,7 +152,12 @@ namespace Client
             string username = Console.ReadLine();
             Console.WriteLine("Password:");
             string password = Console.ReadLine();
-            //ServiceMethod that will login the user into the app
+
+            string message = Console.ReadLine();
+            byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
+
+            _transmitterSocket.Send(messageInBytes);
+            //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }
 
         private static void MainMenuOptions()
