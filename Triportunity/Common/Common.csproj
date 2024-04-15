@@ -5,15 +5,13 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{B541F823-33CE-4B2A-AE78-A2215901B046}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <ProjectGuid>{756855EA-7BDD-4DDF-BA37-DC6EEC1D3E33}</ProjectGuid>
+        <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Client</RootNamespace>
-        <AssemblyName>Client</AssemblyName>
+        <RootNamespace>Common</RootNamespace>
+        <AssemblyName>Common</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -41,24 +39,10 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Objects\ClientModels\Client.cs" />
-        <Compile Include="Objects\ClientModels\DriverInfo.cs" />
-        <Compile Include="Objects\ClientModels\LoginClientRequest.cs" />
-        <Compile Include="Objects\ClientModels\RegisterClientRequest.cs" />
-        <Compile Include="Objects\ClientModels\UpdateClientRequestModel.cs" />
-        <Compile Include="Objects\ReviewModels\Review.cs" />
-        <Compile Include="Objects\Ride.cs" />
-        <Compile Include="Program.cs"/>
+        <Compile Include="CommandsConstraints.cs" />
+        <Compile Include="NetworkHelper.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Services\UserService.cs" />
-        <Compile Include="Objects\VehicleModels\Vehicle.cs" />
-        <Compile Include="Objects\VehicleModels\VehicleImage.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Common\Common.csproj">
-        <Project>{756855ea-7bdd-4ddf-ba37-dc6eec1d3e33}</Project>
-        <Name>Common</Name>
-      </ProjectReference>
+        <Compile Include="ProtocolConstants.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -68,4 +52,5 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+
 </Project>

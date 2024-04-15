@@ -4,12 +4,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Common;
 
 namespace Client
 {
     internal class Program
     {
-        private static readonly Socket _transmitterSocket = ConnectWithServer();
+        private static readonly Socket _transmitterSocket = NetworkHelper.ConnectWithServer();
         private static byte[] _messageInBytes;
         private static bool _userLogged = false;
         private static bool _closeApp;
@@ -49,30 +50,6 @@ namespace Client
                 }
             }
         }
-
-        #region Initializing Transmitter Socket
-
-        private static Socket ConnectWithServer()
-        {
-            IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 0
-            );
-            IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
-            );
-
-            Socket transmitterSocket = new Socket(
-                AddressFamily.InterNetwork,
-                SocketType.Stream,
-                ProtocolType.Tcp
-            );
-            transmitterSocket.Bind(local);
-            transmitterSocket.Connect(server);
-            return transmitterSocket;
-        }
-
-        #endregion
-
         #region Main Menu Options
 
         private static void WrongDigitInserted()
@@ -160,8 +137,7 @@ namespace Client
         }
 
         #endregion
-
-
+        
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
