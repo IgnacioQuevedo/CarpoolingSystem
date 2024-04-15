@@ -10,11 +10,11 @@ namespace Client
 {
     internal class Program
     {
-        private static readonly Socket _transmitterSocket = NetworkHelper.ConnectWithServer();
         private static byte[] _messageInBytes;
         private static bool _userLogged = false;
         private static bool _closeApp;
 
+        private static readonly Socket _clientSocket = NetworkHelper.ConnectWithServer();
         public static void Main(string[] args)
         {
             while (!_closeApp)
@@ -50,6 +50,7 @@ namespace Client
                 }
             }
         }
+
         #region Main Menu Options
 
         private static void WrongDigitInserted()
@@ -65,7 +66,7 @@ namespace Client
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
 
-            NetworkHelper.CloseConnectionWithServer(_transmitterSocket);
+            NetworkHelper.CloseSocketConnections(_clientSocket);
             _closeApp = true;
         }
 
@@ -84,7 +85,7 @@ namespace Client
             {
                 Console.WriteLine("Triportunity is a travel web app");
             }
-            
+
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
             Console.ReadLine();
@@ -103,7 +104,7 @@ namespace Client
 
             string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
             _messageInBytes = NetworkHelper.EncodeMsg(registerInfo);
-            _transmitterSocket.Send(_messageInBytes);
+            _clientSocket.Send(_messageInBytes);
             //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
         }
 
@@ -116,7 +117,7 @@ namespace Client
 
             string loginInfo = username + ";" + password;
             _messageInBytes = NetworkHelper.EncodeMsg(loginInfo);
-            _transmitterSocket.Send(_messageInBytes);
+            _clientSocket.Send(_messageInBytes);
             //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }
 
@@ -132,7 +133,7 @@ namespace Client
         }
 
         #endregion
-        
+
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);

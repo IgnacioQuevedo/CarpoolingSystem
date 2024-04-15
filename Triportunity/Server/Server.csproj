@@ -46,5 +46,11 @@
         <Compile Include="**\*.cs" />
         <!-- También puedes incluir archivos adicionales aquí, si es necesario -->
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Common\Common.csproj">
+        <Project>{756855ea-7bdd-4ddf-ba37-dc6eec1d3e33}</Project>
+        <Name>Common</Name>
+      </ProjectReference>
+    </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
