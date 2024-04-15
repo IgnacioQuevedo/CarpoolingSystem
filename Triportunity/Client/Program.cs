@@ -67,8 +67,7 @@ namespace Client
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
 
-            _transmitterSocket.Shutdown(SocketShutdown.Both);
-            _transmitterSocket.Close();
+            NetworkHelper.CloseConnectionWithServer(_transmitterSocket);
             _closeApp = true;
         }
 
@@ -87,12 +86,10 @@ namespace Client
             {
                 Console.WriteLine("Triportunity is a travel web app");
             }
-
-            Console.WriteLine("");
+            
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.ReadLine();
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Common
 {
@@ -24,9 +25,15 @@ namespace Common
             return transmitterSocket;
         }
 
+        public static void CloseConnectionWithServer(Socket transmitterSocket)
+        {
+            transmitterSocket.Shutdown(SocketShutdown.Both);
+            transmitterSocket.Close();
+        }
+        
         public static byte[] EncodeMsg(string message)
         {
-            
+            return Encoding.UTF8.GetBytes(message);
         }
 
         
