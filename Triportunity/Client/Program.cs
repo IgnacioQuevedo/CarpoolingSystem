@@ -55,15 +55,13 @@ namespace Client
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
-            string goBackMessage = "Returning to main menu";
-            ShowMessageWithDelay(goBackMessage, 1000);
+            ShowMessageWithDelay("Returning to main menu", 1000);
             Console.WriteLine("");
         }
 
         private static void CloseAppOption()
         {
-            string closingMessage = "Closing";
-            ShowMessageWithDelay(closingMessage, 300);
+            ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
 
