@@ -95,21 +95,6 @@ namespace Client
             _closeApp = true;
         }
 
-        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
-        {
-            Console.Write(closingMessage);
-            string dots = "";
-
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(delayTime);
-                dots += ".";
-                Console.Write(dots);
-            }
-
-            Console.WriteLine("");
-        }
-
         private static void AboutUsOption()
         {
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
@@ -143,7 +128,11 @@ namespace Client
             string passwordRegister = Console.ReadLine();
             Console.WriteLine("Insert the same password as above:");
             string repeatedPassword = Console.ReadLine();
-            //ServiceMethod that will create the user.
+
+            string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
+            _messageInBytes = Encoding.UTF8.GetBytes(registerInfo);
+            _transmitterSocket.Send(_messageInBytes);
+            //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
         }
 
         private static void LoginOption()
@@ -153,10 +142,9 @@ namespace Client
             Console.WriteLine("Password:");
             string password = Console.ReadLine();
 
-            string message = Console.ReadLine();
-            byte[] messageInBytes = Encoding.UTF8.GetBytes(message);
-
-            _transmitterSocket.Send(messageInBytes);
+            string loginInfo = username + ";" + password;
+            _messageInBytes = Encoding.UTF8.GetBytes(loginInfo);
+            _transmitterSocket.Send(_messageInBytes);
             //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }
 
@@ -172,5 +160,21 @@ namespace Client
         }
 
         #endregion
+
+
+        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
+        {
+            Console.Write(closingMessage);
+            string dots = "";
+
+            for (int i = 0; i < 4; i++)
+            {
+                Thread.Sleep(delayTime);
+                dots += ".";
+                Console.Write(dots);
+            }
+
+            Console.WriteLine("");
+        }
     }
 }
