@@ -12,17 +12,20 @@ namespace Common
             IPEndPoint local = new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"), 0
             );
+
             IPEndPoint server = new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"), 5000
-            );
-
-            Socket transmitterSocket = new Socket(
+                );
+            
+            Socket clientSocket = new Socket(
                 AddressFamily.InterNetwork,
                 SocketType.Stream,
                 ProtocolType.Tcp
             );
-            transmitterSocket.Bind(local);
-            return transmitterSocket;
+            clientSocket.Bind(local);
+            clientSocket.Connect(server);
+            
+            return clientSocket;
         }
 
         public static Socket DeployServerSocket(int allowedClientsInBacklog)
@@ -49,7 +52,7 @@ namespace Common
             clientSocket.Close();
         }
 
-        public static byte[] EncodeMsg(string message)
+        public static byte[] EncodeMsgIntoBytes(string message)
         {
             return Encoding.UTF8.GetBytes(message);
         }

@@ -11,12 +11,13 @@ namespace Client
     internal class Program
     {
         private static byte[] _messageInBytes;
-        private static bool _userLogged = false;
+        private static readonly bool _userLogged = false;
         private static bool _closeApp;
+        private static Socket _clientSocket;
 
-        private static readonly Socket _clientSocket = NetworkHelper.ConnectWithServer();
         public static void Main(string[] args)
         {
+            _clientSocket = NetworkHelper.ConnectWithServer();
             while (!_closeApp)
             {
                 MainMenuOptions();
@@ -103,7 +104,7 @@ namespace Client
             string repeatedPassword = Console.ReadLine();
 
             string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
-            _messageInBytes = NetworkHelper.EncodeMsg(registerInfo);
+            _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
             _clientSocket.Send(_messageInBytes);
             //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
         }
@@ -116,7 +117,7 @@ namespace Client
             string password = Console.ReadLine();
 
             string loginInfo = username + ";" + password;
-            _messageInBytes = NetworkHelper.EncodeMsg(loginInfo);
+            _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
             _clientSocket.Send(_messageInBytes);
             //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }

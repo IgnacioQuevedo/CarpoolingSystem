@@ -17,9 +17,7 @@ namespace Server
         private static Socket _serverSocket = NetworkHelper.DeployServerSocket(_maxUsersInBackLog);
         public static void Main(string[] args)
         {
-        
             int users = 1;
-
             while (_listenToNewClients)
             {
                 Socket clientSocket = _serverSocket.Accept();
@@ -38,7 +36,6 @@ namespace Server
                 var buffer = new byte[10];
                 try
                 {
-                    // Waits for the client to send the data (It gets in suspended state)
                     int bytesReceived = clientSocket.Receive(buffer);
 
                     if (bytesReceived == 0)
