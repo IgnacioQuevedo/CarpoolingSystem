@@ -11,9 +11,9 @@ namespace Server.Objects.DTOs.RideModelDtos
     public class QuitRideRequestDto
     {
         public Guid RideId { get; set; }
-        public ClientDto ClientToExit { get; set; }
+        public UserDto ClientToExit { get; set; }
 
-        public QuitRideRequestDto(Guid rideId, ClientDto clientToExit)
+        public QuitRideRequestDto(Guid rideId, UserDto clientToExit)
         {
             RideId = rideId;
             ClientToExit = clientToExit;

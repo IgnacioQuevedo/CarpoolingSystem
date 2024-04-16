@@ -1,7 +1,7 @@
 #nullable enable
 namespace Server.Objects.DTOs.ClientModelDtos
 {
-    public class RegisterClientRequestDto
+    public class RegisterUserRequestDto
     {
         public string Username { get; set; }
         public string Password { get; set; }
@@ -9,7 +9,7 @@ namespace Server.Objects.DTOs.ClientModelDtos
         public string PasswordRepeated { get; set; }
         public CreateDriverInfoRequestDto? DriverAspects { get; set; }
 
-        public RegisterClientRequestDto
+        public RegisterUserRequestDto
             (string username, string password,string passwordRepeated, CreateDriverInfoRequestDto? driverAspects)
         {
             Username = username;
