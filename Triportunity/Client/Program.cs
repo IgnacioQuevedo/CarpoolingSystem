@@ -6,7 +6,7 @@ using Client.Objects.ClientModels;
 using Client.Objects.VehicleModels;
 using Client.Services;
 
-namespace ClientUI
+namespace Client
 {
     internal class Program
     {
