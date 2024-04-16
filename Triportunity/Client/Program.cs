@@ -1,19 +1,25 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
+using Common;
 using ClientUI.Services;
 
 namespace ClientUI
 {
     internal class Program
     {
+        private static byte[] _messageInBytes;
+        private static readonly bool _userLogged = false;
+        private static bool _closeApp;
+        private static Socket _clientSocket;
+
         public static void Main(string[] args)
         {
-            bool appFunctional = true;
-            bool userLogged = false;
-
-            while (appFunctional)
+            _clientSocket = NetworkHelper.ConnectWithServer();
+            while (!_closeApp)
             {
                 MainMenuOptions();
 
@@ -33,14 +39,14 @@ namespace ClientUI
                         AboutUsOption();
                         break;
                     case "4":
-                        appFunctional = CloseAppOption();
+                        CloseAppOption();
                         break;
                     default:
                         WrongDigitInserted();
                         break;
                 }
 
-                if (userLogged)
+                if (_userLogged)
                 {
                     //All the new functionalities to be done.
                 }
@@ -52,34 +58,18 @@ namespace ClientUI
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
-            string goBackMessage = "Returning to main menu";
-            ShowMessageWithDelay(goBackMessage, 1000);
+            ShowMessageWithDelay("Returning to main menu", 1000);
             Console.WriteLine("");
         }
 
-        private static bool CloseAppOption()
+        private static void CloseAppOption()
         {
-            bool appFunctional = false;
-            string closingMessage = "Closing";
-
-            ShowMessageWithDelay(closingMessage, 300);
+            ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            return appFunctional;
-        }
 
-        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
-        {
-            Console.Write(closingMessage);
-            string dots = "";
-
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(delayTime);
-                dots += ".";
-                Console.Write(dots);
-            }
-            Console.WriteLine("");
+            NetworkHelper.CloseSocketConnections(_clientSocket);
+            _closeApp = true;
         }
 
         private static void AboutUsOption()
@@ -95,17 +85,14 @@ namespace ClientUI
             }
             else
             {
-                Console.WriteLine("Triportinuty is a travel web app");
+                Console.WriteLine("Triportunity is a travel web app");
             }
 
-            Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.ReadLine();
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
-
         }
 
         private static void RegisterOption()
@@ -116,7 +103,11 @@ namespace ClientUI
             string passwordRegister = Console.ReadLine();
             Console.WriteLine("Insert the same password as above:");
             string repeatedPassword = Console.ReadLine();
-            //ServiceMethod that will create the user.
+
+            string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
+            _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
+            _clientSocket.Send(_messageInBytes);
+            //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
         }
 
         private static void LoginOption()
@@ -125,7 +116,11 @@ namespace ClientUI
             string username = Console.ReadLine();
             Console.WriteLine("Password:");
             string password = Console.ReadLine();
-            //ServiceMethod that will login the user into the app
+
+            string loginInfo = username + ";" + password;
+            _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
+            _clientSocket.Send(_messageInBytes);
+            //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
         }
 
         private static void MainMenuOptions()
@@ -137,9 +132,23 @@ namespace ClientUI
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
             Console.WriteLine("4- Exit app");
-
         }
 
         #endregion
+
+        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
+        {
+            Console.Write(closingMessage);
+            string dots = "";
+
+            for (int i = 0; i < 4; i++)
+            {
+                Thread.Sleep(delayTime);
+                dots += ".";
+                Console.Write(dots);
+            }
+
+            Console.WriteLine("");
+        }
     }
 }
