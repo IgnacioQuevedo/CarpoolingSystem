@@ -272,15 +272,55 @@ namespace Client
         {
             Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
+            List<User> passengers = new List<User>();
+
             string locationMode = "initial";
-            PickLocation(locationMode);
+            CitiesEnum initialLocation = PickLocation(locationMode);
 
             locationMode = "ending";
-            PickLocation(locationMode);
+            CitiesEnum endingLocation = PickLocation(locationMode);
+
+            DateTime departureDate = PickDepartureDate();
 
         }
 
-        private static void PickLocation(string locationMode)
+        private static DateTime PickDepartureDate()
+        {
+            Console.WriteLine("Pick the departure date of the ride");
+
+            Console.WriteLine("Introduce a year");
+            string departureYear = Console.ReadLine();
+
+            Console.WriteLine("Introduce the month");
+            string departureMonth = Console.ReadLine();
+
+            Console.WriteLine("Introduce the day");
+            string departureDay = Console.ReadLine();
+
+            if (int.TryParse(departureYear, out int year) &&
+                int.TryParse(departureMonth, out int month) &&
+                int.TryParse(departureDay, out int day))
+            {
+                try
+                {
+                    DateTime departureDate = new DateTime(year, month, day);
+                    Console.WriteLine("Departure date selected: " + departureDate.ToString("yyyy-MM-dd"));
+                    return departureDate;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    Console.WriteLine("Fecha no válida, vuelve a ingresar la fecha");
+                    return PickDepartureDate();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Por favor ingrese valores numéricos para año, mes y día.");
+                return PickDepartureDate();
+            }
+        }
+
+        private static CitiesEnum PickLocation(string locationMode)
         {
             Console.WriteLine($"Select the {locationMode} location of your ride");
             Console.WriteLine();
@@ -289,7 +329,7 @@ namespace Client
 
             _optionSelected = Console.ReadLine();
 
-            PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
+            return PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
         }
 
         private static void ShowCities()
@@ -301,27 +341,32 @@ namespace Client
             }
         }
 
-        private static void PossibleCasesWhenPickingLocation(string optionSelected, string locationMode)
+        private static CitiesEnum PossibleCasesWhenPickingLocation(string optionSelected, string locationMode)
         {
             try
             {
                 int optionValue = int.Parse(_optionSelected);
 
-                for (int i = 1; i <= _amountOfCities; i++)
+                if (optionValue <= _amountOfCities)
                 {
-                    if (optionValue <= _amountOfCities)
-                    {
-                        string cityName = Enum.GetName(typeof(CitiesEnum), i);
-                        Console.WriteLine($"You have selected {cityName} as your initial location");
-                    }
+                    string cityName = Enum.GetName(typeof(CitiesEnum), optionValue);
+                    Console.WriteLine($"You have selected {cityName} as your initial location");
+
+                    return (CitiesEnum)optionValue;
+                }
+                else
+                {
+                    Console.WriteLine("Has ingresado datos incorrectos, intenta nuevamente...");
+                    return PickLocation(locationMode);
                 }
             }
             catch (FormatException)
             {
-                Console.WriteLine("Parece que has ingresado datos incorrectos, intenta nuevamente...");
-                PickLocation(locationMode);
+                Console.WriteLine("Has ingresado datos incorrectos, intenta nuevamente...");
+                return PickLocation(locationMode);
             }
         }
+
         #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
