@@ -5,8 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Common;
+using ClientUI.Services;
 
-namespace Client
+namespace ClientUI
 {
     internal class Program
     {

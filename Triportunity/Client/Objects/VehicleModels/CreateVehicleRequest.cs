@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientUI.Objects.VehicleModels
+namespace Client.Objects.VehicleModels
 {
-    public class Vehicle
+    public class CreateVehicleRequest
     {
-
         public Guid Id { get; set; }
 
         public VehicleImage Picture { get; set; }
 
-        public Vehicle(VehicleImage picture)
+
+        public CreateVehicleRequest(Guid id, VehicleImage picture)
         {
-            Id = Guid.NewGuid();
+            Id = id;
             Picture = picture;
         }
     }

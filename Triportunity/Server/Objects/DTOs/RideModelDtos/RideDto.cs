@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Server.Objects.Domain.ClientModels;
+using Server.Objects.Domain.Enums;
 
 namespace Server.Objects.DTOs.RideModelDtos
 {
@@ -9,8 +10,8 @@ namespace Server.Objects.DTOs.RideModelDtos
         public Guid Id { get; set; }
         public Client Driver { get; set; }
         public List<Client> Passengers { get; set; }
-        public string InitialLocation { get; set; }
-        public string EndingLocation { get; set; }
+        public CitiesEnum InitialLocation { get; set; }
+        public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
         public int AvailableSeats { get; set; }
         public int TotalSeats { get; set; }
@@ -18,7 +19,7 @@ namespace Server.Objects.DTOs.RideModelDtos
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public RideDto(Guid id, Client driver, List<Client> passengers, string initialLocation, string endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public RideDto(Guid id, Client driver, List<Client> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Id = id;
             Driver = driver;

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Client.Services
+namespace ClientUI.Services
 {
     public static class UserService
     {

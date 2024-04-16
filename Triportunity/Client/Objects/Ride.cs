@@ -1,4 +1,4 @@
-namespace Client.Objects
+namespace ClientUI.Objects
 {
     public class Ride
     {

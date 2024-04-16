@@ -5,9 +5,21 @@ namespace Server.Objects.Domain.VehicleModels
 {
     public class Vehicle
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; private set; } 
 
-        public VehicleImage Picture { get; set; }
+        private VehicleImage _picture;
+        public VehicleImage Picture
+        {
+            get => _picture;
+            set
+            {
+                if (value == null)
+                {
+                    throw new VehicleException("The picture cannot be null.");
+                }
+                _picture = value;
+            }
+        }
 
         public Vehicle(VehicleImage picture)
         {
