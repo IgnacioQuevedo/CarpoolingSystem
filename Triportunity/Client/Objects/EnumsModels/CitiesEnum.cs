@@ -8,7 +8,7 @@ namespace Client.Objects.EnumsModels
 {
     public enum CitiesEnum
     {
-        Montevideo,
+        Montevideo = 1,
         Salto,
         Paysandu,
         CerroLargo,

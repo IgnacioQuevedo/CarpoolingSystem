@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.ClientModels;
+using Client.Objects.EnumsModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleImageModels;
 using Client.Objects.VehicleModels;
@@ -60,6 +61,17 @@ namespace Client
         }
 
         #region Main Menu Options
+
+        private static void MainMenuOptions()
+        {
+            Console.WriteLine("Welcome to Triportunity App");
+            Console.WriteLine("Digit the number of your query");
+
+            Console.WriteLine("1- Sign In");
+            Console.WriteLine("2- Sign Up");
+            Console.WriteLine("3- Who are we?");
+            Console.WriteLine("4- Exit app");
+        }
 
         private static void WrongDigitInserted()
         {
@@ -150,6 +162,34 @@ namespace Client
             }
         }
 
+        private static void LoginOption()
+        {
+            try
+            {
+                Console.WriteLine("Username:");
+                string username = Console.ReadLine();
+                Console.WriteLine("Password:");
+                string password = Console.ReadLine();
+
+                string loginInfo = username + ";" + password;
+                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
+
+                _clientSocket.Send(_messageInBytes);
+                //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
+                //_userLogged = UserService.LoginClient(loginRequest);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                LoginOption();
+            }
+        }
+
+
+        #endregion
+
+        #region Driver creation
+
         private static DriverInfo CreateDriver()
         {
             string ci = "";
@@ -178,28 +218,6 @@ namespace Client
             return driverAspectsOfClient;
         }
 
-        private static void LoginOption()
-        {
-            try
-            {
-                Console.WriteLine("Username:");
-                string username = Console.ReadLine();
-                Console.WriteLine("Password:");
-                string password = Console.ReadLine();
-
-                string loginInfo = username + ";" + password;
-                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
-
-                _clientSocket.Send(_messageInBytes);
-                //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
-                //_userLogged = UserService.LoginClient(loginRequest);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception.Message);
-                LoginOption();
-            }
-        }
 
         public static void PossibleActionsToBeDoneByUser()
         {
@@ -225,7 +243,7 @@ namespace Client
                     break;
 
                 case "1":
-                    //  ride method
+                    CreateRide();
                     break;
 
                 case "2":
@@ -246,19 +264,27 @@ namespace Client
             }
         }
 
-        private static void MainMenuOptions()
-        {
-            Console.WriteLine("Welcome to Triportunity App");
-            Console.WriteLine("Digit the number of your query");
-
-            Console.WriteLine("1- Sign In");
-            Console.WriteLine("2- Sign Up");
-            Console.WriteLine("3- Who are we?");
-            Console.WriteLine("4- Exit app");
-        }
-
         #endregion
 
+
+        private static void CreateRide()
+        {
+            Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
+
+            Console.WriteLine("Select the initial location of your ride");
+
+            int amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+
+            for (int i = 1; i <= amountOfCities; i++)
+            {
+                string cityName = Enum.GetName(typeof(CitiesEnum), i);
+                Console.WriteLine($"Select {i}- {cityName}");
+            }
+
+        }
+
+
+        #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
@@ -273,5 +299,6 @@ namespace Client
 
             Console.WriteLine("");
         }
+        #endregion
     }
 }
