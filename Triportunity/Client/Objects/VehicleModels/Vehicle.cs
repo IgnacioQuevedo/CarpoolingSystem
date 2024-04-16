@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Client.Objects.VehicleImageModels;
 
-namespace ClientUI.Objects.VehicleModels
+namespace Client.Objects.VehicleModels
 {
     public class Vehicle
     {

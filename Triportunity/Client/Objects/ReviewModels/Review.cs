@@ -1,4 +1,4 @@
-namespace ClientUI.Objects.ReviewModels
+namespace Client.Objects.ReviewModels
 {
     public class Review
     {

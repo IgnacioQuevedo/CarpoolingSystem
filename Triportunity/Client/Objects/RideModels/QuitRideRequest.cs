@@ -1,15 +1,11 @@
-﻿using ClientUI.Objects.ClientModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Client.Objects.UserModels;
 
-namespace ClientUI.Objects.RideModels
+namespace Client.Objects.RideModels
 {
     public class QuitRideRequest
     {
         public Guid RideId { get; set; }
-        public Client ClientToExit { get; set; }
+        public User UserToExit { get; set; }
     }
 }

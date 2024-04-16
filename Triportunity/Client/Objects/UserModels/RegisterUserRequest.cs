@@ -1,10 +1,8 @@
 #nullable enable
-using System.Collections.Generic;
-using ClientUI.Objects.VehicleModels;
 
-namespace ClientUI.Objects.ClientModels
+namespace Client.Objects.UserModels
 {
-    public class RegisterClientRequest
+    public class RegisterUserRequest
     {
         public string Username { get; set; }
         public string Password { get; set; }
@@ -12,7 +10,7 @@ namespace ClientUI.Objects.ClientModels
         public DriverInfo? DriverAspects { get; set; }
 
 
-        public RegisterClientRequest
+        public RegisterUserRequest
             (string username, string password, string repeatedPassword, DriverInfo? driverAspects)
         {
             Username = username;

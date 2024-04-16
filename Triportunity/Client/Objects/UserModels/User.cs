@@ -1,9 +1,9 @@
 #nullable enable
 using System;
 
-namespace ClientUI.Objects.ClientModels
+namespace Client.Objects.UserModels
 {
-    public class Client
+    public class User
     {
         public Guid Id { get; set; } 
         public string Username { get; set; }

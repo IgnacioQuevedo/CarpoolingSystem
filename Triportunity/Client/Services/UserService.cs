@@ -1,23 +1,24 @@
 using System;
 using Client.Objects.ClientModels;
+using Client.Objects.UserModels;
 
-namespace ClientUI.Services
+namespace Client.Services
 {
     public class UserService
     {
-        public static void RegisterClient(RegisterClientRequest registerClientRequest)
+        public static void RegisterClient(RegisterUserRequest registerUserRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();
         }
 
-        public static Objects.ClientModels.Client LoginClient(LoginClientRequest loginClientRequest)
+        public static User LoginClient(LoginUserRequest loginUserRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();
         }
 
-        public static Objects.ClientModels.Client UpdateClient(UpdateClientRequestModel clientWithUpdates)
+        public static User UpdateClient(UpdateUserRequestModel userWithUpdates)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();

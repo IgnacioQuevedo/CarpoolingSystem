@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ClientUI.Objects.VehicleModels
+namespace Client.Objects.VehicleImageModels
 {
     public class VehicleImage
     {
@@ -19,7 +15,7 @@ namespace ClientUI.Objects.VehicleModels
 
         public VehicleImage(Guid id, double size, string fileName, string fileExtension, string url)
         {
-            Id = id; 
+            Id = id;
             Size = size;
             FileName = fileName;
             FileExtension = fileExtension;
