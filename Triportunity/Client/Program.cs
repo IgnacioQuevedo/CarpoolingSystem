@@ -22,6 +22,7 @@ namespace Client
         private static bool _closeApp;
 
         private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+        private static int _maxSeatsPerCar = 6;
 
         public static void Main(string[] args)
         {
@@ -282,6 +283,40 @@ namespace Client
 
             DateTime departureDate = PickDepartureDate();
 
+            int availableSeats = PickAmountOfAvailableSeats();
+
+        }
+
+        private static int PickAmountOfAvailableSeats()
+        {
+            Console.WriteLine("Introduzca el número de asientos disponibles en su vehículo");
+
+            Console.WriteLine("1");
+            Console.WriteLine("2");
+            Console.WriteLine("3");
+            Console.WriteLine("4");
+            Console.WriteLine("5");
+            Console.WriteLine("6");
+
+            _optionSelected = Console.ReadLine();
+
+            if (int.TryParse(_optionSelected, out int optionValue))
+            {
+                if (optionValue <= _maxSeatsPerCar)
+                {
+                    return optionValue;
+                }
+                else
+                {
+                    Console.WriteLine("Por favor ingrese valores numéricos válidos para la cantidad de asientos disponibles");
+                    return PickAmountOfAvailableSeats();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Por favor ingrese valores numéricos válidos para la cantidad de asientos disponibles");
+                return PickAmountOfAvailableSeats();
+            }
         }
 
         private static DateTime PickDepartureDate()
@@ -297,9 +332,14 @@ namespace Client
             Console.WriteLine("Introduce the day");
             string departureDay = Console.ReadLine();
 
+            return ParseInputsToDate(departureYear, departureMonth, departureDay);
+        }
+
+        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay)
+        {
             if (int.TryParse(departureYear, out int year) &&
-                int.TryParse(departureMonth, out int month) &&
-                int.TryParse(departureDay, out int day))
+                            int.TryParse(departureMonth, out int month) &&
+                            int.TryParse(departureDay, out int day))
             {
                 try
                 {
