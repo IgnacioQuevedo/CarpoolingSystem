@@ -1,11 +1,11 @@
-﻿using ClientUI.Objects.EnumsModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Client.Objects.EnumsModels;
 
-namespace ClientUI.Objects.RideModels
+namespace Client.Objects.RideModels
 {
     public class ModifyRideRequest
     {

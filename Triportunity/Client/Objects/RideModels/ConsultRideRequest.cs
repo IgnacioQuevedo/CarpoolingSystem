@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClientUI.Objects.RideModels
+namespace Client.Objects.RideModels
 {
     public class ConsultRideRequest
     {

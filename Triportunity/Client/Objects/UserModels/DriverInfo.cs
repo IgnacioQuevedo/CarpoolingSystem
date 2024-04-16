@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using ClientUI.Objects.ReviewModels;
-using ClientUI.Objects.VehicleModels;
+using Client.Objects.ReviewModels;
+using Client.Objects.VehicleModels;
 
-namespace ClientUI.Objects.ClientModels
+namespace Client.Objects.UserModels
 {
     public class DriverInfo
     {

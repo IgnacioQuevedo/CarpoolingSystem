@@ -1,11 +1,11 @@
-namespace ClientUI.Objects.ClientModels
+namespace Client.Objects.UserModels
 {
-    public class LoginClientRequest
+    public class LoginUserRequest
     {
         public string Username { get; set; }
         public string Password { get; set; }
 
-        public LoginClientRequest(string username,string password)
+        public LoginUserRequest(string username, string password)
         {
             Username = username;
             Password = password;

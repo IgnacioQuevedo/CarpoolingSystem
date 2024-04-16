@@ -1,15 +1,11 @@
-﻿using ClientUI.Objects.ClientModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Client.Objects.UserModels;
 
-namespace ClientUI.Objects.RideModels
+namespace Client.Objects.RideModels
 {
     internal class JoinRideRequest
     {
         public Guid RideId { get; set; }
-        public Client PassengerToJoin { get; set; }
+        public User PassengerToJoin { get; set; }
     }
 }
