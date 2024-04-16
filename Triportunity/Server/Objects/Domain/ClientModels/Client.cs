@@ -14,7 +14,7 @@ namespace Server.Objects.Domain.ClientModels
 
         public Client(string username, string password, DriverInfo? driverAspects)
         {
-            Id = new Guid();
+            Id = Guid.NewGuid();
             Username = username;
             Password = password;
             DriverAspects = driverAspects;

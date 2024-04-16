@@ -10,7 +10,6 @@ namespace ClientUI.Objects.VehicleModels
     {
 
         public Guid Id { get; set; }
-
         public VehicleImage Picture { get; set; }
 
         public Vehicle(VehicleImage picture)

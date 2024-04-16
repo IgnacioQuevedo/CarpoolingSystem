@@ -10,5 +10,11 @@ namespace ClientUI.Objects.ClientModels
         public double Puntuation { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Vehicle> Vehicles { get; set; }
+
+        public DriverInfo(string ci, ICollection<Vehicle>vehicles)
+        {
+            Ci = ci;
+            Vehicles = vehicles;
+        }
     }
 }
