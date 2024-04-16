@@ -1,12 +1,20 @@
-﻿using System;
+﻿using Server.DataContext;
+using Server.Objects.Domain.ClientModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Server.Repositories
 {
     public class UserRepository
     {
+        public void CreateUser(User userToAdd)
+        {
+            LockManager.StartWriting();
+            MemoryDatabase.GetInstance().Users.Add(userToAdd);
+            LockManager.StopWriting();
+        }
+
+       
     }
 }
