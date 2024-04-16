@@ -5,14 +5,14 @@ using Server.Exceptions;
 
 namespace Server.Objects.Domain.ClientModels
 {
-    public class Client
+    public class User
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public DriverInfo? DriverAspects { get; set; }
 
-        public Client(string username, string password, DriverInfo? driverAspects)
+        public User(string username, string password, DriverInfo? driverAspects)
         {
             Id = Guid.NewGuid();
             Username = username;
@@ -34,7 +34,7 @@ namespace Server.Objects.Domain.ClientModels
 
             if (Username.Length < validLengthForUsername)
             {
-                throw new ClientException("Username length must be greater than: " + Password.Length + "digits!");
+                throw new UserException("Username length must be greater than: " + Password.Length + "digits!");
             }
         }
 
@@ -47,7 +47,7 @@ namespace Server.Objects.Domain.ClientModels
             if (Password.Length < validLengthForPassword ||
                 !Regex.IsMatch(Password, passwordRegularExpression))
             {
-                throw new ClientException("Error on password. Password must be greater than: " +
+                throw new UserException("Error on password. Password must be greater than: " +
                                           amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
                                           "numbers, and at least one special character!");
             }

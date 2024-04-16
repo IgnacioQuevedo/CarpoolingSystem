@@ -10,8 +10,8 @@ namespace Server.Objects.DTOs.RideModelDtos
 
     public class CreateRideRequestDto
     {
-        public ClientDto Driver { get; set; }
-        public List<ClientDto> Passengers { get; set; }
+        public UserDto Driver { get; set; }
+        public List<UserDto> Passengers { get; set; }
         public CitiesEnumDto InitialLocation { get; set; }
         public CitiesEnumDto EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
@@ -21,7 +21,7 @@ namespace Server.Objects.DTOs.RideModelDtos
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public CreateRideRequestDto(ClientDto driver, List<ClientDto> passengers, CitiesEnumDto initialLocation, CitiesEnumDto endingLocation,
+        public CreateRideRequestDto(UserDto driver, List<UserDto> passengers, CitiesEnumDto initialLocation, CitiesEnumDto endingLocation,
             DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Driver = driver;
