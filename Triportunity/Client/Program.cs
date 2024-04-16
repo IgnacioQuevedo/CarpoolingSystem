@@ -5,49 +5,52 @@ using System.Threading;
 using Client.Objects.ClientModels;
 using Client.Objects.VehicleModels;
 using Client.Services;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using Common;
 
-namespace Client
+namespace ClientUI
 {
     internal class Program
     {
-        private static Client.Objects.ClientModels.Client _clientLogged = null;
-        private static bool _appFunctional = true;
-        private static string _optionSelected = "";
+        private static byte[] _messageInBytes;
+        private static readonly bool _userLogged = false;
+        private static bool _closeApp;
+        private static Socket _clientSocket;
 
         public static void Main(string[] args)
         {
-            while (_appFunctional)
+            _clientSocket = NetworkHelper.ConnectWithServer();
+            while (!_closeApp)
             {
                 if (_clientLogged is null)
                 {
                     MainMenuOptions();
 
                     _optionSelected = Console.ReadLine();
+    switch (optionSelected)
+                {
+                    case "1":
+                        LoginOption();
+                        break;
 
+                    case "2":
+                        RegisterOption();
+                        break;
 
-                    switch (_optionSelected)
-                    {
-                        case "1":
-                            LoginOption();
-                            break;
-
-                        case "2":
-                            RegisterOption();
-                            break;
-
-                        case "3":
-                            AboutUsOption();
-                            break;
-                        case "4":
-                            CloseAppOption();
-                            break;
-                        default:
-                            WrongDigitInserted();
-                            break;
-                    }
+                    case "3":
+                        AboutUsOption();
+                        break;
+                    case "4":
+                        CloseAppOption();
+                        break;
+                    default:
+                        WrongDigitInserted();
+                        break;
                 }
 
-                else
+                if (_userLogged)
                 {
                     {
                         if (_clientLogged.DriverAspects is null)
@@ -101,34 +104,17 @@ namespace Client
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
-            string goBackMessage = "Returning to main menu";
-            ShowMessageWithDelay(goBackMessage, 1000);
+            ShowMessageWithDelay("Returning to main menu", 1000);
             Console.WriteLine("");
         }
 
         private static void CloseAppOption()
         {
-            string closingMessage = "Closing";
-
-            ShowMessageWithDelay(closingMessage, 300);
+            ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            _appFunctional = false;
-        }
-
-        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
-        {
-            Console.Write(closingMessage);
-            string dots = "";
-
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(delayTime);
-                dots += ".";
-                Console.Write(dots);
-            }
-
-            Console.WriteLine("");
+            NetworkHelper.CloseSocketConnections(_clientSocket);
+            _closeApp = true;
         }
 
         private static void AboutUsOption()
@@ -144,14 +130,12 @@ namespace Client
             }
             else
             {
-                Console.WriteLine("Triportinuty is a travel web app");
+                Console.WriteLine("Triportunity is a travel web app");
             }
 
-            Console.WriteLine("");
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.ReadLine();
             ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }
@@ -191,6 +175,11 @@ namespace Client
                     
                     _clientLogged = UserService.LoginClient(loginClient);
                 }
+              string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
+            _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
+              //Need to pass DriverInfo too
+            _clientSocket.Send(_messageInBytes);
+            //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
             }
             catch (Exception exception)
             {
@@ -227,18 +216,23 @@ namespace Client
             var driverAspectsOfClient = new DriverInfo(ci, vehicles);
             return driverAspectsOfClient;
         }
+        }
 
         private static void LoginOption()
         {
             try
             {
                 Console.WriteLine("Username:");
-                var username = Console.ReadLine();
+                string username = Console.ReadLine();
                 Console.WriteLine("Password:");
-                var password = Console.ReadLine();
-
-                var loginRequest = new LoginClientRequest(username, password);
-
+                string password = Console.ReadLine();
+              
+                string loginInfo = username + ";" + password;
+                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
+              
+                _clientSocket.Send(_messageInBytes);
+            //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
+                
                 _clientLogged = UserService.LoginClient(loginRequest);
             }
             catch (Exception exception)
@@ -260,5 +254,20 @@ namespace Client
         }
 
         #endregion
+
+        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
+        {
+            Console.Write(closingMessage);
+            string dots = "";
+
+            for (int i = 0; i < 4; i++)
+            {
+                Thread.Sleep(delayTime);
+                dots += ".";
+                Console.Write(dots);
+            }
+
+            Console.WriteLine("");
+        }
     }
 }

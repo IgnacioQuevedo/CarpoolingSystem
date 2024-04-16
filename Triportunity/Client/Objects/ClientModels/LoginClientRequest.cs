@@ -1,4 +1,4 @@
-namespace Client.Objects.ClientModels
+namespace ClientUI.Objects.ClientModels
 {
     public class LoginClientRequest
     {

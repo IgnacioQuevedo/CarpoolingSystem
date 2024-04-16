@@ -1,8 +1,8 @@
 #nullable enable
 using System.Collections.Generic;
-using Client.Objects.VehicleModels;
+using ClientUI.Objects.VehicleModels;
 
-namespace Client.Objects.ClientModels
+namespace ClientUI.Objects.ClientModels
 {
     public class RegisterClientRequest
     {

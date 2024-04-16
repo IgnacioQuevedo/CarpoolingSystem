@@ -1,7 +1,7 @@
 using System;
 using Client.Objects.ClientModels;
 
-namespace Client.Services
+namespace ClientUI.Services
 {
     public class UserService
     {
