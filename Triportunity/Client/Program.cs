@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.ClientModels;
 using Client.Objects.EnumsModels;
+using Client.Objects.RideModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleImageModels;
 using Client.Objects.VehicleModels;
@@ -285,11 +286,67 @@ namespace Client
 
             int availableSeats = PickAmountOfAvailableSeats();
 
+            int pricePerPerson = IntroducePricePerPerson();
+
+            bool petsAllowed = DecideIfPetsAreAllowed();
+
+            string photoPath = IntroducePhotoPath();
+
+            //CreateRideRequest rideReq = CreateRideRequest();
+
+        }
+
+        private static string IntroducePhotoPath()
+        {
+            Console.Write("Introduce your photo path");
+            return Console.ReadLine();
+        }
+
+        private static bool DecideIfPetsAreAllowed()
+        {
+            bool result = false;
+
+            Console.WriteLine("Do you want to allow pets in your vehicle?");
+            Console.WriteLine("1- If yes");
+            Console.WriteLine("2- If not");
+
+            _optionSelected = Console.ReadLine();
+
+            if (_optionSelected == "1")
+            {
+                Console.WriteLine("You have allowed pets on your vehicle");
+                result = true;
+            }
+            else if (_optionSelected == "2")
+            {
+                Console.WriteLine("You have not allowed pets on your vehicle");
+                result = false;
+            }
+
+            return result;
+        }
+
+        private static int IntroducePricePerPerson()
+        {
+            int pricePerPerson;
+            Console.WriteLine("Introduce the price per person of your ride");
+
+            string priceSetted = Console.ReadLine();
+
+            if (int.TryParse(priceSetted, out pricePerPerson))
+            {
+                return pricePerPerson;
+            }
+            else
+            {
+                Console.WriteLine("Please introduce a numeric value for the price, try again...");
+                return pricePerPerson;
+            }
         }
 
         private static int PickAmountOfAvailableSeats()
         {
-            Console.WriteLine("Introduzca el número de asientos disponibles en su vehículo");
+            Console.WriteLine("Introduce the number of seats available on your vehicle");
 
             Console.WriteLine("1");
             Console.WriteLine("2");
@@ -308,13 +365,13 @@ namespace Client
                 }
                 else
                 {
-                    Console.WriteLine("Por favor ingrese valores numéricos válidos para la cantidad de asientos disponibles");
+                    Console.WriteLine("Please introduce valid numeric values, try again...");
                     return PickAmountOfAvailableSeats();
                 }
             }
             else
             {
-                Console.WriteLine("Por favor ingrese valores numéricos válidos para la cantidad de asientos disponibles");
+                Console.WriteLine("Please introduce valid numeric values, try again...");
                 return PickAmountOfAvailableSeats();
             }
         }
@@ -349,13 +406,13 @@ namespace Client
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    Console.WriteLine("Fecha no válida, vuelve a ingresar la fecha");
+                    Console.WriteLine("Not valid date, introduce again the date");
                     return PickDepartureDate();
                 }
             }
             else
             {
-                Console.WriteLine("Por favor ingrese valores numéricos para año, mes y día.");
+                Console.WriteLine("Please use numeric values for year, month and day");
                 return PickDepartureDate();
             }
         }
@@ -396,13 +453,13 @@ namespace Client
                 }
                 else
                 {
-                    Console.WriteLine("Has ingresado datos incorrectos, intenta nuevamente...");
+                    Console.WriteLine("You have introduced incorrect values, try again...");
                     return PickLocation(locationMode);
                 }
             }
             catch (FormatException)
             {
-                Console.WriteLine("Has ingresado datos incorrectos, intenta nuevamente...");
+                Console.WriteLine("You have introduced incorrect values, try again...");
                 return PickLocation(locationMode);
             }
         }
