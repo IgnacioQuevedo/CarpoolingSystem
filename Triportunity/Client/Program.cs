@@ -21,6 +21,8 @@ namespace Client
         private static Socket _clientSocket;
         private static bool _closeApp;
 
+        private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+
         public static void Main(string[] args)
         {
             _clientSocket = NetworkHelper.ConnectWithServer();
@@ -266,24 +268,60 @@ namespace Client
 
         #endregion
 
-
         private static void CreateRide()
         {
             Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
-            Console.WriteLine("Select the initial location of your ride");
+            string locationMode = "initial";
+            PickLocation(locationMode);
 
-            int amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+            locationMode = "ending";
+            PickLocation(locationMode);
 
-            for (int i = 1; i <= amountOfCities; i++)
+        }
+
+        private static void PickLocation(string locationMode)
+        {
+            Console.WriteLine($"Select the {locationMode} location of your ride");
+            Console.WriteLine();
+
+            ShowCities();
+
+            _optionSelected = Console.ReadLine();
+
+            PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
+        }
+
+        private static void ShowCities()
+        {
+            for (int i = 1; i <= _amountOfCities; i++)
             {
                 string cityName = Enum.GetName(typeof(CitiesEnum), i);
                 Console.WriteLine($"Select {i}- {cityName}");
             }
-
         }
 
+        private static void PossibleCasesWhenPickingLocation(string optionSelected, string locationMode)
+        {
+            try
+            {
+                int optionValue = int.Parse(_optionSelected);
 
+                for (int i = 1; i <= _amountOfCities; i++)
+                {
+                    if (optionValue <= _amountOfCities)
+                    {
+                        string cityName = Enum.GetName(typeof(CitiesEnum), i);
+                        Console.WriteLine($"You have selected {cityName} as your initial location");
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Parece que has ingresado datos incorrectos, intenta nuevamente...");
+                PickLocation(locationMode);
+            }
+        }
         #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
