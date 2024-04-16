@@ -8,8 +8,8 @@ namespace Server.Objects.DTOs.RideModelDtos
     public class RideDto
     {
         public Guid Id { get; set; }
-        public Client Driver { get; set; }
-        public List<Client> Passengers { get; set; }
+        public User Driver { get; set; }
+        public List<User> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
@@ -19,7 +19,7 @@ namespace Server.Objects.DTOs.RideModelDtos
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public RideDto(Guid id, Client driver, List<Client> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public RideDto(Guid id, User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Id = id;
             Driver = driver;
