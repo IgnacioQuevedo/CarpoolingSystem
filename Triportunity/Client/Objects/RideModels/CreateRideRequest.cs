@@ -13,7 +13,6 @@ namespace Client.Objects.RideModels
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
-        public int AvailableSeats { get; set; }
         public int TotalSeats { get; set; }
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }

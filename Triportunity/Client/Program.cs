@@ -4,6 +4,8 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.ClientModels;
+using Client.Objects.EnumsModels;
+using Client.Objects.RideModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleImageModels;
 using Client.Objects.VehicleModels;
@@ -19,6 +21,9 @@ namespace Client
         private static byte[] _messageInBytes;
         private static Socket _clientSocket;
         private static bool _closeApp;
+
+        private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+        private static int _maxSeatsPerCar = 6;
 
         public static void Main(string[] args)
         {
@@ -60,6 +65,17 @@ namespace Client
         }
 
         #region Main Menu Options
+
+        private static void MainMenuOptions()
+        {
+            Console.WriteLine("Welcome to Triportunity App");
+            Console.WriteLine("Digit the number of your query");
+
+            Console.WriteLine("1- Sign In");
+            Console.WriteLine("2- Sign Up");
+            Console.WriteLine("3- Who are we?");
+            Console.WriteLine("4- Exit app");
+        }
 
         private static void WrongDigitInserted()
         {
@@ -150,6 +166,34 @@ namespace Client
             }
         }
 
+        private static void LoginOption()
+        {
+            try
+            {
+                Console.WriteLine("Username:");
+                string username = Console.ReadLine();
+                Console.WriteLine("Password:");
+                string password = Console.ReadLine();
+
+                string loginInfo = username + ";" + password;
+                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
+
+                _clientSocket.Send(_messageInBytes);
+                //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
+                //_userLogged = UserService.LoginClient(loginRequest);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                LoginOption();
+            }
+        }
+
+
+        #endregion
+
+        #region Driver creation
+
         private static DriverInfo CreateDriver()
         {
             string ci = "";
@@ -178,28 +222,6 @@ namespace Client
             return driverAspectsOfClient;
         }
 
-        private static void LoginOption()
-        {
-            try
-            {
-                Console.WriteLine("Username:");
-                string username = Console.ReadLine();
-                Console.WriteLine("Password:");
-                string password = Console.ReadLine();
-
-                string loginInfo = username + ";" + password;
-                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
-
-                _clientSocket.Send(_messageInBytes);
-                //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
-                //_userLogged = UserService.LoginClient(loginRequest);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception.Message);
-                LoginOption();
-            }
-        }
 
         public static void PossibleActionsToBeDoneByUser()
         {
@@ -225,7 +247,7 @@ namespace Client
                     break;
 
                 case "1":
-                    //  ride method
+                    CreateRide();
                     break;
 
                 case "2":
@@ -246,19 +268,203 @@ namespace Client
             }
         }
 
-        private static void MainMenuOptions()
-        {
-            Console.WriteLine("Welcome to Triportunity App");
-            Console.WriteLine("Digit the number of your query");
-
-            Console.WriteLine("1- Sign In");
-            Console.WriteLine("2- Sign Up");
-            Console.WriteLine("3- Who are we?");
-            Console.WriteLine("4- Exit app");
-        }
-
         #endregion
 
+        private static void CreateRide()
+        {
+            Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
+
+            List<User> passengers = new List<User>();
+
+            string locationMode = "initial";
+            CitiesEnum initialLocation = PickLocation(locationMode);
+
+            locationMode = "ending";
+            CitiesEnum endingLocation = PickLocation(locationMode);
+
+            DateTime departureDate = PickDepartureDate();
+
+            int availableSeats = PickAmountOfAvailableSeats();
+
+            int pricePerPerson = IntroducePricePerPerson();
+
+            bool petsAllowed = DecideIfPetsAreAllowed();
+
+            string photoPath = IntroducePhotoPath();
+
+            //CreateRideRequest rideReq = CreateRideRequest();
+
+        }
+
+        private static string IntroducePhotoPath()
+        {
+            Console.Write("Introduce your photo path");
+            return Console.ReadLine();
+        }
+
+        private static bool DecideIfPetsAreAllowed()
+        {
+            bool result = false;
+
+            Console.WriteLine("Do you want to allow pets in your vehicle?");
+            Console.WriteLine("1- If yes");
+            Console.WriteLine("2- If not");
+
+            _optionSelected = Console.ReadLine();
+
+            if (_optionSelected == "1")
+            {
+                Console.WriteLine("You have allowed pets on your vehicle");
+                result = true;
+            }
+            else if (_optionSelected == "2")
+            {
+                Console.WriteLine("You have not allowed pets on your vehicle");
+                result = false;
+            }
+
+            return result;
+        }
+
+        private static int IntroducePricePerPerson()
+        {
+            int pricePerPerson;
+            Console.WriteLine("Introduce the price per person of your ride");
+
+            string priceSetted = Console.ReadLine();
+
+            if (int.TryParse(priceSetted, out pricePerPerson))
+            {
+                return pricePerPerson;
+            }
+            else
+            {
+                Console.WriteLine("Please introduce a numeric value for the price, try again...");
+                return pricePerPerson;
+            }
+        }
+
+        private static int PickAmountOfAvailableSeats()
+        {
+            Console.WriteLine("Introduce the number of seats available on your vehicle");
+
+            Console.WriteLine("1");
+            Console.WriteLine("2");
+            Console.WriteLine("3");
+            Console.WriteLine("4");
+            Console.WriteLine("5");
+            Console.WriteLine("6");
+
+            _optionSelected = Console.ReadLine();
+
+            if (int.TryParse(_optionSelected, out int optionValue))
+            {
+                if (optionValue <= _maxSeatsPerCar)
+                {
+                    return optionValue;
+                }
+                else
+                {
+                    Console.WriteLine("Please introduce valid numeric values, try again...");
+                    return PickAmountOfAvailableSeats();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Please introduce valid numeric values, try again...");
+                return PickAmountOfAvailableSeats();
+            }
+        }
+
+        private static DateTime PickDepartureDate()
+        {
+            Console.WriteLine("Pick the departure date of the ride");
+
+            Console.WriteLine("Introduce a year");
+            string departureYear = Console.ReadLine();
+
+            Console.WriteLine("Introduce the month");
+            string departureMonth = Console.ReadLine();
+
+            Console.WriteLine("Introduce the day");
+            string departureDay = Console.ReadLine();
+
+            return ParseInputsToDate(departureYear, departureMonth, departureDay);
+        }
+
+        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay)
+        {
+            if (int.TryParse(departureYear, out int year) &&
+                            int.TryParse(departureMonth, out int month) &&
+                            int.TryParse(departureDay, out int day))
+            {
+                try
+                {
+                    DateTime departureDate = new DateTime(year, month, day);
+                    Console.WriteLine("Departure date selected: " + departureDate.ToString("yyyy-MM-dd"));
+                    return departureDate;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    Console.WriteLine("Not valid date, introduce again the date");
+                    return PickDepartureDate();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Please use numeric values for year, month and day");
+                return PickDepartureDate();
+            }
+        }
+
+        private static CitiesEnum PickLocation(string locationMode)
+        {
+            Console.WriteLine($"Select the {locationMode} location of your ride");
+            Console.WriteLine();
+
+            ShowCities();
+
+            _optionSelected = Console.ReadLine();
+
+            return PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
+        }
+
+        private static void ShowCities()
+        {
+            for (int i = 1; i <= _amountOfCities; i++)
+            {
+                string cityName = Enum.GetName(typeof(CitiesEnum), i);
+                Console.WriteLine($"Select {i}- {cityName}");
+            }
+        }
+
+        private static CitiesEnum PossibleCasesWhenPickingLocation(string optionSelected, string locationMode)
+        {
+            try
+            {
+                int optionValue = int.Parse(_optionSelected);
+
+                if (optionValue <= _amountOfCities)
+                {
+                    string cityName = Enum.GetName(typeof(CitiesEnum), optionValue);
+                    Console.WriteLine($"You have selected {cityName} as your initial location");
+
+                    return (CitiesEnum)optionValue;
+                }
+                else
+                {
+                    Console.WriteLine("You have introduced incorrect values, try again...");
+                    return PickLocation(locationMode);
+                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("You have introduced incorrect values, try again...");
+                return PickLocation(locationMode);
+            }
+        }
+
+        #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
@@ -273,5 +479,6 @@ namespace Client
 
             Console.WriteLine("");
         }
+        #endregion
     }
 }
