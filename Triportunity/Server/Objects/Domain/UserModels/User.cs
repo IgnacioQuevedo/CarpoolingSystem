@@ -3,7 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using Server.Exceptions;
 
-namespace Server.Objects.Domain.ClientModels
+namespace Server.Objects.Domain.UserModels
 {
     public class User
     {

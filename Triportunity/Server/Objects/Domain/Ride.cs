@@ -1,5 +1,5 @@
 using Server.Exceptions;
-using Server.Objects.Domain.ClientModels;
+using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.Enums;
 using System;
 using System.Collections.Generic;
