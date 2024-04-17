@@ -17,5 +17,18 @@ namespace Client.Objects.RideModels
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
+
+        public CreateRideRequest(User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        {
+            Driver = driver;
+            Passengers = passengers;
+            InitialLocation = initialLocation;
+            EndingLocation = endingLocation;
+            DepartureTime = departureTime;
+            TotalSeats = totalSeats;
+            PricePerPerson = pricePerPerson;
+            PetsAllowed = petsAllowed;
+            PhotoPath = photoPath;
+        }
     }
 }

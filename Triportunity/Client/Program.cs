@@ -24,6 +24,7 @@ namespace Client
 
         private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
+        private static RideService _rideService { get; set; }
 
         public static void Main(string[] args)
         {
@@ -251,7 +252,7 @@ namespace Client
                     break;
 
                 case "2":
-                    // Join ride
+                    JoinRide();
                     break;
                 case "3":
                     // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
@@ -270,6 +271,8 @@ namespace Client
 
         #endregion
 
+        #region Create Ride
+
         private static void CreateRide()
         {
             Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
@@ -286,13 +289,15 @@ namespace Client
 
             int availableSeats = PickAmountOfAvailableSeats();
 
-            int pricePerPerson = IntroducePricePerPerson();
+            double pricePerPerson = IntroducePricePerPerson();
 
             bool petsAllowed = DecideIfPetsAreAllowed();
 
             string photoPath = IntroducePhotoPath();
 
-            //CreateRideRequest rideReq = CreateRideRequest();
+            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, passengers, initialLocation, endingLocation, departureDate, availableSeats, pricePerPerson, petsAllowed, photoPath);
+
+            _rideService.CreateRide(rideReq);
 
         }
 
@@ -326,14 +331,14 @@ namespace Client
             return result;
         }
 
-        private static int IntroducePricePerPerson()
+        private static double IntroducePricePerPerson()
         {
-            int pricePerPerson;
+            double pricePerPerson;
             Console.WriteLine("Introduce the price per person of your ride");
 
             string priceSetted = Console.ReadLine();
 
-            if (int.TryParse(priceSetted, out pricePerPerson))
+            if (double.TryParse(priceSetted, out pricePerPerson))
             {
                 return pricePerPerson;
             }
@@ -464,6 +469,70 @@ namespace Client
             }
         }
 
+        #endregion
+
+        #region Join Ride
+
+        private static void JoinRide()
+        {
+            List<Ride> rides = _rideService.GetAllRides();
+
+            Ride selectedRide = SelectRideFromList(rides);
+
+            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
+
+            _rideService.JoinRide(joinReq);
+
+        }
+
+        private static Ride SelectRideFromList(List<Ride> rides)
+        {
+            Console.WriteLine("Select the ride that fits better from the list below");
+            Console.WriteLine();
+
+            DisplayAllRides(rides);
+
+            _optionSelected = Console.ReadLine();
+
+            if (int.TryParse(_optionSelected, out int optionValue))
+            {
+                if (optionValue <= rides.Count)
+                {
+                    Ride rideSelected = rides[optionValue - 1];
+                    Console.WriteLine($"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
+
+                    return rideSelected;
+                }
+                else
+                {
+                    Console.WriteLine("You must introduce a valid digit for the ride");
+                    return SelectRideFromList(rides);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Introduce a valid number");
+                return SelectRideFromList(rides);
+            }
+        }
+
+        private static void DisplayAllRides(List<Ride> rides)
+        {
+            int amountOfRides = rides.Count;
+
+            Ride actualRide = new Ride();
+
+            for (int i = 0; i < amountOfRides; i++)
+            {
+                actualRide = rides[i];
+                Console.WriteLine($"1- From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} Date of departure: {actualRide.DepartureTime.ToShortDateString()} Price per person: ${actualRide.PricePerPerson}");
+            }
+        }
+
+        #endregion
+
+
+
         #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
@@ -479,6 +548,7 @@ namespace Client
 
             Console.WriteLine("");
         }
+
         #endregion
     }
 }
