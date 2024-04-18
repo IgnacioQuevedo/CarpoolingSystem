@@ -15,5 +15,15 @@ namespace Client.Objects.RideModels
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
+
+        public ModifyRideRequest(CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, double pricePerPerson, bool petsAllowed, string photoPath)
+        {
+            InitialLocation = initialLocation;
+            EndingLocation = endingLocation;
+            DepartureTime = departureTime;
+            PricePerPerson = pricePerPerson;
+            PetsAllowed = petsAllowed;
+            PhotoPath = photoPath;
+        }
     }
 }

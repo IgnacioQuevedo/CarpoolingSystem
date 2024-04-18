@@ -24,5 +24,10 @@ namespace Client.Services
             //Call the endpoint on controller
             return null;
         }
+
+        public void ModifyRide(ModifyRideRequest req)
+        {
+            //Call the endpoint on controller
+        }
     }
 }

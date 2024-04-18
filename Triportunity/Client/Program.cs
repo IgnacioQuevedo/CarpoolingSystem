@@ -233,7 +233,7 @@ namespace Client
 
             Console.WriteLine("Select 1- To create a Ride");
             Console.WriteLine("Select 2- To join a Ride");
-            Console.WriteLine("Select 3- To view all your created rides");
+            Console.WriteLine("Select 3- To view or edit your created rides");
             Console.WriteLine("Select 4- To create a Ride");
             Console.WriteLine("Select 5- To close the app");
             _optionSelected = Console.ReadLine();
@@ -256,8 +256,7 @@ namespace Client
                     JoinRide();
                     break;
                 case "3":
-                    // View all the rides of the client logged and filtered by a criteria (such as Destination,Price,AllowanceOfPets,etc)
-                    // And so on let the client update their published rides and furthermore delete them
+                    ModifyRide();
                     break;
                 case "4":
                     // Close the app
@@ -398,19 +397,23 @@ namespace Client
 
             Console.WriteLine("Introduce the day");
             string departureDay = Console.ReadLine();
+            
+            Console.WriteLine("Introduce the hour of departure");
+            string departureHour = Console.ReadLine();
 
-            return ParseInputsToDate(departureYear, departureMonth, departureDay);
+            return ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
         }
 
-        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay)
+        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay, string departureHour)
         {
             if (int.TryParse(departureYear, out int year) &&
                             int.TryParse(departureMonth, out int month) &&
-                            int.TryParse(departureDay, out int day))
+                            int.TryParse(departureDay, out int day) &&
+                            int.TryParse(departureHour, out int hour))
             {
                 try
                 {
-                    DateTime departureDate = new DateTime(year, month, day);
+                    DateTime departureDate = new DateTime(year, month, day, hour, 0, 0);
                     Console.WriteLine("Departure date selected: " + departureDate.ToString("yyyy-MM-dd"));
                     return departureDate;
                 }
@@ -536,7 +539,39 @@ namespace Client
 
         #endregion
 
+        #region Modify Ride
+        private static void ModifyRide()
+        {
+            List<RideModel> rides = _rideService.GetAllRides();
+            
+            DisplayAllRides(rides);
 
+            RideModel rideSelected = SelectRideFromList(rides);
+            
+            Console.WriteLine("You will have to complete the following steps to have your ride edited");
+
+            string locationMode = "initial";
+            CitiesEnum initialLocation = PickLocation(locationMode);
+
+            locationMode = "ending";
+            CitiesEnum endingLocation = PickLocation(locationMode);
+
+            DateTime departureDate = PickDepartureDate();
+
+            int availableSeats = PickAmountOfAvailableSeats();
+
+            double pricePerPerson = IntroducePricePerPerson();
+
+            bool petsAllowed = DecideIfPetsAreAllowed();
+
+            string photoPath = IntroducePhotoPath();
+            
+            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate, pricePerPerson, petsAllowed, photoPath);
+
+            _rideService.ModifyRide(modifyRideReq);
+
+        }
+        #endregion
 
         #region General menu functions
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
