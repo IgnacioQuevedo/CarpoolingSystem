@@ -234,7 +234,8 @@ namespace Client
             Console.WriteLine("Select 1- To create a Ride");
             Console.WriteLine("Select 2- To join a Ride");
             Console.WriteLine("Select 3- To view all your created rides");
-            Console.WriteLine("Select 4- To close the app");
+            Console.WriteLine("Select 4- To create a Ride");
+            Console.WriteLine("Select 5- To close the app");
             _optionSelected = Console.ReadLine();
 
             switch (_optionSelected)
@@ -259,6 +260,10 @@ namespace Client
                     // And so on let the client update their published rides and furthermore delete them
                     break;
                 case "4":
+                    // Close the app
+                    CloseAppOption();
+                    break;
+                case "5":
                     // Close the app
                     CloseAppOption();
                     break;
@@ -475,9 +480,9 @@ namespace Client
 
         private static void JoinRide()
         {
-            List<Ride> rides = _rideService.GetAllRides();
+            List<RideModel> rides = _rideService.GetAllRides();
 
-            Ride selectedRide = SelectRideFromList(rides);
+            RideModel selectedRide = SelectRideFromList(rides);
 
             JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
@@ -485,7 +490,7 @@ namespace Client
 
         }
 
-        private static Ride SelectRideFromList(List<Ride> rides)
+        private static RideModel SelectRideFromList(List<RideModel> rides)
         {
             Console.WriteLine("Select the ride that fits better from the list below");
             Console.WriteLine();
@@ -498,7 +503,7 @@ namespace Client
             {
                 if (optionValue <= rides.Count)
                 {
-                    Ride rideSelected = rides[optionValue - 1];
+                    RideModel rideSelected = rides[optionValue - 1];
                     Console.WriteLine($"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
 
                     return rideSelected;
@@ -516,11 +521,11 @@ namespace Client
             }
         }
 
-        private static void DisplayAllRides(List<Ride> rides)
+        private static void DisplayAllRides(List<RideModel> rides)
         {
             int amountOfRides = rides.Count;
 
-            Ride actualRide = new Ride();
+            RideModel actualRide = new RideModel();
 
             for (int i = 0; i < amountOfRides; i++)
             {

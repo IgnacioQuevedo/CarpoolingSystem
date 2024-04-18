@@ -3,6 +3,7 @@ using Server.Objects.Domain.ClientModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Server.Objects.Domain.UserModels;
 
 namespace Server.Repositories
 {

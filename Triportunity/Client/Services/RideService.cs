@@ -19,7 +19,7 @@ namespace Client.Services
             //Call the endpoint on controller
         }
 
-        public List<Ride> GetAllRides()
+        public List<RideModel> GetAllRides()
         {
             //Call the endpoint on controller
             return null;
