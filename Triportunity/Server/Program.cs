@@ -20,14 +20,14 @@ namespace Server
             int users = 1;
             while (_listenToNewClients)
             {
-                Socket clientSocket = _serverSocket.Accept();
+                Socket clientConnectedSocket = _serverSocket.Accept();
                 int actualUser = users;
-                new Thread(() => ManageUser(clientSocket, actualUser)).Start();
+                new Thread(() => ManageUser(clientConnectedSocket, actualUser)).Start();
                 users++;
             }
         }
 
-        private static void ManageUser(Socket clientSocket, int actualUser)
+        private static void ManageUser(Socket clientConnectedSocket, int actualUser)
         {
             Console.WriteLine($@"The user {actualUser} is connected");
 
@@ -36,7 +36,7 @@ namespace Server
                 var buffer = new byte[10];
                 try
                 {
-                    int bytesReceived = clientSocket.Receive(buffer);
+                    int bytesReceived = clientConnectedSocket.Receive(buffer);
 
                     if (bytesReceived == 0)
                     {
@@ -55,7 +55,7 @@ namespace Server
                 }
             }
 
-            NetworkHelper.CloseSocketConnections(clientSocket);
+            NetworkHelper.CloseSocketConnections();
         }
     }
 }

@@ -188,6 +188,7 @@ namespace Client
                 Console.WriteLine(exception.Message);
                 LoginOption();
             }
+            
         }
 
 
