@@ -24,18 +24,11 @@ namespace Client
         private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
         private static RideService _rideService { get; set; }
-
-        private static Socket _clientSocket;
-        private static NetworkHelper _networkHelper;
-
-        public Program(NetworkHelper networkHelper)
-        {
-            _networkHelper = networkHelper;
-            _clientSocket = _networkHelper.ConnectWithServer();
-        }
         
         public static void Main(string[] args)
         {
+           NetworkHelper.ConnectWithServer();
+
             while (!_closeApp)
             {
                 if (_userLogged is null)
@@ -97,7 +90,7 @@ namespace Client
             ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            _networkHelper.CloseSocketConnections();
+            NetworkHelper.CloseSocketConnections();
             _closeApp = true;
         }
 
@@ -161,9 +154,9 @@ namespace Client
                 }
 
                 string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
-                _messageInBytes = _networkHelper.EncodeMsgIntoBytes(registerInfo);
+                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
                 //Need to pass DriverInfo too
-                _clientSocket.Send(_messageInBytes);
+                NetworkHelper.Send(_messageInBytes);
                 //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
             }
             catch (Exception exception)
@@ -184,9 +177,9 @@ namespace Client
                 string password = Console.ReadLine();
 
                 string loginInfo = username + ";" + password;
-                _messageInBytes = _networkHelper.EncodeMsgIntoBytes(loginInfo);
-                
-                _networkHelper.Send(_messageInBytes);
+                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
+
+                NetworkHelper.Send(_messageInBytes);
                 //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
                 //_userLogged = UserService.LoginClient(loginRequest);
             }

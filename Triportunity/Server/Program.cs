@@ -14,15 +14,11 @@ namespace Server
         private static bool _clientWantsToContinueSendingData = true;
         
         private static Socket _serverSocket;
-        private static NetworkHelper _networkHelper;
-
-        public Program(NetworkHelper networkHelper)
-        {
-            _networkHelper = networkHelper;
-            _serverSocket = _networkHelper.DeployServerSocket(ProtocolConstants.MaxUsersInBackLog);
-        }
+        
         public static void Main(string[] args)
         {
+            _serverSocket = NetworkHelper.DeployServerSocket();
+            
             int users = 1;
             while (_listenToNewClients)
             {
@@ -41,10 +37,10 @@ namespace Server
             {
                 try
                 {
-                    byte[]  msgLengthBuffer = _networkHelper.Receive(ProtocolConstants.DataLengthSize);
+                    byte[]  msgLengthBuffer = NetworkHelper.Receive(ProtocolConstants.DataLengthSize);
                     int msgLength = BitConverter.ToInt32(msgLengthBuffer, 0);
                     
-                    byte[] dataBuffer = _networkHelper.Receive(msgLength);
+                    byte[] dataBuffer = NetworkHelper.Receive(msgLength);
                     
                     string message = Encoding.UTF8.GetString(dataBuffer);
                     
@@ -58,7 +54,7 @@ namespace Server
                 }
             }
 
-            _networkHelper.CloseSocketConnections();
+            NetworkHelper.CloseSocketConnections();
         }
         
     }

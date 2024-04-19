@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Common
 {
-    public class NetworkHelper
+    public static class NetworkHelper
     {
-        private Socket _clientSocket;
+        private static Socket _clientSocket;
 
-        public Socket ConnectWithServer()
+        public static Socket ConnectWithServer()
         {
             IPEndPoint local = new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"), 0
@@ -31,7 +31,7 @@ namespace Common
             return newClientSocket;
         }
 
-        public Socket DeployServerSocket(int allowedClientsInBacklog)
+        public static Socket DeployServerSocket()
         {
             var localEndPoint = new IPEndPoint(
                 IPAddress.Parse("127.0.0.1"), 5000
@@ -44,28 +44,28 @@ namespace Common
             );
 
             serverSocket.Bind(localEndPoint);
-            serverSocket.Listen(allowedClientsInBacklog);
+            serverSocket.Listen(ProtocolConstants.MaxUsersInBackLog);
             Console.WriteLine("Waiting for clients...");
             return serverSocket;
         }
 
-        public void CloseSocketConnections()
+        public static void CloseSocketConnections()
         {
             _clientSocket.Shutdown(SocketShutdown.Both);
             _clientSocket.Close();
         }
 
-        public byte[] EncodeMsgIntoBytes(string message)
+        public static byte[] EncodeMsgIntoBytes(string message)
         {
             return Encoding.UTF8.GetBytes(message);
         }
 
-        public string DecodeMsgFromBytes(byte[] buffer)
+        public static string DecodeMsgFromBytes(byte[] buffer)
         {
             return Encoding.UTF8.GetString(buffer);
         }
 
-        public void Send(byte[] buffer)
+        public static void Send(byte[] buffer)
         {
             int size = buffer.Length;
             int offSet = 0;
@@ -82,7 +82,7 @@ namespace Common
             }
         }
 
-        public byte[] Receive(int messageLength)
+        public static byte[] Receive(int messageLength)
         {
             byte[] buffer = new byte[messageLength];
 
