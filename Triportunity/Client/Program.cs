@@ -31,6 +31,8 @@ namespace Client
         { 
             clientSocket = NetworkHelper.ConnectWithServer();
             Console.WriteLine("Waiting for the server to be ready");
+            Console.WriteLine("");
+            
             _closeApp = !NetworkHelper.IsSocketConnected(clientSocket);
             
             while (!_closeApp)
@@ -73,9 +75,7 @@ namespace Client
 
         private static void MainMenuOptions()
         {
-            Console.WriteLine("Welcome to Triportunity App");
             Console.WriteLine("Digit the number of your query");
-
             Console.WriteLine("1- Sign In");
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");

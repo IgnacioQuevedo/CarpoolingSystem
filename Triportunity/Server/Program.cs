@@ -23,32 +23,22 @@ namespace Server
             while (_listenToNewClients)
             {
                 Socket clientSocketServerSide = _serverSocket.Accept();
-                
-                string connectedMsg = "Welcome to the server! You are user " + users + "!";
-                
-                NetworkHelper.SendMessage(clientSocketServerSide,connectedMsg);
+
+                string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
+
+                NetworkHelper.SendMessage(clientSocketServerSide, connectedMsg);
                 int actualUser = users;
                 new Thread(() => ManageUser(clientSocketServerSide, actualUser)).Start();
                 users++;
             }
         }
-
         private static void ManageUser(Socket clientSocketServerSide, int actualUser)
         {
-            Console.WriteLine($@"The user {actualUser} is connected");
-
             while (_clientWantsToContinueSendingData)
             {
                 try
                 {
-                    byte[] msgLengthBuffer =
-                        NetworkHelper.Receive(clientSocketServerSide, ProtocolConstants.DataLengthSize);
-                    int msgLength = BitConverter.ToInt32(msgLengthBuffer, 0);
-
-                    byte[] dataBuffer = NetworkHelper.Receive(clientSocketServerSide, msgLength);
-
-                    string message = Encoding.UTF8.GetString(dataBuffer);
-
+                    string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
                 }
 
