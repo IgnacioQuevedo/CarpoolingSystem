@@ -9,11 +9,6 @@ namespace Common
     {
         private Socket _clientSocket;
 
-        public NetworkHelper(Socket clientSocket)
-        {
-            _clientSocket = clientSocket;
-        }
-
         public Socket ConnectWithServer()
         {
             IPEndPoint local = new IPEndPoint(
@@ -24,15 +19,16 @@ namespace Common
                 IPAddress.Parse("127.0.0.1"), 5000
             );
 
-            Socket clientSocket = new Socket(
+            Socket newClientSocket = new Socket(
                 AddressFamily.InterNetwork,
                 SocketType.Stream,
                 ProtocolType.Tcp
             );
-            clientSocket.Bind(local);
-            clientSocket.Connect(server);
-
-            return clientSocket;
+            newClientSocket.Bind(local);
+            newClientSocket.Connect(server);
+            _clientSocket = newClientSocket;
+            
+            return newClientSocket;
         }
 
         public Socket DeployServerSocket(int allowedClientsInBacklog)
@@ -69,37 +65,35 @@ namespace Common
             return Encoding.UTF8.GetString(buffer);
         }
 
-
         public void Send(byte[] buffer)
         {
             int size = buffer.Length;
             int offSet = 0;
-            int amountByteSend = 0;
+            int amountByteSent = 0;
 
             while (size > 0)
             {
-                amountByteSend = _clientSocket.Send(buffer, offSet, amountByteSend, SocketFlags.None);
+                amountByteSent = _clientSocket.Send(buffer, offSet, size, SocketFlags.None);
 
-                if (amountByteSend == 0) throw new SocketException();
+                if (amountByteSent == 0) throw new SocketException();
 
-                size = size - amountByteSend;
-                offSet = offSet + amountByteSend;
+                size = size - amountByteSent;
+                offSet = offSet + amountByteSent;
             }
         }
 
         public byte[] Receive(int messageLength)
         {
-            
             byte[] buffer = new byte[messageLength];
-            
+
             int size = buffer.Length;
             int offSet = 0;
             int amountByteSent = 0;
-            
+
             while (size > 0)
             {
                 amountByteSent = _clientSocket.Receive(buffer, offSet, size, SocketFlags.None);
-                
+
                 if (amountByteSent == 0) throw new SocketException();
 
                 size = size - amountByteSent;

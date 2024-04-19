@@ -15,6 +15,8 @@ namespace Server
         private static int _maxUsersInBackLog = 1000;
         
         private static Socket _serverSocket = NetworkHelper.DeployServerSocket(_maxUsersInBackLog);
+        
+        
         public static void Main(string[] args)
         {
             int users = 1;
