@@ -12,11 +12,15 @@ namespace Server
     {
         private static bool _listenToNewClients = true;
         private static bool _clientWantsToContinueSendingData = true;
-        private static int _maxUsersInBackLog = 1000;
         
-        private static Socket _serverSocket = NetworkHelper.DeployServerSocket(_maxUsersInBackLog);
-        
-        
+        private static Socket _serverSocket;
+        private static NetworkHelper _networkHelper;
+
+        public Program(NetworkHelper networkHelper)
+        {
+            _networkHelper = networkHelper;
+            _serverSocket = _networkHelper.DeployServerSocket(ProtocolConstants.MaxUsersInBackLog);
+        }
         public static void Main(string[] args)
         {
             int users = 1;
@@ -32,21 +36,18 @@ namespace Server
         private static void ManageUser(Socket clientConnectedSocket, int actualUser)
         {
             Console.WriteLine($@"The user {actualUser} is connected");
-
+            
             while (_clientWantsToContinueSendingData)
             {
-                var buffer = new byte[10];
                 try
                 {
-                    int bytesReceived = clientConnectedSocket.Receive(buffer);
-
-                    if (bytesReceived == 0)
-                    {
-                        Console.WriteLine("The user has been disconnected");
-                        break;
-                    }
-
-                    string message = Encoding.UTF8.GetString(buffer);
+                    byte[]  msgLengthBuffer = _networkHelper.Receive(ProtocolConstants.DataLengthSize);
+                    int msgLength = BitConverter.ToInt32(msgLengthBuffer, 0);
+                    
+                    byte[] dataBuffer = _networkHelper.Receive(msgLength);
+                    
+                    string message = Encoding.UTF8.GetString(dataBuffer);
+                    
                     Console.WriteLine($@"The user {actualUser} : {message}");
                 }
 
@@ -57,7 +58,8 @@ namespace Server
                 }
             }
 
-            NetworkHelper.CloseSocketConnections();
+            _networkHelper.CloseSocketConnections();
         }
+        
     }
 }
