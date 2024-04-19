@@ -23,12 +23,16 @@ namespace Client
 
         private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
-        private static RideService _rideService { get; set; }
-        
-        public static void Main(string[] args)
-        {
-           NetworkHelper.ConnectWithServer();
 
+        public static Socket clientSocket;
+        private static RideService _rideService { get; set; }
+
+        public static void Main(string[] args)
+        { 
+            clientSocket = NetworkHelper.ConnectWithServer();
+            Console.WriteLine("Waiting for the server to be ready");
+            _closeApp = !NetworkHelper.IsSocketConnected(clientSocket);
+            
             while (!_closeApp)
             {
                 if (_userLogged is null)
@@ -90,7 +94,7 @@ namespace Client
             ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            NetworkHelper.CloseSocketConnections();
+            NetworkHelper.CloseSocketConnections(clientSocket);
             _closeApp = true;
         }
 
@@ -156,7 +160,7 @@ namespace Client
                 string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
                 _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
                 //Need to pass DriverInfo too
-                NetworkHelper.Send(_messageInBytes);
+                NetworkHelper.Send(clientSocket,_messageInBytes);
                 //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
             }
             catch (Exception exception)
@@ -178,8 +182,8 @@ namespace Client
 
                 string loginInfo = username + ";" + password;
                 _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
-
-                NetworkHelper.Send(_messageInBytes);
+                
+                NetworkHelper.Send(clientSocket, _messageInBytes);
                 //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
                 //_userLogged = UserService.LoginClient(loginRequest);
             }
