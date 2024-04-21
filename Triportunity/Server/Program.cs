@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using Common;
 
@@ -12,39 +10,33 @@ namespace Server
     {
         private static bool _listenToNewClients = true;
         private static bool _clientWantsToContinueSendingData = true;
-        private static int _maxUsersInBackLog = 1000;
-        
-        private static Socket _serverSocket = NetworkHelper.DeployServerSocket(_maxUsersInBackLog);
+
+        private static Socket _serverSocket;
+
         public static void Main(string[] args)
         {
+            _serverSocket = NetworkHelper.DeployServerSocket();
+
             int users = 1;
             while (_listenToNewClients)
             {
-                Socket clientSocket = _serverSocket.Accept();
+                Socket clientSocketServerSide = _serverSocket.Accept();
+
+                string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
+
+                NetworkHelper.SendMessage(clientSocketServerSide, connectedMsg);
                 int actualUser = users;
-                new Thread(() => ManageUser(clientSocket, actualUser)).Start();
+                new Thread(() => ManageUser(clientSocketServerSide, actualUser)).Start();
                 users++;
             }
         }
-
-        private static void ManageUser(Socket clientSocket, int actualUser)
+        private static void ManageUser(Socket clientSocketServerSide, int actualUser)
         {
-            Console.WriteLine($@"The user {actualUser} is connected");
-
             while (_clientWantsToContinueSendingData)
             {
-                var buffer = new byte[10];
                 try
                 {
-                    int bytesReceived = clientSocket.Receive(buffer);
-
-                    if (bytesReceived == 0)
-                    {
-                        Console.WriteLine("The user has been disconnected");
-                        break;
-                    }
-
-                    string message = Encoding.UTF8.GetString(buffer);
+                    string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
                 }
 
@@ -55,7 +47,7 @@ namespace Server
                 }
             }
 
-            NetworkHelper.CloseSocketConnections(clientSocket);
+            NetworkHelper.CloseSocketConnections(clientSocketServerSide);
         }
     }
 }

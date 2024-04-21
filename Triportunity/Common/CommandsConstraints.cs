@@ -1,6 +1,6 @@
 namespace Common
 {
-    public class CommandsConstraints
+    public static class CommandsConstraints
     {
     }
 }

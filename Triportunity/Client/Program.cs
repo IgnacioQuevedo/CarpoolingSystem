@@ -19,16 +19,22 @@ namespace Client
         private static User _userLogged;
         private static string _optionSelected;
         private static byte[] _messageInBytes;
-        private static Socket _clientSocket;
         private static bool _closeApp;
 
         private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
+
+        public static Socket clientSocket;
         private static RideService _rideService { get; set; }
 
         public static void Main(string[] args)
-        {
-            _clientSocket = NetworkHelper.ConnectWithServer();
+        { 
+            clientSocket = NetworkHelper.ConnectWithServer();
+            Console.WriteLine("Waiting for the server to be ready");
+            Console.WriteLine("");
+            
+            _closeApp = !NetworkHelper.IsSocketConnected(clientSocket);
+            
             while (!_closeApp)
             {
                 if (_userLogged is null)
@@ -69,9 +75,7 @@ namespace Client
 
         private static void MainMenuOptions()
         {
-            Console.WriteLine("Welcome to Triportunity App");
             Console.WriteLine("Digit the number of your query");
-
             Console.WriteLine("1- Sign In");
             Console.WriteLine("2- Sign Up");
             Console.WriteLine("3- Who are we?");
@@ -90,7 +94,7 @@ namespace Client
             ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
-            NetworkHelper.CloseSocketConnections(_clientSocket);
+            NetworkHelper.CloseSocketConnections(clientSocket);
             _closeApp = true;
         }
 
@@ -156,7 +160,7 @@ namespace Client
                 string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
                 _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
                 //Need to pass DriverInfo too
-                _clientSocket.Send(_messageInBytes);
+                NetworkHelper.Send(clientSocket,_messageInBytes);
                 //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
             }
             catch (Exception exception)
@@ -177,9 +181,8 @@ namespace Client
                 string password = Console.ReadLine();
 
                 string loginInfo = username + ";" + password;
-                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(loginInfo);
-
-                _clientSocket.Send(_messageInBytes);
+                
+                NetworkHelper.SendMessage(clientSocket,loginInfo);
                 //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
                 //_userLogged = UserService.LoginClient(loginRequest);
             }
@@ -189,7 +192,6 @@ namespace Client
                 LoginOption();
             }
         }
-
 
         #endregion
 
@@ -279,7 +281,8 @@ namespace Client
 
         private static void CreateRide()
         {
-            Console.WriteLine("You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
+            Console.WriteLine(
+                "You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
             List<User> passengers = new List<User>();
 
@@ -299,10 +302,10 @@ namespace Client
 
             string photoPath = IntroducePhotoPath();
 
-            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, passengers, initialLocation, endingLocation, departureDate, availableSeats, pricePerPerson, petsAllowed, photoPath);
+            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, passengers, initialLocation, endingLocation,
+                departureDate, availableSeats, pricePerPerson, petsAllowed, photoPath);
 
             _rideService.CreateRide(rideReq);
-
         }
 
         private static string IntroducePhotoPath()
@@ -397,19 +400,20 @@ namespace Client
 
             Console.WriteLine("Introduce the day");
             string departureDay = Console.ReadLine();
-            
+
             Console.WriteLine("Introduce the hour of departure");
             string departureHour = Console.ReadLine();
 
             return ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
         }
 
-        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay, string departureHour)
+        private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay,
+            string departureHour)
         {
             if (int.TryParse(departureYear, out int year) &&
-                            int.TryParse(departureMonth, out int month) &&
-                            int.TryParse(departureDay, out int day) &&
-                            int.TryParse(departureHour, out int hour))
+                int.TryParse(departureMonth, out int month) &&
+                int.TryParse(departureDay, out int day) &&
+                int.TryParse(departureHour, out int hour))
             {
                 try
                 {
@@ -490,7 +494,6 @@ namespace Client
             JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
             _rideService.JoinRide(joinReq);
-
         }
 
         private static RideModel SelectRideFromList(List<RideModel> rides)
@@ -507,7 +510,8 @@ namespace Client
                 if (optionValue <= rides.Count)
                 {
                     RideModel rideSelected = rides[optionValue - 1];
-                    Console.WriteLine($"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
+                    Console.WriteLine(
+                        $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
 
                     return rideSelected;
                 }
@@ -533,21 +537,23 @@ namespace Client
             for (int i = 0; i < amountOfRides; i++)
             {
                 actualRide = rides[i];
-                Console.WriteLine($"1- From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} Date of departure: {actualRide.DepartureTime.ToShortDateString()} Price per person: ${actualRide.PricePerPerson}");
+                Console.WriteLine(
+                    $"1- From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} Date of departure: {actualRide.DepartureTime.ToShortDateString()} Price per person: ${actualRide.PricePerPerson}");
             }
         }
 
         #endregion
 
         #region Modify Ride
+
         private static void ModifyRide()
         {
             List<RideModel> rides = _rideService.GetAllRides();
-            
+
             DisplayAllRides(rides);
 
             RideModel rideSelected = SelectRideFromList(rides);
-            
+
             Console.WriteLine("You will have to complete the following steps to have your ride edited");
 
             string locationMode = "initial";
@@ -565,15 +571,17 @@ namespace Client
             bool petsAllowed = DecideIfPetsAreAllowed();
 
             string photoPath = IntroducePhotoPath();
-            
-            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate, pricePerPerson, petsAllowed, photoPath);
+
+            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
+                pricePerPerson, petsAllowed, photoPath);
 
             _rideService.ModifyRide(modifyRideReq);
-
         }
+
         #endregion
 
         #region General menu functions
+
         private static void ShowMessageWithDelay(string closingMessage, int delayTime)
         {
             Console.Write(closingMessage);
