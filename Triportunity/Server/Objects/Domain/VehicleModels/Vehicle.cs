@@ -20,7 +20,6 @@ namespace Server.Objects.Domain.VehicleModels
                 _picture = value;
             }
         }
-
         public Vehicle(VehicleImage picture)
         {
             if (picture == null)
