@@ -1,9 +1,27 @@
 using System;
-using System.Threading.Tasks;
+using Client.Objects.ClientModels;
+using Client.Objects.UserModels;
 
 namespace Client.Services
 {
-    public static class UserService
+    public class UserService
     {
+        public static void RegisterClient(RegisterUserRequest registerUserRequest)
+        {
+            // Invoke the necessary methods to being possible to communicate with the UserController of backend
+            throw new NotImplementedException();
+        }
+
+        public static User LoginClient(LoginUserRequest loginUserRequest)
+        {
+            // Invoke the necessary methods to being possible to communicate with the UserController of backend
+            throw new NotImplementedException();
+        }
+
+        public static User UpdateClient(UpdateUserRequestModel userWithUpdates)
+        {
+            // Invoke the necessary methods to being possible to communicate with the UserController of backend
+            throw new NotImplementedException();
+        }
     }
 }

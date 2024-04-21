@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
 using Server.Objects.Domain.ClientModels;
+using Server.Objects.Domain.UserModels;
 
 namespace Server.DataContext
 {
     public class MemoryDatabase
     {
-        public ICollection<Client> Clients { get; set; }
+        public ICollection<User> Users { get; set; }
         public ICollection<Ride> Rides { get; set; }
 
         private static MemoryDatabase _database;
@@ -14,7 +15,7 @@ namespace Server.DataContext
 
         private MemoryDatabase()
         {
-            Clients = new List<Client>();
+            Users = new List<User>();
             Rides = new List<Ride>();
         }
         public static MemoryDatabase GetInstance()

@@ -1,11 +1,11 @@
-namespace Server.Objects.DTOs.ClientModelDtos
+namespace Client.Objects.UserModels
 {
-    public class LoginClientRequestDto
+    public class LoginUserRequest
     {
         public string Username { get; set; }
         public string Password { get; set; }
 
-        public LoginClientRequestDto(string username, string password)
+        public LoginUserRequest(string username, string password)
         {
             Username = username;
             Password = password;

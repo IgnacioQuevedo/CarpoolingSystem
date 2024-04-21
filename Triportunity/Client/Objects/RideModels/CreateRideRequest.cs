@@ -1,34 +1,30 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Server.Objects.Domain.ClientModels;
-using Server.Objects.Domain.Enums;
-using Server.Objects.Domain.UserModels;
+using Client.Objects.EnumsModels;
+using Client.Objects.UserModels;
 
-namespace Server.Objects.DTOs.RideModelDtos
+
+namespace Client.Objects.RideModels
 {
-    public class RideDto
+    public class CreateRideRequest
     {
-        public Guid Id { get; set; }
         public User Driver { get; set; }
         public List<User> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
-        public int AvailableSeats { get; set; }
         public int TotalSeats { get; set; }
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public RideDto(Guid id, User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public CreateRideRequest(User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
-            Id = id;
             Driver = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
             EndingLocation = endingLocation;
             DepartureTime = departureTime;
-            AvailableSeats = availableSeats;
             TotalSeats = totalSeats;
             PricePerPerson = pricePerPerson;
             PetsAllowed = petsAllowed;

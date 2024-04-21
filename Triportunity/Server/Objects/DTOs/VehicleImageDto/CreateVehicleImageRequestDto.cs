@@ -8,6 +8,8 @@ namespace Server.Objects.DTOs.VehicleImage
 {
     public class CreateVehicleImageRequestDto
     {
+        public Guid Id { get; set; }
+        public double Size { get; set; }
         public string Url { get; set; }
 
         public string FileName { get; set; }

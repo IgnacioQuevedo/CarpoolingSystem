@@ -1,10 +1,13 @@
-﻿using Server.Objects.Domain.Enums;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Client.Objects.EnumsModels;
 
-namespace Server.Objects.DTOs.RideModelDtos
+namespace Client.Objects.RideModels
 {
-
-    public class ModifyRideRequestDto
+    public class ModifyRideRequest
     {
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
@@ -13,13 +16,13 @@ namespace Server.Objects.DTOs.RideModelDtos
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public ModifyRideRequestDto(CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime rideDate,
-            DateTime departureTime, double pricePerPerson, bool petsAllowed, string photoPath)
+        public ModifyRideRequest(CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             InitialLocation = initialLocation;
             EndingLocation = endingLocation;
             DepartureTime = departureTime;
             PricePerPerson = pricePerPerson;
+            PetsAllowed = petsAllowed;
             PhotoPath = photoPath;
         }
     }

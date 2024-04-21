@@ -3,15 +3,16 @@ using Client.Objects.VehicleImageModels;
 
 namespace Client.Objects.VehicleModels
 {
-    public class Vehicle
+    public class CreateVehicleRequest
     {
-
         public Guid Id { get; set; }
+
         public VehicleImage Picture { get; set; }
 
-        public Vehicle(VehicleImage picture)
+
+        public CreateVehicleRequest(Guid id, VehicleImage picture)
         {
-            Id = Guid.NewGuid();
+            Id = id;
             Picture = picture;
         }
     }

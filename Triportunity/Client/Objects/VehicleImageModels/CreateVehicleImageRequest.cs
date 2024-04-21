@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-
-namespace Server.Objects.DTOs.VehicleImage
+namespace Client.Objects.VehicleImageModels
 {
-    public class VehicleImageDto
+    public class CreateVehicleImageRequest
     {
         public Guid Id { get; set; }
-
         public double Size { get; set; }
         public string FileName { get; set; }
 
@@ -18,12 +12,13 @@ namespace Server.Objects.DTOs.VehicleImage
 
         public string Url { get; set; }
 
-        public VehicleImageDto(string fileName, string fileExtension, string url)
+        public CreateVehicleImageRequest(Guid id, double size, string fileName, string fileExtension, string url)
         {
+            Id = id;
+            Size = size;
             FileName = fileName;
             FileExtension = fileExtension;
             Url = url;
         }
-
     }
 }
