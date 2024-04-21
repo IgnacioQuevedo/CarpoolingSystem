@@ -113,15 +113,12 @@ namespace Common
 
             while (offSet < size)
             {
-                //[0000]
                 amountByteSent = clientSocketServerSide.Receive(responseBuffer, offSet, size - offSet, SocketFlags.None);
 
                 if (amountByteSent == 0) throw new SocketException();
                 
                 offSet = offSet + amountByteSent;
             }
-            
-            //[1234]
             return responseBuffer;
         }
         

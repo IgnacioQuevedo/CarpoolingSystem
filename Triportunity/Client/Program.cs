@@ -181,6 +181,7 @@ namespace Client
                 string password = Console.ReadLine();
 
                 string loginInfo = username + ";" + password;
+                
                 NetworkHelper.SendMessage(clientSocket,loginInfo);
                 //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
                 //_userLogged = UserService.LoginClient(loginRequest);
