@@ -18,7 +18,6 @@ namespace Server.Repositories
         {
             lock (_lock)
             {
-                // Esperar mientras haya un escritor trabajando o esperando para evitar inanición de escritores.
                 while (_writeInProgress || _writerWaiting)
                 {
                     Monitor.Wait(_lock);
@@ -34,7 +33,6 @@ namespace Server.Repositories
                 _readers--;
                 if (_readers == 0)
                 {
-                    // Notificar a los escritores que pueden proceder si no hay lectores.
                     Monitor.PulseAll(_lock);
                 }
             }
@@ -45,7 +43,6 @@ namespace Server.Repositories
             lock (_lock)
             {
                 _writerWaiting = true;
-                // Esperar mientras haya un escritor trabajando o lectores leyendo.
                 while (_writeInProgress || _readers > 0)
                 {
                     Monitor.Wait(_lock);
@@ -60,7 +57,6 @@ namespace Server.Repositories
             lock (_lock)
             {
                 _writeInProgress = false;
-                // Notificar a todos que el escritor ha terminado.
                 Monitor.PulseAll(_lock);
             }
         }
