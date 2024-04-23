@@ -12,13 +12,13 @@ namespace Client.Services
             throw new NotImplementedException();
         }
 
-        public static User LoginClient(LoginUserRequest loginUserRequest)
+        public static UserDto LoginClient(LoginUserRequest loginUserRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();
         }
 
-        public static User UpdateClient(UpdateUserRequestModel userWithUpdates)
+        public static UserDto UpdateClient(UpdateUserRequestModel userWithUpdates)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();

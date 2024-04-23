@@ -1,4 +1,5 @@
-﻿using Server.DataContext;
+﻿using System;
+using Server.DataContext;
 using System.Linq;
 using Server.Objects.Domain.UserModels;
 
@@ -66,6 +67,16 @@ namespace Server.Repositories
                     }
                 }
             }
+        }
+
+        public User UserById(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetUserByUsername(string username)
+        {
+            throw new NotImplementedException();
         }
     }
 ]

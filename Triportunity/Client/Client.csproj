@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\RideModels\RideModel.cs" />
-    <Compile Include="Objects\UserModels\User.cs" />
+    <Compile Include="Objects\UserModels\UserDto.cs" />
     <Compile Include="Objects\UserModels\DriverInfo.cs" />
     <Compile Include="Objects\UserModels\LoginUserRequest.cs" />
     <Compile Include="Objects\UserModels\RegisterUserRequest.cs" />

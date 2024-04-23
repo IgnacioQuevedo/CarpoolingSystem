@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using Server.Objects.DTOs.UserModelDtos;
 
 namespace Server.Objects.DTOs.ClientModelDtos
 {
