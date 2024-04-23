@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using Server.Objects.DTOs.VehicleModelDto;
 
-namespace Server.Objects.DTOs.ClientModelDtos
+namespace Server.Objects.DTOs.UserModelDtos
 {
     public class CreateDriverInfoRequestDto
     {
-        public int Ci { get; set; }
         public ICollection<VehicleDto> Vehicles { get; set; }
 
-        public CreateDriverInfoRequestDto(int ci, ICollection<VehicleDto> vehiclesOfClient)
+        public CreateDriverInfoRequestDto(ICollection<VehicleDto> vehiclesOfClient)
         {
-            Ci = ci;
             Vehicles = vehiclesOfClient;
         }
     }

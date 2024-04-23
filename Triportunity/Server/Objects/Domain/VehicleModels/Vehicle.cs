@@ -1,34 +1,18 @@
-﻿using Server.Exceptions;
-using System;
+﻿using System;
+
 
 namespace Server.Objects.Domain.VehicleModels
 {
     public class Vehicle
     {
-        public Guid Id { get; private set; } 
+        public Guid Id { get; private set; }
 
-        private VehicleImage _picture;
-        public VehicleImage Picture
+        public string DestinationFilePath { get; set; }
+    
+       public Vehicle(string destinationPath)
         {
-            get => _picture;
-            set
-            {
-                if (value == null)
-                {
-                    throw new VehicleException("The picture cannot be null.");
-                }
-                _picture = value;
-            }
-        }
-        public Vehicle(VehicleImage picture)
-        {
-            if (picture == null)
-            {
-                throw new VehicleException("The picture cannot be null.");
-            }
-
             Id = Guid.NewGuid();
-            Picture = picture;
+            DestinationFilePath = destinationPath;
         }
     }
 }
