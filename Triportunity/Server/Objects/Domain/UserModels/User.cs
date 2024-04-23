@@ -12,13 +12,15 @@ namespace Server.Objects.Domain.UserModels
         public string Ci { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PasswordRepeated { get; set; }
         public DriverInfo? DriverAspects { get; set; }
 
-        public User(string username, string password, string ci, DriverInfo? driverAspects)
+        public User(string ci, string username, string password, string passwordRepeated, DriverInfo? driverAspects)
         {
             Id = Guid.NewGuid();
             Username = username;
             Password = password;
+            PasswordRepeated = passwordRepeated;
             Ci = ci;
             DriverAspects = driverAspects;
 
@@ -54,6 +56,11 @@ namespace Server.Objects.Domain.UserModels
                 throw new UserException("Error on password. Password must be greater than: " +
                                         amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
                                         "numbers, and at least one special character!");
+            }
+            
+            if (Password != PasswordRepeated)
+            {
+                throw new UserException("Passwords must be the same!");
             }
         }
 

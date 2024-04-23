@@ -9,22 +9,22 @@ using Server.Objects.Domain;
 using Server.Objects.Domain.ClientModels;
 using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.VehicleModels;
-using Server.Objects.DTOs.ClientModelDtos;
+using Server.Objects.DTOs.UserModelDtos;
 using Server.Repositories;
 
 
 namespace Server.Controllers
 {
-    public class ClientController
+    public static class ClientController
     {
         
-        private UserRepository _userRepository = new UserRepository();
+        private static UserRepository _userRepository = new UserRepository();
 
-        public void RegisterUser(RegisterUserRequestDto request)
+        public static void RegisterUser(RegisterUserRequestDto request)
         {
             try
             {
-                User userToRegister = new User(request.Username, request.Password, request.Ci, null);
+                User userToRegister = new User(request.Ci, request.Username, request.Password,request.PasswordRepeated, null);
                 _userRepository.RegisterUser(userToRegister);
             }
             catch (UserException exception)
@@ -33,7 +33,7 @@ namespace Server.Controllers
             }
         }
 
-        public bool LoginUser(string username, string password)
+        public static bool LoginUser(string username, string password)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace Server.Controllers
             }
         }
 
-        public UserClient GetUserById(Guid userId)
+        public static UserClient GetUserById(Guid userId)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace Server.Controllers
             }
         }
 
-        public void RateDriver(Guid driverId, ReviewClient reviewToAdd)
+        public static void RateDriver(Guid driverId, ReviewClient reviewToAdd)
         {
             try
             {
@@ -87,7 +87,7 @@ namespace Server.Controllers
                 throw new Exception(exceptionCaught.Message);
             }
         }
-        public void SetVehicle(Guid driverId, VehicleClient vehicleToAdd)
+        public static void SetVehicle(Guid driverId, VehicleClient vehicleToAdd)
         {
             try
             {

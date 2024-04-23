@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using Server.Objects.DTOs.RideModelDtos;
 using System.Linq;
+using Client.Services;
 using Server.Exceptions;
 using Server.Objects.Domain.UserModels;
 
@@ -11,11 +12,10 @@ namespace Server.Repositories
 {
     public class RideRepository
     {
-
+        public static UserRepository _userRepository = new UserRepository();
         public static void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
-            rideToAdd.Id = Guid.NewGuid();
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
             LockManager.StopWriting();
         }
@@ -24,28 +24,31 @@ namespace Server.Repositories
         {
             LockManager.StartWriting();
             Ride rideToJoin = GetRideById(rideId);
-            var user = UserRepository.FindUserById(userId);
-            if (rideToJoin.AvailableSeats < 1)
-            {
-                throw new RideException("No are no available seats");
-            }
-            if (rideToJoin.Passengers.Contains(user))
-            {
-                throw new RideException("User is already in the ride");
-            }
-
+            User user = _userRepository.GetUserById(userId);
+            
+            ValidateJoinRide(user, rideToJoin);
             rideToJoin.Passengers.Add(user);
             rideToJoin.AvailableSeats--;
             LockManager.StopWriting();
         }
+        private static void ValidateJoinRide(User user, Ride rideToJoin)
+        {
+            string exceptionMessage = "";
+            
+            if (rideToJoin.AvailableSeats < 1) exceptionMessage = "No are no available seats";
+            if (rideToJoin.Passengers.Contains(user)) exceptionMessage= "User is already in the ride";
+            if (rideToJoin.DepartureTime <= DateTime.Now) exceptionMessage = "Cannot join a ride that has already departed";
+            
+            if(exceptionMessage != "") throw new RideException(exceptionMessage);
+        }
 
         private static Ride GetRideById(Guid rideId)
         {
-            var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(x => x.Id == rideId);
+            var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
             if (rideToFind == null)
             {
-                throw new Exception("Ride not found");
+                throw new RideException("Ride not found");
             }
             return rideToFind;
         }
@@ -54,7 +57,8 @@ namespace Server.Repositories
         {
             LockManager.StartWriting();
             Ride rideToQuit = GetRideById(rideId);
-            var user  = UserRepository.FindUserById(userId);
+            User user  = _userRepository.GetUserById(userId);
+            
             if (!rideToQuit.Passengers.Contains(user))
             {
                 throw new RideException("User is not in the ride");
@@ -72,13 +76,20 @@ namespace Server.Repositories
 
         public static ICollection<Ride> GetRides()
         {
-
             LockManager.StartReading();
             ICollection<Ride> rides = MemoryDatabase.GetInstance().Rides;
             if (rides == null)
             {
                 throw new RideException("No rides found");
             }
+            foreach (var ride in rides)
+            {
+                if(ride.DepartureTime <= DateTime.Now)
+                {
+                    DeleteRide(ride.Id);
+                }
+            }
+            
             LockManager.StopReading();
             return rides;
         }
@@ -87,37 +98,24 @@ namespace Server.Repositories
         {
             LockManager.StartWriting();
             Ride rideToDelete = GetRideById(rideId);
-            if (rideToDelete.Published)
-            {
-                throw new RideException("Cannot delete a published ride");
-            }
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
             LockManager.StopWriting();
         }
 
-        public static void CancelPublishedRide(Guid rideId)
+        public static void DisablePublishedRide(Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToCancel = GetRideById(rideId);
-            if (!rideToCancel.Published)
-            {
-                throw new RideException("Cannot cancel a non-published ride");
-            }
-            if (rideToCancel.DepartureTime <= DateTime.Now)
-            {
-                throw new RideException("Cannot cancel a ride that has already departed");
-            }
             rideToCancel.Published = false;
             LockManager.StopWriting();
         }
 
         public ICollection<Ride> FilterByPrice(int minPrice, int maxPrice)
         {
-            ICollection<Ride> filteredRides;
-
-            var rides = GetRides();
-
             LockManager.StartReading();
+            ICollection<Ride> filteredRides = new List<Ride>();
+            var rides = GetRides();
+            
             filteredRides = rides
                 .Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
                 .ToList();
@@ -128,9 +126,9 @@ namespace Server.Repositories
 
         public ICollection<Ride> FilterByInitialLocation(string initialLocation)
         {
-            ICollection<Ride> filteredRides;
             LockManager.StartReading();
-
+            ICollection<Ride> filteredRides = new List<Ride>();
+            
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.InitialLocation.Equals(initialLocation))
                 .ToList();
@@ -140,8 +138,8 @@ namespace Server.Repositories
 
         public ICollection<Ride> FilterByDestination(string destination)
         {
-            ICollection<Ride> filteredRides;
             LockManager.StartReading();
+            ICollection<Ride> filteredRides = new List<Ride>();
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.EndingLocation.Equals(destination))
                 .ToList();
@@ -151,9 +149,8 @@ namespace Server.Repositories
 
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
-            ICollection<Review> reviews;
-
             LockManager.StartReading();
+            ICollection<Review> reviews = new List<Review>();
 
             Ride actualRide = GetRideById(ride);
             reviews = actualRide.Driver.DriverAspects.Reviews;
