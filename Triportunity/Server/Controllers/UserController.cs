@@ -26,5 +26,17 @@ namespace Server.Controllers
             }
         }
         
+        public void LoginUser(string username, string password)
+        {
+            try
+            {
+                _userRepository.Login(username,password);
+            }
+            catch (UserException exceptionCaught)
+            {
+                throw new Exception(exceptionCaught.Message);
+            }
+        }
+        
     }
 }

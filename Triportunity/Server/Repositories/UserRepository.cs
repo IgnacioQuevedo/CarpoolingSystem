@@ -33,7 +33,7 @@ namespace Server.Repositories
             return true;
         }
 
-        private bool Login(string username, string password)
+        public bool Login(string username, string password)
         {
             var possibleLogin = FindClientViaUsername(username);
 
