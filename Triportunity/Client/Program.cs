@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.EnumsModels;
 using Client.Objects.RideModels;
 using Client.Objects.UserModels;
-using Client.Objects.VehicleImageModels;
 using Client.Objects.VehicleModels;
 using Client.Services;
 using Common;
+using Microsoft.Win32;
 
 namespace Client
 {
     internal class Program
     {
+
         private static User _userLogged;
         private static string _optionSelected;
         private static byte[] _messageInBytes;
@@ -27,13 +29,13 @@ namespace Client
         private static RideService _rideService { get; set; }
 
         public static void Main(string[] args)
-        { 
+        {
             clientSocket = NetworkHelper.ConnectWithServer();
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
-            
+
             _closeApp = !NetworkHelper.IsSocketConnected(clientSocket);
-            
+
             while (!_closeApp)
             {
                 if (_userLogged is null)
@@ -133,34 +135,35 @@ namespace Client
                 Console.WriteLine("Insert the same password as above:");
                 var repeatedPassword = Console.ReadLine();
 
+                Console.WriteLine("Insert your Ci for the registration");
+                string ci = Console.ReadLine();
+
+                var clientToRegister =
+                    new RegisterUserRequest(usernameRegister, passwordRegister, repeatedPassword,
+                        driverAspectsOfClient, ci);
+
+                UserService.RegisterClient(clientSocket, clientToRegister);
+
+                _userLogged = UserService.
+
                 Console.WriteLine("Do you want to be register as a driver?");
+
                 Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
                 if (Console.ReadLine().Equals("Y"))
                 {
-                    driverAspectsOfClient = CreateDriver();
+                    SetVehicles();
                 }
 
                 ShowMessageWithDelay("Registering", 500);
 
-                var clientToRegister =
-                    new RegisterUserRequest(usernameRegister, passwordRegister, repeatedPassword,
-                        driverAspectsOfClient);
-
-                UserService.RegisterClient(clientToRegister);
                 Console.WriteLine("Want to login?");
                 if (Console.ReadLine().Equals("Y"))
                 {
                     var loginClient =
                         new LoginUserRequest(clientToRegister.Username, clientToRegister.Password);
 
-                    _userLogged = UserService.LoginClient(loginClient);
+                    _userLogged = UserService.LoginClient(clientSocket, loginClient);
                 }
-
-                string registerInfo = usernameRegister + ";" + passwordRegister + ";" + repeatedPassword;
-                _messageInBytes = NetworkHelper.EncodeMsgIntoBytes(registerInfo);
-                //Need to pass DriverInfo too
-                NetworkHelper.Send(clientSocket,_messageInBytes);
-                //ServiceMethod that will create the user (DO AS A REFACTOR IN A TIME)
             }
             catch (Exception exception)
             {
@@ -179,11 +182,9 @@ namespace Client
                 Console.WriteLine("Password:");
                 string password = Console.ReadLine();
 
-                string loginInfo = username + ";" + password;
-                
-                NetworkHelper.SendMessage(clientSocket,loginInfo);
-                //ServiceMethod that will login the user into the app (DO AS A REFACTOR IN A TIME)
-                //_userLogged = UserService.LoginClient(loginRequest);
+                LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
+
+                _userLogged = UserService.LoginClient(clientSocket, loginUserRequest);
             }
             catch (Exception exception)
             {
@@ -196,57 +197,49 @@ namespace Client
 
         #region Driver creation
 
-        private static DriverInfo CreateDriver()
+        private static void SetVehicles()
         {
-            string ci = "";
             string addNewVehicle = "Y";
             ICollection<VehicleDto> vehicles = new List<VehicleDto>();
 
-            Console.WriteLine("Insert your Ci for the registration");
-            ci = Console.ReadLine();
-
             while (addNewVehicle.Equals("Y"))
             {
-                Console.WriteLine("Insert a image of your Vehicle");
-                //This must be fixed in a future.
-                VehicleImage vehicleImage = null;
-                var newVehicle = new VehicleDto(vehicleImage);
 
-                vehicles.Add(newVehicle);
+                UserService.SetDriverVehicles(clientSocket, _userLogged.Username);
+
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                 Console.WriteLine("If yes - Enter 'Y'");
                 Console.WriteLine("If not - Enter 'N'");
 
                 addNewVehicle = Console.ReadLine();
             }
-
-            var driverAspectsOfClient = new DriverInfo(ci, vehicles);
-            return driverAspectsOfClient;
         }
 
 
         public static void PossibleActionsToBeDoneByUser()
         {
-            if (_userLogged.DriverAspects is null)
+            if (_userLogged.Vehicles is null)
             {
-                Console.WriteLine("Select 0- If you want to be registered as a driver");
+                Console.WriteLine("Select 3- If you want to be registered as a driver");
             }
 
-            Console.WriteLine("Select 1- To create a Ride");
-            Console.WriteLine("Select 2- To join a Ride");
-            Console.WriteLine("Select 3- To view or edit your created rides");
             Console.WriteLine("Select 4- To create a Ride");
-            Console.WriteLine("Select 5- To close the app");
+            Console.WriteLine("Select 5- To join a Ride");
+            Console.WriteLine("Select 6- To view or edit your created rides");
+            Console.WriteLine("Select 7- To Quit a Ride");
+            Console.WriteLine("Select 8- To Delete a Ride");
+            Console.WriteLine("Select x- To close the app");
             _optionSelected = Console.ReadLine();
 
             switch (_optionSelected)
             {
                 case "0":
-                    var driverAspects = CreateDriver();
-                    var clientWithUpdates = new UpdateUserRequestModel
+                    //var driverAspects = set();
+                    /*var clientWithUpdates = new CreateDriverRequest
                         (_userLogged.Id, driverAspects);
+                    */
 
-                    _userLogged = UserService.UpdateClient(clientWithUpdates);
+                    // _userLogged = UserService.CreateDriver(clientWithUpdates);
                     break;
 
                 case "1":
@@ -486,13 +479,13 @@ namespace Client
 
         private static void JoinRide()
         {
-            List<RideModel> rides = _rideService.GetAllRides();
+            //  List<RideModel> rides = _rideService.GetAllRides();
 
-            RideModel selectedRide = SelectRideFromList(rides);
+            //RideModel selectedRide = SelectRideFromList(rides);
 
-            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
+            //JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
-            _rideService.JoinRide(joinReq);
+            // _rideService.JoinRide(joinReq);
         }
 
         private static RideModel SelectRideFromList(List<RideModel> rides)
@@ -547,11 +540,11 @@ namespace Client
 
         private static void ModifyRide()
         {
-            List<RideModel> rides = _rideService.GetAllRides();
+            //List<RideModel> rides = _rideService.GetAllRides();
 
-            DisplayAllRides(rides);
+            //DisplayAllRides(rides);
 
-            RideModel rideSelected = SelectRideFromList(rides);
+            // RideModel rideSelected = SelectRideFromList(rides);
 
             Console.WriteLine("You will have to complete the following steps to have your ride edited");
 
@@ -571,10 +564,10 @@ namespace Client
 
             string photoPath = IntroducePhotoPath();
 
-            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
-                pricePerPerson, petsAllowed, photoPath);
+            //  ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
+            //    pricePerPerson, petsAllowed, photoPath);
 
-            _rideService.ModifyRide(modifyRideReq);
+            //_rideService.ModifyRide(modifyRideReq);
         }
 
         #endregion
