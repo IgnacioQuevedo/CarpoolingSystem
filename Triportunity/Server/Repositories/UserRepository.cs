@@ -18,11 +18,19 @@ namespace Server.Repositories
             MemoryDatabase.GetInstance().Users.Add(userToRegister);
             LockManager.StopWriting();
         }
+        
+        private void UserAlreadyExists(string usernameToValidate)
+        {
+            if (MemoryDatabase.GetInstance().Users.Any(x => x.Username.Equals(usernameToValidate)))
+            {
+                throw new UserException("User already exists");
+            }
+        }
 
         public bool Login(string username, string password)
         {
             LockManager.StartReading();
-            var possibleLogin = GetUserByUsername(username);
+            User possibleLogin = GetUserByUsername(username);
 
             if (possibleLogin.Password.Equals(password))
             {
@@ -35,7 +43,7 @@ namespace Server.Repositories
 
         public User GetUserByUsername(string usernameOfClient)
         {
-            var clientFound = MemoryDatabase.GetInstance().Users
+            User clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
             if (clientFound == null)
@@ -62,13 +70,13 @@ namespace Server.Repositories
         public void RegisterDriver(string userName, DriverInfo driveInfo)
         {
             LockManager.StartWriting();
-            UserAlreadyExists(userName);
-            if (user.DriverAspects != null)
+            User userFound = GetUserByUsername(userName);
+            if (userFound.DriverAspects != null)
             {
                 throw new UserException("User is already a driver");
             }
 
-            user.DriverAspects = driveInfo;
+            userFound.DriverAspects = driveInfo;
             LockManager.StopWriting();
         }
 
@@ -100,12 +108,6 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        private void UserAlreadyExists(string usernameToValidate)
-        {
-            if (MemoryDatabase.GetInstance().Users.Any(x => x.Username.Equals(usernameToValidate)))
-            {
-                throw new UserException("User already exists");
-            }
-        }
+     
     }
 }
