@@ -1,30 +1,36 @@
-﻿using System;
-using Server.DataContext;
+﻿using Server.DataContext;
 using System.Linq;
 using Server.Objects.Domain.UserModels;
+using Server.Objects.Domain;
+using Server.Exceptions;
+using System;
+using System.IO;
+using Server.Objects.Domain.ClientModels;
+using System.Collections.Generic;
+using Server.Objects.Domain.VehicleModels;
 
 namespace Server.Repositories
 {
-    public class UserRepository
+    public static class UserRepository
     {
-        public void CreateUser(User userToAdd)
+
+        public static void RegisterUser(User clientToRegister)
         {
             LockManager.StartWriting();
-            MemoryDatabase.GetInstance().Users.Add(userToAdd);
-            LockManager.StopWriting();
-        }
-        
-        public void RegisterClient(User clientToRegister)
-        {
             if (!UsernameRegistered(clientToRegister.Username))
             {
                 MemoryDatabase.GetInstance().Users.Add(clientToRegister);
             }
+            else
+            {
+                throw new UserException("Username already registered");
+            }
+            LockManager.StopWriting();
         }
 
-        private bool UsernameRegistered(string username)
+        private static bool UsernameRegistered(string username)
         {
-            var clientWithThatUsername = FindClientViaUsername(username);
+            var clientWithThatUsername = FindUserByUsername(username);
 
             if (clientWithThatUsername != null)
             {
@@ -34,49 +40,84 @@ namespace Server.Repositories
             return true;
         }
 
-        public bool Login(string username, string password)
+        public static bool Login(string username, string password)
         {
-            var possibleLogin = FindClientViaUsername(username);
+            LockManager.StartReading();
+            var possibleLogin = FindUserByUsername(username);
 
             if (possibleLogin.Password.Equals(password))
             {
                 return true;
             }
-
+            LockManager.StopReading();
             return false;
         }
 
-        public User FindClientViaUsername(string usernameOfClient)
+        public static User FindUserByUsername(string usernameOfClient)
         {
             var clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
+            if (clientFound == null)
+            {
+                throw new UserException("User not found");
+            }
+
             return clientFound;
         }
 
-        public void UpdateClient(User clientWithUpdates)
+        public static User FindUserById(Guid id)
         {
-            lock (clientWithUpdates)
+            var clientFound = MemoryDatabase.GetInstance().Users
+                .FirstOrDefault(x => x.Id.Equals(id));
+
+            if (clientFound == null)
             {
-                foreach (var client in MemoryDatabase.GetInstance().Users)
-                {
-                    if (client.Username.Equals(clientWithUpdates.Username))
-                    {
-                        client.Password = clientWithUpdates.Password;
-                        client.DriverAspects = clientWithUpdates.DriverAspects;
-                    }
-                }
+                throw new UserException("User not found");
             }
+
+            return clientFound;
         }
 
-        public User UserById(Guid userId)
+        public static void RegisterDriver(string userName, DriverInfo driveInfo)
         {
-            throw new NotImplementedException();
+            LockManager.StartWriting();
+            User user = FindUserByUsername(userName);
+            if (user.DriverAspects != null)
+            {
+                throw new UserException("User is already a driver");
+            }
+            user.DriverAspects = driveInfo;
+            LockManager.StopWriting();
         }
 
-        public void GetUserByUsername(string username)
+        public static void RateDriver(Guid id, Review review)
         {
-            throw new NotImplementedException();
+            LockManager.StartWriting();
+            User user = FindUserById(id);
+            if (user.DriverAspects == null)
+            {
+                throw new UserException("User is not a driver");
+            }
+
+            user.DriverAspects.Reviews.Add(review);
+            user.DriverAspects.Puntuation = user.DriverAspects.Reviews.Average(x => x.Punctuation);
+
+            LockManager.StopWriting();
         }
+
+        public static void SetVehicle(Guid id, Vehicle vehicle)
+        {
+            LockManager.StartWriting();
+            User user = FindUserById(id);
+            if (user.DriverAspects == null)
+            {
+                throw new UserException("User is not a driver");
+            }
+
+            user.DriverAspects.Vehicles.Add(vehicle);
+            LockManager.StopWriting();
+        }
+
     }
-]
+}

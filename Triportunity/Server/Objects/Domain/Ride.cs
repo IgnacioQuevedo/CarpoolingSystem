@@ -10,6 +10,7 @@ namespace Server.Objects.Domain
     {
         public Guid Id { get; set; }
         public User Driver { get; set; }
+        public bool Published { get; set; }
         public List<User> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
@@ -33,6 +34,7 @@ namespace Server.Objects.Domain
             PricePerPerson = pricePerPerson;
             PetsAllowed = petsAllowed;
             PhotoPath = photoPath;
+            Published = true;
 
             RideValidations();
         }
