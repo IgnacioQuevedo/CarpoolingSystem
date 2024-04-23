@@ -47,6 +47,10 @@
         <!-- También puedes incluir archivos adicionales aquí, si es necesario -->
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\Client\Client.csproj">
+        <Project>{b541f823-33ce-4b2a-ae78-a2215901b046}</Project>
+        <Name>Client</Name>
+      </ProjectReference>
       <ProjectReference Include="..\Common\Common.csproj">
         <Project>{756855ea-7bdd-4ddf-ba37-dc6eec1d3e33}</Project>
         <Name>Common</Name>

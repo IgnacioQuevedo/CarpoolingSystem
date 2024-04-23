@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
-using Client.Objects.ClientModels;
 using Client.Objects.EnumsModels;
 using Client.Objects.RideModels;
 using Client.Objects.UserModels;
@@ -201,7 +200,7 @@ namespace Client
         {
             string ci = "";
             string addNewVehicle = "Y";
-            ICollection<Vehicle> vehicles = new List<Vehicle>();
+            ICollection<VehicleDto> vehicles = new List<VehicleDto>();
 
             Console.WriteLine("Insert your Ci for the registration");
             ci = Console.ReadLine();
@@ -211,7 +210,7 @@ namespace Client
                 Console.WriteLine("Insert a image of your Vehicle");
                 //This must be fixed in a future.
                 VehicleImage vehicleImage = null;
-                var newVehicle = new Vehicle(vehicleImage);
+                var newVehicle = new VehicleDto(vehicleImage);
 
                 vehicles.Add(newVehicle);
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");

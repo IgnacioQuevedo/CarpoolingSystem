@@ -1,5 +1,4 @@
 using System;
-using Client.Objects.ClientModels;
 using Client.Objects.UserModels;
 
 namespace Client.Services
@@ -12,13 +11,13 @@ namespace Client.Services
             throw new NotImplementedException();
         }
 
-        public static UserDto LoginClient(LoginUserRequest loginUserRequest)
+        public static User LoginClient(LoginUserRequest loginUserRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();
         }
 
-        public static UserDto UpdateClient(UpdateUserRequestModel userWithUpdates)
+        public static User UpdateClient(UpdateUserRequestModel userWithUpdates)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();

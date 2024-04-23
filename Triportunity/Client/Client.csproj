@@ -41,13 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\RideModels\RideModel.cs" />
-    <Compile Include="Objects\UserModels\UserDto.cs" />
-    <Compile Include="Objects\UserModels\DriverInfo.cs" />
+    <Compile Include="Objects\UserModels\UserClient.cs" />
+    <Compile Include="Objects\UserModels\DriverInfoClient.cs" />
     <Compile Include="Objects\UserModels\LoginUserRequest.cs" />
     <Compile Include="Objects\UserModels\RegisterUserRequest.cs" />
-    <Compile Include="Objects\UserModels\UpdateUserRequestModel.cs" />
+    <Compile Include="Objects\UserModels\UpdateDriverRequest.cs" />
     <Compile Include="Objects\EnumsModels\CitiesEnum.cs" />
-    <Compile Include="Objects\ReviewModels\Review.cs" />
+    <Compile Include="Objects\ReviewModels\ReviewClient.cs" />
     <Compile Include="Objects\RideModels\ConsultRideRequest.cs" />
     <Compile Include="Objects\RideModels\CreateRideRequest.cs" />
     <Compile Include="Objects\RideModels\FilterRideRequest.cs" />
@@ -60,7 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Services\RideService.cs" />
-    <Compile Include="Objects\VehicleModels\Vehicle.cs" />
+    <Compile Include="Objects\VehicleModels\VehicleClient.cs" />
     <Compile Include="Objects\VehicleModels\CreateVehicleRequest.cs" />
   </ItemGroup>
   <ItemGroup>
