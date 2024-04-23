@@ -9,11 +9,15 @@ namespace Server.Objects.Domain.VehicleModels
         public string FileName { get; set; }
         public string DestinationFilePath { get; set; }
     
-       public Vehicle(string fileName,string destinationPath)
+       public Vehicle(string fileName)
         {
             Id = Guid.NewGuid();
             FileName = fileName;
-            DestinationFilePath = destinationPath;
+        }
+
+        public void SetDestinationFilePath(string destinationFilePath)
+        {
+            DestinationFilePath = destinationFilePath;
         }
     }
 }

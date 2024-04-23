@@ -107,7 +107,6 @@ namespace Server.Repositories
             user.DriverAspects.Vehicles.Add(vehicle);
             LockManager.StopWriting();
         }
-
-     
+        
     }
 }

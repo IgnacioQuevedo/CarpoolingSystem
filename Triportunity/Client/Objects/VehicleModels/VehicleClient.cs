@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Security.Cryptography;
-using Client.Objects.VehicleImageModels;
 
 namespace Client.Objects.VehicleModels
 {
     public class VehicleClient
     {
         public Guid Id { get; set; }
-
         public string ImageFileName { get; set; }
+        
 
-        public VehicleClient(Guid id, string ImageFileName)
+        public VehicleClient(Guid id, string imageFileName)
         {
             Id = id;
-            ImageFileName = ImageFileName;
+            ImageFileName = imageFileName;
         }
     }
 }

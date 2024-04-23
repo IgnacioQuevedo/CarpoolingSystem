@@ -1,4 +1,3 @@
-#nullable enable
 
 namespace Client.Objects.UserModels
 {
@@ -7,11 +6,11 @@ namespace Client.Objects.UserModels
         public string Username { get; set; }
         public string Password { get; set; }
         public string RepeatedPassword { get; set; }
-        public DriverInfo? DriverAspects { get; set; }
+        public DriverInfoClient? DriverAspects { get; set; }
 
 
         public RegisterUserRequest
-            (string username, string password, string repeatedPassword, DriverInfo? driverAspects)
+            (string username, string password, string repeatedPassword, DriverInfoClient? driverAspects)
         {
             Username = username;
             Password = password;

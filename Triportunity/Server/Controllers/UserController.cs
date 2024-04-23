@@ -76,11 +76,22 @@ namespace Server.Controllers
             }
         }
 
-        public void UpdateDriver(Guid userId, UpdateDriverRequest request)
+        public void RateDriver(Guid driverId, ReviewClient reviewToAdd)
         {
             try
             {
-                User userWithUpdates = new User();
+                _userRepository.RateDriver(driverId, new Review(reviewToAdd.Punctuation, reviewToAdd.Comment));
+            }
+            catch (UserException exceptionCaught)
+            {
+                throw new Exception(exceptionCaught.Message);
+            }
+        }
+        public void SetVehicle(Guid driverId, VehicleClient vehicleToAdd)
+        {
+            try
+            {
+                _userRepository.SetVehicle(driverId, new Vehicle(vehicleToAdd.ImageFileName));
             }
             catch (UserException exceptionCaught)
             {
