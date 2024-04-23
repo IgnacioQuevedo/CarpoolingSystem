@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
-using Client.Objects.ClientModels;
 using Client.Objects.EnumsModels;
 using Client.Objects.RideModels;
 using Client.Objects.UserModels;
@@ -201,10 +200,11 @@ namespace Client
         private static void SetVehicles()
         {
             string addNewVehicle = "Y";
-            ICollection<Vehicle> vehicles = new List<Vehicle>();
+            ICollection<VehicleDto> vehicles = new List<VehicleDto>();
 
             while (addNewVehicle.Equals("Y"))
             {
+
                 UserService.SetDriverVehicles(clientSocket, _userLogged.Username);
 
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");

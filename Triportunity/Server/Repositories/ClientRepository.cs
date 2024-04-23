@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using Server.DataContext;
 using Server.Objects.Domain.ClientModels;
+using Server.Objects.Domain.UserModels;
 
 namespace Server.Repositories
 {
@@ -10,13 +11,13 @@ namespace Server.Repositories
         private readonly object _monitor = new object();
         private int _readersCount = 0;
 
-        public void RegisterClient(Client clientToRegister)
+        public void RegisterClient(User clientToRegister)
         {
             lock (_monitor)
             {
                 if (!UsernameRegistered(clientToRegister.Username))
                 {
-                    MemoryDatabase.GetInstance().Clients.Add(clientToRegister);
+                    MemoryDatabase.GetInstance().Users.Add(clientToRegister);
                 }
             }
         }
@@ -45,19 +46,19 @@ namespace Server.Repositories
             return false;
         }
 
-        public Client FindClientViaUsername(string usernameOfClient)
+        public User FindClientViaUsername(string usernameOfClient)
         {
-            var clientFound = MemoryDatabase.GetInstance().Clients
+            var clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
             return clientFound;
         }
 
-        public void UpdateClient(Client clientWithUpdates)
+        public void UpdateClient(User clientWithUpdates)
         {
             lock (clientWithUpdates)
             {
-                foreach (var client in MemoryDatabase.GetInstance().Clients)
+                foreach (var client in MemoryDatabase.GetInstance().Users)
                 {
                     if (client.Username.Equals(clientWithUpdates.Username))
                     {

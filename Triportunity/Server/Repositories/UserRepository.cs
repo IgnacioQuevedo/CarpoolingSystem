@@ -1,7 +1,5 @@
-﻿using Server.DataContext;
-using Server.Objects.Domain.ClientModels;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using Server.DataContext;
 using System.Linq;
 using Server.Objects.Domain.UserModels;
 
@@ -36,7 +34,7 @@ namespace Server.Repositories
             return true;
         }
 
-        private bool Login(string username, string password)
+        public bool Login(string username, string password)
         {
             var possibleLogin = FindClientViaUsername(username);
 
@@ -69,6 +67,16 @@ namespace Server.Repositories
                     }
                 }
             }
+        }
+
+        public User UserById(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void GetUserByUsername(string username)
+        {
+            throw new NotImplementedException();
         }
     }
 ]

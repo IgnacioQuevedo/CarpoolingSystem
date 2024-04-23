@@ -1,15 +1,14 @@
 #nullable enable
 using System;
-using Server.Objects.DTOs.UserModelDtos;
 
-namespace Server.Objects.DTOs.ClientModelDtos
+namespace Server.Objects.DTOs.UserModelDtos
 {
-    public class UserDto
+    public class GetUserResponse
     {
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public DriverInfoDto? DriverAspectsDto { get; set; }
+        public GetDriverInfoResponse? DriverAspectsDto { get; set; }
 
         public UserDto(Guid id, string username, string password, DriverInfoDto? driverAspectsDto)
         {
@@ -19,5 +18,9 @@ namespace Server.Objects.DTOs.ClientModelDtos
             DriverAspectsDto = driverAspectsDto;
 
         }
+    }
+
+    public class GetDriverInfoResponse
+    {
     }
 }

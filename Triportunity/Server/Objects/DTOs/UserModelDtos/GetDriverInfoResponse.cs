@@ -4,15 +4,15 @@ using Server.Objects.DTOs.VehicleModelDto;
 
 namespace Server.Objects.DTOs.UserModelDtos
 {
-    public class DriverInfoDto
+    public class GetDriverInfoResponse
     {
         public double Puntuation { get; set; }
-        public ICollection<VehicleDto> Vehicles { get; set; }
         public ICollection<ReviewDto> Reviews { get; set; }
+        public ICollection<VehicleDto> Vehicles { get; set; }
 
-        public DriverInfoDto(ICollection<ReviewDto> reviews,ICollection<VehicleDto> vehicles)
+        public GetDriverInfoResponse(double punctuation ,ICollection<ReviewDto> reviews, ICollection<VehicleDto> vehicles)
         {
-            Puntuation = 5.0;
+            Puntuation = punctuation;
             Vehicles = vehicles;
             Reviews = reviews;
         }

@@ -9,15 +9,17 @@ namespace Server.Objects.Domain.UserModels
     public class User
     {
         public Guid Id { get; set; }
+        public string Ci { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public DriverInfo? DriverAspects { get; set; }
 
-        public User(string username, string password, DriverInfo? driverAspects)
+        public User(string username, string password, string ci, DriverInfo? driverAspects)
         {
             Id = Guid.NewGuid();
             Username = username;
             Password = password;
+            Ci = ci;
             DriverAspects = driverAspects;
 
             ClientValidations();
@@ -27,6 +29,7 @@ namespace Server.Objects.Domain.UserModels
         {
             UsernameValidation();
             PasswordValidation();
+            CheckIfCiIsEmpty();
         }
 
         private void UsernameValidation()
@@ -49,9 +52,38 @@ namespace Server.Objects.Domain.UserModels
                 !Regex.IsMatch(Password, passwordRegularExpression))
             {
                 throw new UserException("Error on password. Password must be greater than: " +
-                                          amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
-                                          "numbers, and at least one special character!");
+                                        amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
+                                        "numbers, and at least one special character!");
             }
+        }
+
+        private void CheckIfCiIsEmpty()
+        {
+            int minimalLengthForCi = 6;
+
+            if (string.IsNullOrEmpty(Ci))
+            {
+                throw new DriverInfoException("Ci must be declared.");
+            }
+
+            if (Ci.Length < minimalLengthForCi || !NumericFormatIsCorrect())
+            {
+                throw new DriverInfoException("Ci must be in a correct format. It must be at least of" +
+                                              minimalLengthForCi + "and without special characters");
+            }
+        }
+
+        private bool NumericFormatIsCorrect()
+        {
+            foreach (char c in Ci)
+            {
+                if (!char.IsDigit(c))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

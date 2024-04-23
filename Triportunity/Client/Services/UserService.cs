@@ -1,5 +1,4 @@
 using System;
-using Client.Objects.ClientModels;
 using Client.Objects.UserModels;
 
 namespace Client.Services

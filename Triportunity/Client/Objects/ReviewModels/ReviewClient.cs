@@ -1,19 +1,18 @@
 using System;
 
-namespace Server.Objects.DTOs.ReviewModelDtos
+namespace Client.Objects.ReviewModels
 {
-    public class ReviewDto
+    public class ReviewClient
     {
         public Guid Id { get; set; }
         public double Punctuation { get; set; }
         public string Comment { get; set; }
 
-        public ReviewDto(Guid id ,double punctuation,string comment)
+        public ReviewClient(Guid id, double punctuation, string comment)
         {
             Id = id;
             Punctuation = punctuation;
             Comment = comment;
         }
     }
-    
 }
