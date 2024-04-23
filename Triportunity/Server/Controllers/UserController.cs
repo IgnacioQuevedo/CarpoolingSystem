@@ -13,7 +13,7 @@ namespace Server.Controllers
     {
         private UserRepository _userRepository = new UserRepository();
         
-        public void RegisterClient(RegisterUserRequestDto request)
+        public void RegisterUser(RegisterUserRequestDto request)
         {
             try
             {
@@ -24,7 +24,6 @@ namespace Server.Controllers
             {
                 throw new Exception(exception.Message);
             }
-            
         }
         
     }
