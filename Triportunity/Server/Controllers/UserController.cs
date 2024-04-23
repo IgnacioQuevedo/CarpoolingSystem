@@ -17,6 +17,7 @@ namespace Server.Controllers
 {
     public class ClientController
     {
+        
         private UserRepository _userRepository = new UserRepository();
 
         public void RegisterUser(RegisterUserRequestDto request)
@@ -24,7 +25,7 @@ namespace Server.Controllers
             try
             {
                 User userToRegister = new User(request.Username, request.Password, request.Ci, null);
-                _userRepository.RegisterClient(userToRegister);
+                _userRepository.RegisterUser(userToRegister);
             }
             catch (UserException exception)
             {
@@ -48,7 +49,7 @@ namespace Server.Controllers
         {
             try
             {
-                User userInDb = _userRepository.UserById(userId);
+                User userInDb = _userRepository.GetUserById(userId);
                 DriverInfo driverInfoOfUser = userInDb.DriverAspects;
 
                 List<ReviewClient> reviewsClient = null;

@@ -11,16 +11,16 @@ namespace Client.Services
             throw new NotImplementedException();
         }
 
-        public static User LoginClient(LoginUserRequest loginUserRequest)
+        public static UserClient LoginClient(LoginUserRequest loginUserRequest)
         {
             // Invoke the necessary methods to being possible to communicate with the UserController of backend
             throw new NotImplementedException();
         }
 
-        public static User UpdateClient(UpdateUserRequestModel userWithUpdates)
-        {
-            // Invoke the necessary methods to being possible to communicate with the UserController of backend
-            throw new NotImplementedException();
-        }
+        // public static UserClient UpdateDriver(UpdateUserRequestModel userWithUpdates)
+        // {
+        //     // Invoke the necessary methods to being possible to communicate with the UserController of backend
+        //     throw new NotImplementedException();
+        // }
     }
 }
