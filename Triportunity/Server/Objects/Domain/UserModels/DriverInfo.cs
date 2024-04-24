@@ -16,21 +16,21 @@ namespace Server.Objects.Domain.ClientModels
             Reviews = new List<Review>();
             Vehicles = driverVehicles;
             
-            DriverInfoValidations();
+            //DriverInfoValidations();
         }
 
-        private void DriverInfoValidations()
-        {
-            ValidateThatExistsVehicles();
-        }
+        // private void DriverInfoValidations()
+        // {
+        //     ValidateThatExistsVehicles();
+        // }
 
-        private void ValidateThatExistsVehicles()
-        {
-            if (Vehicles.Count == 0)
-            {
-                throw new DriverInfoException("At least one vehicle must be declared");
-            }
-        }
+        // private void ValidateThatExistsVehicles()
+        // {
+        //     if (Vehicles.Count == 0)
+        //     {
+        //         throw new DriverInfoException("At least one vehicle must be declared");
+        //     }
+        // }
 
   
     }

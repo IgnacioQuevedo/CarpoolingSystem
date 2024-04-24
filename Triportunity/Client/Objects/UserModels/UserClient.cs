@@ -18,6 +18,7 @@ namespace Client.Objects.UserModels
         public UserClient(Guid id, string ci, string username, string password, DriverInfoClient? driverAspects)
         {
             Id = id;
+            Ci = ci;
             Username = username;
             Password = password;
             DriverAspects = driverAspects;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using Client.Objects.ReviewModels;
 using Client.Objects.UserModels;
@@ -17,21 +18,34 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
-        public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
+        public static UserClient RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
             {
-                string registerInfo = ProtocolConstants.Request + CommandsConstraints.Register + ";" +
+                string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
+                                      registerUserRequest.Ci + ";" +
                                       registerUserRequest.Username + ";" +
-                                      registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword + ";" +
-                                      registerUserRequest.Ci;
+                                      registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
                 NetworkHelper.SendMessage(socket, registerInfo);
+
+                string registerResult = NetworkHelper.ReceiveMessage(socket);
+
+                string[] registerResultArray =
+                    registerResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                UserClient userClientRegistered = new UserClient(Guid.Parse(registerResultArray[2]),
+                    registerUserRequest.Ci, registerUserRequest.Username, registerUserRequest.Password, null);
+
+                return userClientRegistered;
             }
-            catch (Exception e)
+            
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
+                throw new Exception(exceptionCaught.Message);
             }
+
+         
         }
 
         public static UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
@@ -80,12 +94,12 @@ namespace Client.Services
             }
         }
 
-        public static void SetDriverVehicles(Socket socket, string username)
+        public static void SetDriverVehicles(Socket socket, Guid userId)
         {
             Console.WriteLine("Please enter the path of the vehicle image");
             string path = Console.ReadLine();
 
-            string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + username;
+            string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
             NetworkHelper.SendMessage(socket, message);
 
             NetworkHelper.SendImageFromClient(socket, path);

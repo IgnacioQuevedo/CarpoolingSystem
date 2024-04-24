@@ -94,7 +94,8 @@ namespace Common
         public static string ReceiveMessage(Socket socket)
         {
             //This buffer has the constant length represented in bytes.
-            byte[] bufferConstantLength = new byte[ProtocolConstants.DataLengthSize];
+            
+            byte[] bufferConstantLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
 
             byte[] msgLengthBuffer = Receive(socket, bufferConstantLength);
             byte[] dataBuffer = Receive(socket, msgLengthBuffer);
@@ -194,16 +195,16 @@ namespace Common
                     Directory.CreateDirectory(pathDirectoryImageAllocated);
                 }
                 
-                byte[] bufferConstantNumberLength = new byte[ProtocolConstants.DataLengthSize];
+                byte[] bufferConstantNumberLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
                 byte[] bufferFileNameLength =
                     Receive(socket, bufferConstantNumberLength); 
                 
                 byte[] fileNameInBytes = Receive(socket, bufferFileNameLength);
-                string fileName = Encoding.UTF8.GetString(fileNameInBytes, 0, bufferFileNameLength.Length);
+                string fileName = Encoding.UTF8.GetString(fileNameInBytes, 0, BitConverter.ToInt32(bufferFileNameLength,0));
                 string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
 
-                byte[] bufferFileConstantLength = new byte[8];
+                byte[] bufferFileConstantLength = BitConverter.GetBytes(8);
                 byte[] bufferFileLength = Receive(socket, bufferFileConstantLength);
 
                 long fileLength = BitConverter.ToInt64(bufferFileLength, 0);

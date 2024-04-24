@@ -150,7 +150,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                UserService.RegisterClient(clientSocket, clientToRegister);
+                _userLogged = UserService.RegisterClient(clientSocket, clientToRegister);
 
                 Console.WriteLine("Do you want to be register as a driver? -- 'Y' for Yes or 'N' for No");
                 string beDriver = Console.ReadLine();
@@ -192,12 +192,12 @@ namespace Client
 
         private static void SetVehicles(string usernameRegistered)
         {
-            string addNewVehicle = "";
+            string addNewVehicle = "Y";
             ICollection<VehicleClient> vehicles = new List<VehicleClient>();
 
             while (addNewVehicle.Equals("Y"))
             {
-                UserService.SetDriverVehicles(clientSocket, _userLogged.Username);
+                UserService.SetDriverVehicles(clientSocket, _userLogged.Id);
 
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                 Console.WriteLine("If yes - Enter 'Y'");

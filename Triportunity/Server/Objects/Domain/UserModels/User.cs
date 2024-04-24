@@ -47,20 +47,14 @@ namespace Server.Objects.Domain.UserModels
         private void PasswordValidation()
         {
             const int validLengthForPassword = 6;
-            const int amountOfNumbersOnPassword = 4;
-            string passwordRegularExpression = $@"^(?=(?:\D*\d){{{amountOfNumbersOnPassword},}})(?=.*[^\w\d\s])";
-
-            if (Password.Length < validLengthForPassword ||
-                !Regex.IsMatch(Password, passwordRegularExpression))
-            {
-                throw new UserException("Error on password. Password must be greater than: " +
-                                        amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
-                                        "numbers, and at least one special character!");
-            }
             
             if (Password != PasswordRepeated)
             {
                 throw new UserException("Passwords must be the same!");
+            }
+            if (Password.Length < validLengthForPassword)
+            {
+                throw new UserException("Password length must be greater than: " + validLengthForPassword + "digits!");
             }
         }
 

@@ -49,7 +49,7 @@ namespace Server
             int command = 0;
             string username = "";
             string password = "";
-            
+
             while (_clientWantsToContinueSendingData)
             {
                 try
@@ -57,7 +57,7 @@ namespace Server
                     string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
 
-                    string[] messageArray= message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                     command = int.Parse(messageArray[1]);
 
                     Guid userId;
@@ -70,32 +70,34 @@ namespace Server
                             break;
 
                         case CommandsConstraints.Register:
-                            
+
                             string ci = messageArray[2];
                             username = messageArray[3];
                             password = messageArray[4];
                             string repeatedPassword = messageArray[5];
-                            
+
                             User user = new User(ci, username, password, repeatedPassword, null);
                             _userRepository.RegisterUser(user);
+                            string response = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + user.Id;
+                            NetworkHelper.SendMessage(clientSocketServerSide, response);
                             break;
 
                         case CommandsConstraints.CreateDriver:
-                            
+
                             userId = Guid.Parse(messageArray[2]);
                             User userFound = _userRepository.GetUserById(userId);
-                            
+
                             if (userFound.DriverAspects == null)
                             {
                                 List<Vehicle> vehicles = new List<Vehicle>();
                                 userFound.DriverAspects = new DriverInfo(vehicles);
                             }
-                            
+
                             string destinationFilePath = NetworkHelper.ReceiveImageToServer(clientSocketServerSide);
-                            
+
                             Vehicle vehicle = new Vehicle();
                             vehicle.DestinationFilePath = destinationFilePath;
-                            
+
                             userFound.DriverAspects.Vehicles.Add(vehicle);
 
                             break;
