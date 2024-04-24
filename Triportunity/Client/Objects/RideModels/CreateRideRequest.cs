@@ -8,8 +8,8 @@ namespace Client.Objects.RideModels
 {
     public class CreateRideRequest
     {
-        public User Driver { get; set; }
-        public List<User> Passengers { get; set; }
+        public UserClient Driver { get; set; }
+        public List<UserClient> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
@@ -18,7 +18,7 @@ namespace Client.Objects.RideModels
         public bool PetsAllowed { get; set; }
         public string PhotoPath { get; set; }
 
-        public CreateRideRequest(User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public CreateRideRequest(UserClient driver, List<UserClient> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
         {
             Driver = driver;
             Passengers = passengers;

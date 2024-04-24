@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace Client.Objects.RideModels
 {
-    public class RideModel
+    public class RideClient
     {
         public Guid Id { get; set; }
-        public User Driver { get; set; }
-        public List<User> Passengers { get; set; }
+        public UserClient Driver { get; set; }
+        public List<UserClient> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
