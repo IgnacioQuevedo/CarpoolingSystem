@@ -78,7 +78,7 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public static ICollection<Ride> GetRides()
+        public ICollection<Ride> GetRides()
         {
             LockManager.StartReading();
             ICollection<Ride> rides = MemoryDatabase.GetInstance().Rides;
