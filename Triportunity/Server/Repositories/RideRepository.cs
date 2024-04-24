@@ -13,6 +13,7 @@ namespace Server.Repositories
     public class RideRepository
     {
         public static UserRepository _userRepository = new UserRepository();
+
         public static void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
@@ -25,21 +26,23 @@ namespace Server.Repositories
             LockManager.StartWriting();
             Ride rideToJoin = GetRideById(rideId);
             User user = _userRepository.GetUserById(userId);
-            
+
             ValidateJoinRide(user, rideToJoin);
             rideToJoin.Passengers.Add(user);
             rideToJoin.AvailableSeats--;
             LockManager.StopWriting();
         }
+
         private static void ValidateJoinRide(User user, Ride rideToJoin)
         {
             string exceptionMessage = "";
-            
+
             if (rideToJoin.AvailableSeats < 1) exceptionMessage = "No are no available seats";
-            if (rideToJoin.Passengers.Contains(user)) exceptionMessage= "User is already in the ride";
-            if (rideToJoin.DepartureTime <= DateTime.Now) exceptionMessage = "Cannot join a ride that has already departed";
-            
-            if(exceptionMessage != "") throw new RideException(exceptionMessage);
+            if (rideToJoin.Passengers.Contains(user)) exceptionMessage = "User is already in the ride";
+            if (rideToJoin.DepartureTime <= DateTime.Now)
+                exceptionMessage = "Cannot join a ride that has already departed";
+
+            if (exceptionMessage != "") throw new RideException(exceptionMessage);
         }
 
         private static Ride GetRideById(Guid rideId)
@@ -50,15 +53,16 @@ namespace Server.Repositories
             {
                 throw new RideException("Ride not found");
             }
+
             return rideToFind;
         }
 
-        public static void QuitRide(Guid userId, Guid rideId)
+        public void QuitRide(Guid userId, Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToQuit = GetRideById(rideId);
-            User user  = _userRepository.GetUserById(userId);
-            
+            User user = _userRepository.GetUserById(userId);
+
             if (!rideToQuit.Passengers.Contains(user))
             {
                 throw new RideException("User is not in the ride");
@@ -82,19 +86,20 @@ namespace Server.Repositories
             {
                 throw new RideException("No rides found");
             }
+
             foreach (var ride in rides)
             {
-                if(ride.DepartureTime <= DateTime.Now)
+                if (ride.DepartureTime <= DateTime.Now)
                 {
                     DeleteRide(ride.Id);
                 }
             }
-            
+
             LockManager.StopReading();
             return rides;
         }
 
-        public static void DeleteRide(Guid rideId)
+        public void DeleteRide(Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToDelete = GetRideById(rideId);
@@ -115,7 +120,7 @@ namespace Server.Repositories
             LockManager.StartReading();
             ICollection<Ride> filteredRides = new List<Ride>();
             var rides = GetRides();
-            
+
             filteredRides = rides
                 .Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
                 .ToList();
@@ -128,7 +133,7 @@ namespace Server.Repositories
         {
             LockManager.StartReading();
             ICollection<Ride> filteredRides = new List<Ride>();
-            
+
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.InitialLocation.Equals(initialLocation))
                 .ToList();
@@ -175,7 +180,5 @@ namespace Server.Repositories
             rideToUpdate.PricePerPerson = rideWithUpdates.PricePerPerson;
             LockManager.StopWriting();
         }
-
     }
-
 }

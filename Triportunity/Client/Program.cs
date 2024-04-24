@@ -261,7 +261,7 @@ namespace Client
 
                 case 4:
                     if (_userLogged.DriverAspects != null)
-                        ViewOrEditRides();
+                        ViewAndEditRides();
                     else
                         CloseAppOption();
                     break;
@@ -277,9 +277,8 @@ namespace Client
             }
         }
 
-        private static void ViewOrEditRides()
+        private static void ViewAndEditRides()
         {
-            throw new NotImplementedException();
         }
 
         private static void QuitRide()
@@ -499,18 +498,18 @@ namespace Client
 
         private static void JoinRide()
         {
-            //  List<RideModel> rides = _rideService.GetAllRides();
+            List<RideModel> rides = _rideService.GetAllRides();
 
-            //RideModel selectedRide = SelectRideFromList(rides);
+            RideModel selectedRide = SelectRideFromList(rides);
 
-            //JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
+            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
-            // _rideService.JoinRide(joinReq);
+             _rideService.JoinRide(joinReq);
         }
 
         private static RideModel SelectRideFromList(List<RideModel> rides)
         {
-            Console.WriteLine("Select the ride that fits better from the list below");
+            Console.WriteLine("Select the ride you are aiming into");
             Console.WriteLine();
 
             DisplayAllRides(rides);

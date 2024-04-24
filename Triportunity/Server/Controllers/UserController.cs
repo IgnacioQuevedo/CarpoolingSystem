@@ -15,7 +15,7 @@ using Server.Repositories;
 
 namespace Server.Controllers
 {
-    public static class ClientController
+    public static class UserController
     {
         
         private static UserRepository _userRepository = new UserRepository();
@@ -91,7 +91,7 @@ namespace Server.Controllers
         {
             try
             {
-                _userRepository.SetVehicle(driverId, new Vehicle(vehicleToAdd.ImageFileName));
+                _userRepository.SetVehicle(driverId, new Vehicle());
             }
             catch (UserException exceptionCaught)
             {

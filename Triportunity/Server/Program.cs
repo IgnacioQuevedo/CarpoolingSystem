@@ -22,6 +22,9 @@ namespace Server
 
         private static Socket _serverSocket;
 
+        private static UserRepository _userRepository = new UserRepository();
+        private static RideRepository _rideRepository = new RideRepository();
+
         public static void Main(string[] args)
         {
             _serverSocket = NetworkHelper.DeployServerSocket();
@@ -39,11 +42,14 @@ namespace Server
                 users++;
             }
         }
+
         private static void ManageUser(Socket clientSocketServerSide, int actualUser)
         {
             string direction = "";
             int command = 0;
-
+            string username = "";
+            string password = "";
+            
             while (_clientWantsToContinueSendingData)
             {
                 try
@@ -51,72 +57,52 @@ namespace Server
                     string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
 
-                    string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] messageArray= message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    command = int.Parse(messageArray[1]);
 
-                    direction = messageArray[0];
-
-                    if ((messageArray[0].Equals(ProtocolConstants.Response) || messageArray[0].Equals(ProtocolConstants.Response)) && int.TryParse(messageArray[1], out command))
-                    {
-
-                    }
-
+                    Guid userId;
                     switch (command)
                     {
                         case CommandsConstraints.Login:
-
-                            string[] loginInfoArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                            UserRepository.Login(loginInfoArray[2], loginInfoArray[3]);
-
+                            username = messageArray[2];
+                            password = messageArray[3];
+                            _userRepository.Login(username, password);
                             break;
 
                         case CommandsConstraints.Register:
-
-
-                            string registerMessage = NetworkHelper.ReceiveMessage(clientSocketServerSide);
-
-                            string[] userInfoArray = registerMessage.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                            string username = userInfoArray[2];
-
-                            string password = userInfoArray[3];
-
-                            string repeatedPassword = userInfoArray[4];
-
-                            string ci = userInfoArray[5];
-
-                            double punctuation = int.Parse(userInfoArray[6]);
-
-                            ICollection<Review> reviews = new List<Review>();
-
-                            DriverInfo driverAspects = null;
-
-                            User user = new User(userInfoArray[2], userInfoArray[3], userInfoArray[4], driverAspects);
-
-                            UserRepository.RegisterClient(user);
-
+                            
+                            string ci = messageArray[2];
+                            username = messageArray[3];
+                            password = messageArray[4];
+                            string repeatedPassword = messageArray[5];
+                            
+                            User user = new User(ci, username, password, repeatedPassword, null);
+                            _userRepository.RegisterUser(user);
                             break;
 
-                        case CommandsConstraints.SetVehicle:
-
-                            string[] userToEditArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                            username = userToEditArray[2];
-
-                            string filePath = NetworkHelper.ReceiveImageToServer(clientSocketServerSide);
-
-                            User userFound = UserRepository.FindClientViaUsername(username);
-
-                            userFound.DriverAspects = new DriverInfo();
-
-                            Vehicle vehicle = new Vehicle(filePath);
-
+                        case CommandsConstraints.CreateDriver:
+                            
+                            userId = Guid.Parse(messageArray[2]);
+                            User userFound = _userRepository.GetUserById(userId);
+                            
+                            if (userFound.DriverAspects == null)
+                            {
+                                List<Vehicle> vehicles = new List<Vehicle>();
+                                userFound.DriverAspects = new DriverInfo(vehicles);
+                            }
+                            
+                            string destinationFilePath = NetworkHelper.ReceiveImageToServer(clientSocketServerSide);
+                            
+                            Vehicle vehicle = new Vehicle();
+                            vehicle.DestinationFilePath = destinationFilePath;
+                            
                             userFound.DriverAspects.Vehicles.Add(vehicle);
 
                             break;
                         case CommandsConstraints.CreateRide:
 
-                            string[] rideInfoArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] rideInfoArray = message.Split(new string[] { ";" },
+                                StringSplitOptions.RemoveEmptyEntries);
 
                             List<Guid> passengers = new List<Guid>();
                             for (int i = 8; i < rideInfoArray.Length; i++)
@@ -134,19 +120,20 @@ namespace Server
                             bool pets = bool.Parse(rideInfoArray[8]);
                             string path = rideInfoArray[9];
 
-                            Ride ride = new Ride(id, initialLocation, endingLocation, departureTime, availableSeats
-                                , price, pets, path, passengers);
+                            // Ride ride = new Ride(id, initialLocation, endingLocation, departureTime, availableSeats
+                            //     , price, pets, path, passengers);
 
-                            RideRepository.CreateRide(ride);
+                            // RideRepository.CreateRide(ride);
 
                             break;
 
                         case CommandsConstraints.JoinRide:
                             string joinRideInfo = NetworkHelper.ReceiveMessage(_serverSocket);
 
-                            string[] rideArray = joinRideInfo.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] rideArray = joinRideInfo.Split(new string[] { ";" },
+                                StringSplitOptions.RemoveEmptyEntries);
 
-                            Guid userId = Guid.Parse(rideArray[2]);
+                            userId = Guid.Parse(rideArray[2]);
                             Guid rideId = Guid.Parse(rideArray[3]);
 
                             RideRepository.JoinRide(userId, rideId);
@@ -156,7 +143,8 @@ namespace Server
                         case CommandsConstraints.EditRides:
                             string editedRide = NetworkHelper.ReceiveMessage(_serverSocket);
 
-                            string[] editInfo = editedRide.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] editInfo = editedRide.Split(new string[] { ";" },
+                                StringSplitOptions.RemoveEmptyEntries);
 
                             Guid originalId = Guid.Parse(editInfo[2]);
                             CitiesEnum initialLocationEdit = (CitiesEnum)int.Parse(editInfo[3]);
@@ -167,28 +155,30 @@ namespace Server
                             string photoPath = editInfo[8];
                             bool published = bool.Parse(editInfo[9]);
 
-                            ModifyRideRequestDto udaptedRide = new ModifyRideRequestDto(originalId, initialLocationEdit, finalLocation, deapartureTimeEdit, priceEdit, petsAllowed, photoPath, published);
-
-                            RideRepository.UpdateRide(udaptedRide);
+                            // ModifyRideRequestDto udaptedRide = new ModifyRideRequestDto(originalId, initialLocationEdit,
+                            //     finalLocation, deapartureTimeEdit, priceEdit, petsAllowed, photoPath, published);
+                            //
+                            // _rideRepository.UpdateRide(udaptedRide);
 
                             break;
 
                         case CommandsConstraints.DeleteRide:
                             Guid rideToDeleteId = Guid.Parse(NetworkHelper.ReceiveMessage(_serverSocket));
 
-                            RideRepository.DeleteRide(rideToDeleteId);
+                            _rideRepository.DeleteRide(rideToDeleteId);
 
                             break;
 
                         case CommandsConstraints.QuitRide:
                             string quitRideInfo = NetworkHelper.ReceiveMessage(_serverSocket);
 
-                            string[] quitRideArray = quitRideInfo.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] quitRideArray = quitRideInfo.Split(new string[] { ";" },
+                                StringSplitOptions.RemoveEmptyEntries);
 
                             Guid userQuitId = Guid.Parse(quitRideArray[2]);
                             Guid rideQuitId = Guid.Parse(quitRideArray[3]);
 
-                            RideRepository.QuitRide(userQuitId, rideQuitId);
+                            _rideRepository.QuitRide(userQuitId, rideQuitId);
 
                             break;
                     }
@@ -200,8 +190,8 @@ namespace Server
                     break;
                 }
             }
+
             NetworkHelper.CloseSocketConnections(clientSocketServerSide);
         }
-
     }
 }
