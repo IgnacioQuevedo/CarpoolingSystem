@@ -10,6 +10,17 @@ namespace Client.Objects.UserModels
         public string Password { get; set; }
         public DriverInfoClient? DriverAspects { get; set; }
 
+        public UserClient()
+        {
+            
+        }
+
+        public UserClient(string username, string password, DriverInfoClient? driverAspects)
+        {
+            Username = username;
+            Password = password;
+            DriverAspects = driverAspects;
+        }
         public UserClient(Guid id, string username, string password, DriverInfoClient? driverAspects)
         {
             Id = id;

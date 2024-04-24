@@ -74,7 +74,7 @@ namespace Server.Repositories
         {
 
             LockManager.StartReading();
-            ICollection<Ride> rides = MemoryDatabase.GetInstance().Rides;
+            ICollection<Ride> rides = (ICollection<Ride>)MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Published == true);
             if (rides == null)
             {
                 throw new RideException("No rides found");
@@ -111,7 +111,7 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public ICollection<Ride> FilterByPrice(int minPrice, int maxPrice)
+        public ICollection<Ride> FilterByPrice(double minPrice, double maxPrice)
         {
             ICollection<Ride> filteredRides;
 
@@ -176,6 +176,8 @@ namespace Server.Repositories
             rideToUpdate.EndingLocation = rideWithUpdates.EndingLocation;
             rideToUpdate.InitialLocation = rideWithUpdates.InitialLocation;
             rideToUpdate.PricePerPerson = rideWithUpdates.PricePerPerson;
+            rideToUpdate.PetsAllowed = rideWithUpdates.PetsAllowed;
+            rideToUpdate.PhotoPath = rideWithUpdates.PhotoPath;
             LockManager.StopWriting();
         }
 

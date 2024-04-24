@@ -9,6 +9,7 @@ namespace Client.Objects.RideModels
 {
     public class ModifyRideRequest
     {
+        public  Guid Id { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
