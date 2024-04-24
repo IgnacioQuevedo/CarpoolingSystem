@@ -19,6 +19,8 @@ namespace Client
 
         private static UserClient _userLogged;
         private static string _optionSelected;
+        private static UserService _userService;
+        private static RideService _rideService;
 
         //private static byte[] _messageInBytes;
         private static bool _closeApp;
@@ -36,8 +38,8 @@ namespace Client
         public static void Main(string[] args)
         {
             clientSocket = NetworkHelper.ConnectWithServer();
-            UserService userService = new UserService(clientSocket);
-            RideService rideService = new RideService(clientSocket);
+            _userService = new UserService(clientSocket);
+            _rideService = new RideService(clientSocket);
             
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
@@ -539,7 +541,6 @@ namespace Client
         #endregion
 
         #region Modify Ride
-
         private static void ModifyRide()
         {
             ICollection<RideClient> ridesCollection = _rideService.GetAllRides();

@@ -85,7 +85,7 @@ namespace Client.Services
             Console.WriteLine("Please enter the path of the vehicle image");
             string path = Console.ReadLine();
 
-            string message = ProtocolConstants.Request + ";" + CommandsConstraints.SetVehicle + ";" + username;
+            string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + username;
             NetworkHelper.SendMessage(socket, message);
 
             NetworkHelper.SendImageFromClient(socket, path);

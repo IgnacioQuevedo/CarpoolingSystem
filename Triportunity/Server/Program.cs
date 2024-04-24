@@ -140,7 +140,7 @@ namespace Server
 
                             break;
 
-                        case CommandsConstraints.EditRides:
+                        case CommandsConstraints.EditRide:
                             string editedRide = NetworkHelper.ReceiveMessage(_serverSocket);
 
                             string[] editInfo = editedRide.Split(new string[] { ";" },

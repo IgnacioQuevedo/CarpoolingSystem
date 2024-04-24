@@ -7,14 +7,11 @@ namespace Client.Objects.RideModels
     {
         public Guid RideId { get; set; }
         public UserClient UserToExit { get; set; }
-<<<<<<< HEAD
-=======
 
         public QuitRideRequest(Guid rideId, UserClient userToExit)
         {
             RideId = rideId;
             UserToExit = userToExit;
         }
->>>>>>> develop
     }
 }

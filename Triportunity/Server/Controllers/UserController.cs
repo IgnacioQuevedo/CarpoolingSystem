@@ -64,7 +64,7 @@ namespace Server.Controllers
                         .Select(vehicle => new VehicleClient(vehicle.Id, vehicle.DestinationFilePath)).ToList();
                 }
 
-                UserClient userToReturn = new UserClient(userInDb.Id, userInDb.Username, userInDb.Password,
+                UserClient userToReturn = new UserClient(userInDb.Id,userInDb.Ci, userInDb.Username, userInDb.Password,
                     new DriverInfoClient(driverInfoOfUser.Puntuation, reviewsClient, vehiclesClient));
 
                 return userToReturn;
