@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Objects\RideModels\RideModel.cs" />
+    <Compile Include="Objects\RideModels\RideClient.cs" />
     <Compile Include="Objects\UserModels\UserClient.cs" />
     <Compile Include="Objects\UserModels\DriverInfoClient.cs" />
     <Compile Include="Objects\UserModels\LoginUserRequest.cs" />

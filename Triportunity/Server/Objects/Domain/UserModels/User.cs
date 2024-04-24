@@ -12,13 +12,15 @@ namespace Server.Objects.Domain.UserModels
         public string Ci { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string PasswordRepeated { get; set; }
         public DriverInfo? DriverAspects { get; set; }
 
-        public User(string username, string password, string ci, DriverInfo? driverAspects)
+        public User(string ci, string username, string password, string passwordRepeated, DriverInfo? driverAspects)
         {
             Id = Guid.NewGuid();
             Username = username;
             Password = password;
+            PasswordRepeated = passwordRepeated;
             Ci = ci;
             DriverAspects = driverAspects;
 
@@ -45,15 +47,14 @@ namespace Server.Objects.Domain.UserModels
         private void PasswordValidation()
         {
             const int validLengthForPassword = 6;
-            const int amountOfNumbersOnPassword = 4;
-            string passwordRegularExpression = $@"^(?=(?:\D*\d){{{amountOfNumbersOnPassword},}})(?=.*[^\w\d\s])";
-
-            if (Password.Length < validLengthForPassword ||
-                !Regex.IsMatch(Password, passwordRegularExpression))
+            
+            if (Password != PasswordRepeated)
             {
-                throw new UserException("Error on password. Password must be greater than: " +
-                                        amountOfNumbersOnPassword + "and must contain: " + amountOfNumbersOnPassword +
-                                        "numbers, and at least one special character!");
+                throw new UserException("Passwords must be the same!");
+            }
+            if (Password.Length < validLengthForPassword)
+            {
+                throw new UserException("Password length must be greater than: " + validLengthForPassword + "digits!");
             }
         }
 

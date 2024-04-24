@@ -4,58 +4,46 @@ using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain;
 using Server.Exceptions;
 using System;
-using System.IO;
 using Server.Objects.Domain.ClientModels;
-using System.Collections.Generic;
 using Server.Objects.Domain.VehicleModels;
 
 namespace Server.Repositories
 {
-    public static class UserRepository
+    public class UserRepository
     {
-
-        public static void RegisterUser(User clientToRegister)
+        public void RegisterUser(User userToRegister)
         {
             LockManager.StartWriting();
-            if (!UsernameRegistered(clientToRegister.Username))
-            {
-                MemoryDatabase.GetInstance().Users.Add(clientToRegister);
-            }
-            else
-            {
-                throw new UserException("Username already registered");
-            }
+            UserAlreadyExists(userToRegister.Username);
+            MemoryDatabase.GetInstance().Users.Add(userToRegister);
             LockManager.StopWriting();
         }
-
-        private static bool UsernameRegistered(string username)
+        
+        private void UserAlreadyExists(string usernameToValidate)
         {
-            var clientWithThatUsername = FindUserByUsername(username);
-
-            if (clientWithThatUsername != null)
+            if (MemoryDatabase.GetInstance().Users.Any(x => x.Username.Equals(usernameToValidate)))
             {
-                return false;
+                throw new UserException("User already exists");
             }
-
-            return true;
         }
 
-        public static bool Login(string username, string password)
+        public bool Login(string username, string password)
         {
             LockManager.StartReading();
-            var possibleLogin = FindUserByUsername(username);
+            User possibleLogin = GetUserByUsername(username);
 
             if (possibleLogin.Password.Equals(password))
             {
                 return true;
             }
+
             LockManager.StopReading();
             return false;
         }
 
-        public static User FindUserByUsername(string usernameOfClient)
+        public User GetUserByUsername(string usernameOfClient)
         {
-            var clientFound = MemoryDatabase.GetInstance().Users
+            User clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
             if (clientFound == null)
@@ -66,7 +54,7 @@ namespace Server.Repositories
             return clientFound;
         }
 
-        public static User FindUserById(Guid id)
+        public User GetUserById(Guid id)
         {
             var clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Id.Equals(id));
@@ -79,22 +67,23 @@ namespace Server.Repositories
             return clientFound;
         }
 
-        public static void RegisterDriver(string userName, DriverInfo driveInfo)
+        public void RegisterDriver(string userName, DriverInfo driveInfo)
         {
             LockManager.StartWriting();
-            User user = FindUserByUsername(userName);
-            if (user.DriverAspects != null)
+            User userFound = GetUserByUsername(userName);
+            if (userFound.DriverAspects != null)
             {
                 throw new UserException("User is already a driver");
             }
-            user.DriverAspects = driveInfo;
+
+            userFound.DriverAspects = driveInfo;
             LockManager.StopWriting();
         }
 
-        public static void RateDriver(Guid id, Review review)
+        public void RateDriver(Guid id, Review review)
         {
             LockManager.StartWriting();
-            User user = FindUserById(id);
+            User user = GetUserById(id);
             if (user.DriverAspects == null)
             {
                 throw new UserException("User is not a driver");
@@ -106,10 +95,10 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public static void SetVehicle(Guid id, Vehicle vehicle)
+        public void SetVehicle(Guid id, Vehicle vehicle)
         {
             LockManager.StartWriting();
-            User user = FindUserById(id);
+            User user = GetUserById(id);
             if (user.DriverAspects == null)
             {
                 throw new UserException("User is not a driver");
@@ -118,6 +107,6 @@ namespace Server.Repositories
             user.DriverAspects.Vehicles.Add(vehicle);
             LockManager.StopWriting();
         }
-
+        
     }
 }

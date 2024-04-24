@@ -30,6 +30,7 @@ namespace Common
             newClientSocket.Connect(server);
             return newClientSocket;
         }
+
         public static bool IsSocketConnected(Socket clientSocket)
         {
             try
@@ -49,11 +50,13 @@ namespace Common
                 return false;
             }
         }
+
         public static void CloseSocketConnections(Socket clientSocket)
         {
             clientSocket.Shutdown(SocketShutdown.Both);
             clientSocket.Close();
         }
+
         public static Socket DeployServerSocket()
         {
             var localEndPoint = new IPEndPoint(
@@ -71,26 +74,34 @@ namespace Common
             Console.WriteLine("Waiting for clients...");
             return serverSocket;
         }
+
         public static byte[] EncodeMsgIntoBytes(string message)
         {
             return Encoding.UTF8.GetBytes(message);
         }
+
         public static string DecodeMsgFromBytes(byte[] buffer)
         {
             return Encoding.UTF8.GetString(buffer);
         }
+
         public static void SendMessage(Socket socket, string message)
         {
             Send(socket, BitConverter.GetBytes(message.Length));
             Send(socket, EncodeMsgIntoBytes(message));
         }
+
         public static string ReceiveMessage(Socket socket)
         {
-            byte[] msgLengthBuffer = Receive(socket, ProtocolConstants.DataLengthSize);
-            int msgLength = BitConverter.ToInt32(msgLengthBuffer, 0);
-            byte[] dataBuffer = Receive(socket, msgLength);
+            //This buffer has the constant length represented in bytes.
+            
+            byte[] bufferConstantLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
+
+            byte[] msgLengthBuffer = Receive(socket, bufferConstantLength);
+            byte[] dataBuffer = Receive(socket, msgLengthBuffer);
             return DecodeMsgFromBytes(dataBuffer);
         }
+
         public static void Send(Socket clientSocketServerSide, byte[] buffer)
         {
             int size = buffer.Length;
@@ -107,9 +118,11 @@ namespace Common
                 offSet = offSet + amountByteSent;
             }
         }
-        public static byte[] Receive(Socket clientSocketServerSide, int messageLength)
+
+        public static byte[] Receive(Socket clientSocketServerSide, byte[] bufferWithTheLengthNumber)
         {
-            byte[] responseBuffer = new byte[messageLength];
+            int length = BitConverter.ToInt32(bufferWithTheLengthNumber, 0);
+            byte[] responseBuffer = new byte[length];
 
             int size = responseBuffer.Length;
             int offSet = 0;
@@ -117,12 +130,14 @@ namespace Common
 
             while (offSet < size)
             {
-                amountByteSent = clientSocketServerSide.Receive(responseBuffer, offSet, size - offSet, SocketFlags.None);
+                amountByteSent =
+                    clientSocketServerSide.Receive(responseBuffer, offSet, size - offSet, SocketFlags.None);
 
                 if (amountByteSent == 0) throw new SocketException();
 
                 offSet = offSet + amountByteSent;
             }
+
             return responseBuffer;
         }
 
@@ -133,7 +148,7 @@ namespace Common
                 FileInfo fileInfo = new FileInfo(filePath);
                 if (!fileInfo.Exists)
                 {
-                    Console.WriteLine("El archivo especificado no existe.");
+                    Console.WriteLine("The specific file does not exit.");
                     return;
                 }
 
@@ -160,11 +175,12 @@ namespace Common
                     }
                 }
 
-                Console.WriteLine($"Terminé de enviar archivo {fileInfo.Name}, de tamaño {fileLength} bytes, desde {filePath}");
+                Console.WriteLine(
+                    $"Terminï¿½ de enviar archivo {fileInfo.Name}, de tamaï¿½o {fileLength} bytes, desde {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error durante la transmisión del archivo: {ex.Message}");
+                Console.WriteLine($"Error durante la transmisiï¿½n del archivo: {ex.Message}");
             }
         }
 
@@ -172,56 +188,56 @@ namespace Common
         {
             try
             {
-                string destinationFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
+                string pathDirectoryImageAllocated = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
 
-                if (!Directory.Exists(destinationFolderPath))
+                if (!Directory.Exists(pathDirectoryImageAllocated))
                 {
-                    Directory.CreateDirectory(destinationFolderPath);
+                    Directory.CreateDirectory(pathDirectoryImageAllocated);
                 }
+                
+                byte[] bufferConstantNumberLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
+                byte[] bufferFileNameLength =
+                    Receive(socket, bufferConstantNumberLength); 
+                
+                byte[] fileNameInBytes = Receive(socket, bufferFileNameLength);
+                string fileName = Encoding.UTF8.GetString(fileNameInBytes, 0, BitConverter.ToInt32(bufferFileNameLength,0));
+                string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
-                byte[] fileNameLengthInBytes = new byte[4];
-                socket.Receive(fileNameLengthInBytes);
-                int fileNameLength = BitConverter.ToInt32(fileNameLengthInBytes, 0);
-                byte[] fileNameInBytes = Receive(socket, fileNameLength);
-                string fileName = Encoding.UTF8.GetString(fileNameInBytes, 0, fileNameLength);
 
+                byte[] bufferFileConstantLength = BitConverter.GetBytes(8);
+                byte[] bufferFileLength = Receive(socket, bufferFileConstantLength);
 
-                byte[] fileLengthInBytes = new byte[8];
-                socket.Receive(fileLengthInBytes);
-                long fileLength = BitConverter.ToInt64(fileLengthInBytes, 0);
-
-                string destinationFilePath = Path.Combine(destinationFolderPath, fileName);
-
+                long fileLength = BitConverter.ToInt64(bufferFileLength, 0);
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
+
                 using (FileStream fileStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
                 {
                     int offset = 0;
                     for (int currentPart = 1; currentPart <= amountOfParts; currentPart++)
                     {
                         bool isLastPart = (currentPart == amountOfParts);
-                        int byteAmountToReceive = isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
+                        int byteAmountToReceive =
+                            isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
+
+                        byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
                         Console.WriteLine($"Recibiendo parte #{currentPart}, de {byteAmountToReceive} bytes");
-                        byte[] buffer = Receive(socket, byteAmountToReceive);
+                        byte[] buffer = Receive(socket, byteAmountToReceiveInBytes);
                         fileStream.Write(buffer, 0, buffer.Length);
 
                         offset += buffer.Length;
                     }
                 }
 
-                Console.WriteLine($"Terminé de recibir archivo {fileName}, de tamaño {fileLength} bytes, guardado en {destinationFilePath}");
+                Console.WriteLine(
+                    $"Completed sending {fileName}, of  {fileLength} length in bytes, allocated en {destinationFilePath}");
 
                 return destinationFilePath;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error durante la recepción del archivo: {ex.Message}");
-                throw new Exception($"Error durante la recepción del archivo: {ex.Message}");
+                Console.WriteLine("Error while receiving file:");
+                throw new Exception($"Error: {ex.Message}");
             }
         }
-
-
-
     }
-
-
 }

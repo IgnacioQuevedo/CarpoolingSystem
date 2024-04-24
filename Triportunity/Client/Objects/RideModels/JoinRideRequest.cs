@@ -6,9 +6,9 @@ namespace Client.Objects.RideModels
     public class JoinRideRequest
     {
         public Guid RideId { get; set; }
-        public User PassengerToJoin { get; set; }
+        public UserClient PassengerToJoin { get; set; }
 
-        public JoinRideRequest(Guid rideId, User passengerToJoin)
+        public JoinRideRequest(Guid rideId, UserClient passengerToJoin)
         {
             RideId = Guid.Empty;
             PassengerToJoin = passengerToJoin;

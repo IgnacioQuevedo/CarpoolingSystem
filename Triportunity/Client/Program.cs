@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.EnumsModels;
@@ -11,27 +10,37 @@ using Client.Objects.UserModels;
 using Client.Objects.VehicleModels;
 using Client.Services;
 using Common;
-using Microsoft.Win32;
 
 namespace Client
 {
     internal class Program
     {
+        #region Variables Initialization
 
         private static UserClient _userLogged;
         private static string _optionSelected;
-        private static byte[] _messageInBytes;
-        private static bool _closeApp;
+        private static UserService _userService;
+        private static RideService _rideService;
 
-        private static int _amountOfCities = CitiesEnum.GetValues(typeof(CitiesEnum)).Length;
+        //private static byte[] _messageInBytes;
+        private static bool _closeApp;
+        private static int _amountOfCities = Enum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
 
+        #endregion
+
+        #region Socket
+
         public static Socket clientSocket;
-        private static RideService _rideService { get; set; }
+
+        #endregion
 
         public static void Main(string[] args)
         {
             clientSocket = NetworkHelper.ConnectWithServer();
+            _userService = new UserService(clientSocket);
+            _rideService = new RideService(clientSocket);
+            
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
 
@@ -68,7 +77,7 @@ namespace Client
 
                 else
                 {
-                    PossibleActionsToBeDoneByUser();
+                    PossibleActionsToBeDoneByLoggedUser();
                 }
             }
         }
@@ -87,13 +96,11 @@ namespace Client
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
-            ShowMessageWithDelay("Returning to main menu", 1000);
             Console.WriteLine("");
         }
 
         private static void CloseAppOption()
         {
-            ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
             NetworkHelper.CloseSocketConnections(clientSocket);
@@ -119,7 +126,6 @@ namespace Client
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
             Console.ReadLine();
-            ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }
 
@@ -129,47 +135,33 @@ namespace Client
 
             try
             {
-                Console.WriteLine("Your username will be:");
-                var usernameRegister = Console.ReadLine();
-                Console.WriteLine("Register your password:");
-                var passwordRegister = Console.ReadLine();
-                Console.WriteLine("Insert the same password as above:");
-                var repeatedPassword = Console.ReadLine();
-
                 Console.WriteLine("Insert your Ci for the registration");
                 string ci = Console.ReadLine();
 
-                var clientToRegister =
-                    new RegisterUserRequest(usernameRegister, passwordRegister, repeatedPassword,
-                        driverAspectsOfClient, ci);
+                Console.WriteLine("Your username will be:");
+                var usernameRegister = Console.ReadLine();
 
-                UserService.RegisterClient(clientSocket, clientToRegister);
+                Console.WriteLine("Register your password:");
+                var passwordRegister = Console.ReadLine();
 
-                //_userLogged = UserService.
+                Console.WriteLine("Insert the same password as above:");
+                var repeatedPassword = Console.ReadLine();
 
-                Console.WriteLine("Do you want to be register as a driver?");
+                RegisterUserRequest clientToRegister =
+                    new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                Console.WriteLine("Insert 'Y' for Yes or 'N' for No");
-                if (Console.ReadLine().Equals("Y"))
+                _userLogged = UserService.RegisterClient(clientSocket, clientToRegister);
+
+                Console.WriteLine("Do you want to be register as a driver? -- 'Y' for Yes or 'N' for No");
+                string beDriver = Console.ReadLine();
+                if (beDriver == "Y")
                 {
-                    SetVehicles();
-                }
-
-                ShowMessageWithDelay("Registering", 500);
-
-                Console.WriteLine("Want to login?");
-                if (Console.ReadLine().Equals("Y"))
-                {
-                    var loginClient =
-                        new LoginUserRequest(clientToRegister.Username, clientToRegister.Password);
-
-                    _userLogged = UserService.LoginClient(clientSocket, loginClient);
+                    SetVehicles(usernameRegister);
                 }
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception.Message);
-                Console.WriteLine("Redo all again but without the above error.");
+                Console.WriteLine("Redo all again but without this error: " + exception.Message);
                 RegisterOption();
             }
         }
@@ -198,68 +190,79 @@ namespace Client
 
         #region Driver creation
 
-        private static void SetVehicles()
+        private static void SetVehicles(string usernameRegistered)
         {
             string addNewVehicle = "Y";
             ICollection<VehicleClient> vehicles = new List<VehicleClient>();
 
             while (addNewVehicle.Equals("Y"))
             {
-
-                UserService.SetDriverVehicles(clientSocket, _userLogged.Username);
+                UserService.SetDriverVehicles(clientSocket, _userLogged.Id);
 
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                 Console.WriteLine("If yes - Enter 'Y'");
                 Console.WriteLine("If not - Enter 'N'");
-
                 addNewVehicle = Console.ReadLine();
             }
         }
 
 
-        public static void PossibleActionsToBeDoneByUser()
+        public static void PossibleActionsToBeDoneByLoggedUser()
         {
-            if (_userLogged.DriverAspects.Vehicles is null)
+            string _optionSelected = "";
+            if (_userLogged.DriverAspects != null)
+
             {
-                Console.WriteLine("Select 3- If you want to be registered as a driver");
+                Console.WriteLine("Select 1 - To create a Ride");
+                Console.WriteLine("Select 2 - To join a Ride");
+                Console.WriteLine("Select 3 - To Quit a Ride");
+                Console.WriteLine("Select 4 - To view, edit and delete your created rides");
+                Console.WriteLine("Select 5 - To close the app");
+
+                _optionSelected = Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("Select 1 - If you want to be registered as a driver");
+                Console.WriteLine("Select 2 - To join a Ride");
+                Console.WriteLine("Select 3 - To Quit a Ride");
+                Console.WriteLine("Select 4 - To close the app");
+                _optionSelected = Console.ReadLine();
             }
 
-            Console.WriteLine("Select 4- To create a Ride");
-            Console.WriteLine("Select 5- To join a Ride");
-            Console.WriteLine("Select 6- To view or edit your created rides");
-            Console.WriteLine("Select 7- To Quit a Ride");
-            Console.WriteLine("Select 8- To Delete a Ride");
-            Console.WriteLine("Select x- To close the app");
-            _optionSelected = Console.ReadLine();
-
-            switch (_optionSelected)
+            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 5)
             {
-                case "0":
-                    //var driverAspects = set();
-                    /*var clientWithUpdates = new CreateDriverRequest
-                        (_userLogged.Id, driverAspects);
-                    */
+                WrongDigitInserted();
+                return;
+            }
 
-                    // _userLogged = UserService.CreateDriver(clientWithUpdates);
+            switch (optionParsed)
+            {
+                case 1:
+                    if (_userLogged.DriverAspects != null)
+                        CreateRide();
+                    else
+                        SetVehicles(_userLogged.Username);
                     break;
 
-                case "1":
-                    CreateRide();
-                    break;
-
-                case "2":
+                case 2:
                     JoinRide();
                     break;
-                case "3":
-                    ModifyRide();
+
+                case 3:
+                    QuitRide();
                     break;
-                case "4":
-                    // Close the app
-                    CloseAppOption();
+
+                case 4:
+                    if (_userLogged.DriverAspects != null)
+                        ModifyRide();
+                    else
+                        CloseAppOption();
                     break;
-                case "5":
-                    // Close the app
-                    CloseAppOption();
+
+                case 5:
+                    if (_userLogged.DriverAspects != null)
+                        CloseAppOption();
                     break;
 
                 default:
@@ -480,7 +483,7 @@ namespace Client
 
         private static void JoinRide()
         {
-            List <RideClient> rides = (List<RideClient>)_rideService.GetAllRides();
+            List<RideClient> rides = (List<RideClient>)_rideService.GetAllRides();
 
             RideClient selectedRide = SelectRideFromList(rides);
 
@@ -491,7 +494,7 @@ namespace Client
 
         private static RideClient SelectRideFromList(List<RideClient> rides)
         {
-            Console.WriteLine("Select the ride that fits better from the list below");
+            Console.WriteLine("Select the ride you are aiming into");
             Console.WriteLine();
 
             DisplayAllRides(rides);
@@ -538,7 +541,6 @@ namespace Client
         #endregion
 
         #region Modify Ride
-
         private static void ModifyRide()
         {
             ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
@@ -593,6 +595,7 @@ namespace Client
         #endregion
 
         #region Delete Ride
+
         private static void DeleteRide()
         {
             ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
@@ -625,7 +628,6 @@ namespace Client
 
         #region Get Ride Info
 
-
         private static void GetRideInfo()
         {
             ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
@@ -651,7 +653,7 @@ namespace Client
 
             Console.WriteLine("Introduce the maximum price");
             double maxPrice = double.Parse(Console.ReadLine());
-            
+
             _rideService.GetRidesFilteredByPrice(minPrice, maxPrice);
         }
 
@@ -687,26 +689,6 @@ namespace Client
             CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
 
             _rideService.GetRidesFilteredByEndingLocation(endingLocation);
-        }
-
-        #endregion
-
-
-        #region General menu functions
-
-        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
-        {
-            Console.Write(closingMessage);
-            string dots = "";
-
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(delayTime);
-                dots += ".";
-                Console.Write(dots);
-            }
-
-            Console.WriteLine("");
         }
 
         #endregion
