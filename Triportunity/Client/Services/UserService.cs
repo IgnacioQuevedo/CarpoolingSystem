@@ -10,7 +10,12 @@ namespace Client.Services
 {
     public class UserService
     {
-
+        private static Socket _clientSocket;
+        public UserService(Socket socketClient)
+        {
+            _clientSocket = socketClient;
+        }
+        
         public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
@@ -28,36 +33,45 @@ namespace Client.Services
 
         public static UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
-            string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" + loginUserRequest.Username + ";" + loginUserRequest.Password;
-            NetworkHelper.SendMessage(socket, message);
-            string loginResult = NetworkHelper.ReceiveMessage(socket);
-
-            string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-            string username = loginArray[2];
-            string password = loginArray[3];
-            int puntuation = int.Parse(loginArray[4]);
-            List<ReviewClient> reviews = new List<ReviewClient>();
-            List<VehicleClient> vehicles = new List<VehicleClient>();
-            foreach (var review in loginArray[5].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+            try
             {
-                string[] reviewArray = review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]), double.Parse(reviewArray[1]), reviewArray[2]);
-                reviews.Add(reviewClient);
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" + loginUserRequest.Username + ";" + loginUserRequest.Password;
+                NetworkHelper.SendMessage(socket, message);
+                string loginResult = NetworkHelper.ReceiveMessage(socket);
+
+                string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                Guid id = Guid.Parse(loginArray[2]);
+                string ci = loginArray[3];
+                string username = loginArray[4];
+                string password = loginArray[5];
+                int puntuation = int.Parse(loginArray[6]);
+                List<ReviewClient> reviews = new List<ReviewClient>();
+                List<VehicleClient> vehicles = new List<VehicleClient>();
+                foreach (var review in loginArray[7].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string[] reviewArray = review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]), double.Parse(reviewArray[1]), reviewArray[2]);
+                    reviews.Add(reviewClient);
+                }
+
+                foreach (var vehicle in loginArray[8].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string[] vehicleArray = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1]);
+                    vehicles.Add(vehicleClient);
+                }
+
+                DriverInfoClient driverInfo = new DriverInfoClient(puntuation, reviews, vehicles);
+
+                UserClient user = new UserClient(id,ci, username, password, driverInfo);
+
+                return user;
+            }catch (Exception e)
+            {
+                throw new Exception(e.Message);
             }
 
-            foreach (var vehicle in loginArray[6].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                string[] vehicleArray = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1]);
-                vehicles.Add(vehicleClient);
-            }
-
-            DriverInfoClient driverInfo = new DriverInfoClient(puntuation, reviews, vehicles);
-
-            UserClient user = new UserClient(Id,username, password, driverInfo);
-
-            return user;
         }
 
         public static void SetDriverVehicles(Socket socket, string username)

@@ -1,4 +1,3 @@
-
 namespace Client.Objects.UserModels
 {
     public class RegisterUserRequest
@@ -11,7 +10,7 @@ namespace Client.Objects.UserModels
 
 
         public RegisterUserRequest
-            (string ci,string username, string password, string repeatedPassword, DriverInfoClient? driverAspects)
+            (string ci, string username, string password, string repeatedPassword, DriverInfoClient? driverAspects)
         {
             Ci = ci;
             Username = username;

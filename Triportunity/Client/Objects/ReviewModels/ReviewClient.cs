@@ -8,6 +8,10 @@ namespace Client.Objects.ReviewModels
         public double Punctuation { get; set; }
         public string Comment { get; set; }
 
+        public ReviewClient()
+        {
+            
+        }
         public ReviewClient(Guid id, double punctuation, string comment)
         {
             Id = id;

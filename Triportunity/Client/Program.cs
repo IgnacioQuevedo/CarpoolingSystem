@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.EnumsModels;
+using Client.Objects.ReviewModels;
 using Client.Objects.RideModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleModels;
@@ -17,7 +18,6 @@ namespace Client
         #region Variables Initialization
 
         private static UserClient _userLogged;
-
         private static string _optionSelected;
 
         //private static byte[] _messageInBytes;
@@ -33,16 +33,12 @@ namespace Client
 
         #endregion
 
-        #region Services
-
-        private static UserService _userService = new UserService();
-        private static RideService _rideService = new RideService();
-
-        #endregion
-
         public static void Main(string[] args)
         {
             clientSocket = NetworkHelper.ConnectWithServer();
+            UserService userService = new UserService(clientSocket);
+            RideService rideService = new RideService(clientSocket);
+            
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
 
@@ -98,13 +94,11 @@ namespace Client
         private static void WrongDigitInserted()
         {
             Console.WriteLine("Insert a valid digit, please.");
-            //ShowMessageWithDelay("Returning to main menu", 1000);
             Console.WriteLine("");
         }
 
         private static void CloseAppOption()
         {
-            // ShowMessageWithDelay("Closing", 300);
             Console.WriteLine("");
             Console.WriteLine("Closed App with success!");
             NetworkHelper.CloseSocketConnections(clientSocket);
@@ -130,7 +124,6 @@ namespace Client
             Console.WriteLine("Enter any key to go back to the main menu");
             Console.ReadKey();
             Console.ReadLine();
-            //ShowMessageWithDelay("Going back to Main Menu", 500);
             Console.WriteLine();
         }
 
@@ -163,8 +156,6 @@ namespace Client
                 {
                     SetVehicles(usernameRegister);
                 }
-
-                // ShowMessageWithDelay("Registering", 500);
             }
             catch (Exception exception)
             {
@@ -218,13 +209,14 @@ namespace Client
         {
             string _optionSelected = "";
             if (_userLogged.DriverAspects != null)
+
             {
                 Console.WriteLine("Select 1 - To create a Ride");
                 Console.WriteLine("Select 2 - To join a Ride");
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To view, edit and delete your created rides");
                 Console.WriteLine("Select 5 - To close the app");
-                
+
                 _optionSelected = Console.ReadLine();
             }
             else
@@ -239,7 +231,7 @@ namespace Client
             if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 5)
             {
                 WrongDigitInserted();
-                return; 
+                return;
             }
 
             switch (optionParsed)
@@ -261,7 +253,7 @@ namespace Client
 
                 case 4:
                     if (_userLogged.DriverAspects != null)
-                        ViewAndEditRides();
+                        ModifyRide();
                     else
                         CloseAppOption();
                     break;
@@ -275,15 +267,6 @@ namespace Client
                     WrongDigitInserted();
                     break;
             }
-        }
-
-        private static void ViewAndEditRides()
-        {
-        }
-
-        private static void QuitRide()
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
@@ -498,16 +481,16 @@ namespace Client
 
         private static void JoinRide()
         {
-            List<RideModel> rides = _rideService.GetAllRides();
+            List<RideClient> rides = (List<RideClient>)_rideService.GetAllRides();
 
-            RideModel selectedRide = SelectRideFromList(rides);
+            RideClient selectedRide = SelectRideFromList(rides);
 
             JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
-             _rideService.JoinRide(joinReq);
+            _rideService.JoinRide(joinReq);
         }
 
-        private static RideModel SelectRideFromList(List<RideModel> rides)
+        private static RideClient SelectRideFromList(List<RideClient> rides)
         {
             Console.WriteLine("Select the ride you are aiming into");
             Console.WriteLine();
@@ -520,7 +503,7 @@ namespace Client
             {
                 if (optionValue <= rides.Count)
                 {
-                    RideModel rideSelected = rides[optionValue - 1];
+                    RideClient rideSelected = rides[optionValue - 1];
                     Console.WriteLine(
                         $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
 
@@ -539,11 +522,11 @@ namespace Client
             }
         }
 
-        private static void DisplayAllRides(List<RideModel> rides)
+        private static void DisplayAllRides(List<RideClient> rides)
         {
             int amountOfRides = rides.Count;
 
-            RideModel actualRide = new RideModel();
+            RideClient actualRide = new RideClient();
 
             for (int i = 0; i < amountOfRides; i++)
             {
@@ -559,11 +542,12 @@ namespace Client
 
         private static void ModifyRide()
         {
-            //List<RideModel> rides = _rideService.GetAllRides();
+            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            //DisplayAllRides(rides);
+            DisplayAllRides(ridesList);
 
-            // RideModel rideSelected = SelectRideFromList(rides);
+            RideClient rideSelected = SelectRideFromList(ridesList);
 
             Console.WriteLine("You will have to complete the following steps to have your ride edited");
 
@@ -583,29 +567,127 @@ namespace Client
 
             string photoPath = IntroducePhotoPath();
 
-            //  ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
-            //    pricePerPerson, petsAllowed, photoPath);
+            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
+                pricePerPerson, petsAllowed, photoPath);
 
-            //_rideService.ModifyRide(modifyRideReq);
+            _rideService.ModifyRide(modifyRideReq);
         }
 
         #endregion
 
-        #region General menu functions
+        #region Quit Ride
 
-        private static void ShowMessageWithDelay(string closingMessage, int delayTime)
+        private static void QuitRide()
         {
-            Console.Write(closingMessage);
-            string dots = "";
+            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            for (int i = 0; i < 4; i++)
-            {
-                Thread.Sleep(delayTime);
-                dots += ".";
-                Console.Write(dots);
-            }
+            DisplayAllRides(ridesList);
 
-            Console.WriteLine("");
+            RideClient rideSelected = SelectRideFromList(ridesList);
+
+            QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
+
+            _rideService.QuitRide(quitRideReq);
+        }
+
+        #endregion
+
+        #region Delete Ride
+
+        private static void DeleteRide()
+        {
+            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+
+            DisplayAllRides(ridesList);
+
+            RideClient rideSelected = SelectRideFromList(ridesList);
+
+            _rideService.DeleteRide(rideSelected.Id);
+        }
+
+        #endregion
+
+        #region Disable Ride
+
+        private static void DisableRide()
+        {
+            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+
+            DisplayAllRides(ridesList);
+
+            RideClient rideSelected = SelectRideFromList(ridesList);
+
+            _rideService.DisableRide(rideSelected.Id);
+        }
+
+        #endregion
+
+        #region Get Ride Info
+
+        private static void GetRideInfo()
+        {
+            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+
+            DisplayAllRides(ridesList);
+
+            RideClient rideSelected = SelectRideFromList(ridesList);
+
+            _rideService.GetRideById(rideSelected.Id);
+        }
+
+        #endregion
+
+        #region Get Rides By Price
+
+        private static void GetRidesByPrice()
+        {
+            Console.WriteLine("Introduce the minumun and maximum price you want to filter the rides by");
+
+            Console.WriteLine("Introduce the minimum price");
+            double minPrice = double.Parse(Console.ReadLine());
+
+            Console.WriteLine("Introduce the maximum price");
+            double maxPrice = double.Parse(Console.ReadLine());
+
+            _rideService.GetRidesFilteredByPrice(minPrice, maxPrice);
+        }
+
+        #endregion
+
+        #region Get Rides By Initial Location
+
+        private static void GetRidesByInitialLocation()
+        {
+            Console.WriteLine("Introduce the initial location you want to filter the rides by");
+
+            ShowCities();
+
+            _optionSelected = Console.ReadLine();
+
+            CitiesEnum initialLocation = PossibleCasesWhenPickingLocation(_optionSelected, "initial");
+
+            _rideService.GetRidesFilteredByInitialLocation(initialLocation);
+        }
+
+        #endregion
+
+        #region Get Rides By Ending Location
+
+        private static void GetRidesByEndingLocation()
+        {
+            Console.WriteLine("Introduce the ending location you want to filter the rides by");
+
+            ShowCities();
+
+            _optionSelected = Console.ReadLine();
+
+            CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
+
+            _rideService.GetRidesFilteredByEndingLocation(endingLocation);
         }
 
         #endregion

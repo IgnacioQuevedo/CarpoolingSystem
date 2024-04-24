@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Client.Objects.RideModels
 {
-    public class RideModel
+    public class RideClient
     {
         public Guid Id { get; set; }
         public UserClient Driver { get; set; }
