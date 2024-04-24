@@ -61,7 +61,7 @@ namespace Server.Controllers
                         .Select(review => new ReviewClient(review.Id, review.Punctuation, review.Comment)).ToList();
 
                     vehiclesClient = userInDb.DriverAspects.Vehicles
-                        .Select(vehicle => new VehicleClient(vehicle.Id, vehicle.DestinationFilePath)).ToList();
+                        .Select(vehicle => new VehicleClient(vehicle.Id,vehicle.ImageAllocatedAtAServer)).ToList();
                 }
 
                 UserClient userToReturn = new UserClient(userInDb.Id,userInDb.Ci, userInDb.Username, userInDb.Password,

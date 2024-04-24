@@ -16,5 +16,6 @@ namespace Common
         public const int GetDriverReviews = 12;
         public const int GetAllRides = 13;
         public const int FindUserById = 14;
+        public const int GetCarImage = 14;
     }
 }

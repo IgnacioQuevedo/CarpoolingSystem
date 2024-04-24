@@ -18,7 +18,7 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
-        public static UserClient RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
+        public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
             {
@@ -35,17 +35,13 @@ namespace Client.Services
                     registerResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
                 UserClient userClientRegistered = new UserClient(Guid.Parse(registerResultArray[2]),
                     registerUserRequest.Ci, registerUserRequest.Username, registerUserRequest.Password, null);
-
-                return userClientRegistered;
             }
-            
+
             catch (Exception exceptionCaught)
             {
                 Console.WriteLine(exceptionCaught.Message);
                 throw new Exception(exceptionCaught.Message);
             }
-
-         
         }
 
         public static UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
@@ -83,7 +79,6 @@ namespace Client.Services
                 }
 
                 DriverInfoClient driverInfo = new DriverInfoClient(puntuation, reviews, vehicles);
-
                 UserClient user = new UserClient(id, ci, username, password, driverInfo);
 
                 return user;
@@ -102,7 +97,7 @@ namespace Client.Services
             string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
             NetworkHelper.SendMessage(socket, message);
 
-            NetworkHelper.SendImageFromClient(socket, path);
+            NetworkHelper.SendImage(socket, path);
         }
 
         public static UserClient FindUserById(Socket socket, Guid id)
@@ -148,6 +143,13 @@ namespace Client.Services
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        public static ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
+        {
+            UserClient user = FindUserById(_clientSocket, userLoggedId);
+            if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
+            return null;
         }
     }
 }

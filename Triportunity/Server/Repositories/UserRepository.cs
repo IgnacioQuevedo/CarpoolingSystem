@@ -107,6 +107,23 @@ namespace Server.Repositories
             user.DriverAspects.Vehicles.Add(vehicle);
             LockManager.StopWriting();
         }
-        
+
+        public Vehicle GetVehicleById(Guid userId, Guid vehicleId)
+        {
+            LockManager.StartReading();
+            User user = GetUserById(userId);
+            if (user.DriverAspects != null)
+            {
+                Vehicle vehicle = user.DriverAspects.Vehicles.FirstOrDefault(x => x.Id.Equals(vehicleId));
+
+                if (vehicle == null)
+                {
+                    throw new UserException("Vehicle not found");
+                }
+                return vehicle;
+            }
+            LockManager.StopWriting();
+            throw new UserException("User is not a driver");
+        }
     }
 }

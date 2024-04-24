@@ -6,7 +6,7 @@ namespace Server.Objects.Domain.VehicleModels
     public class Vehicle
     {
         public Guid Id { get; private set; }
-        public string DestinationFilePath { get; set; }
+        public string ImageAllocatedAtAServer { get; set; }
     
        public Vehicle()
         {

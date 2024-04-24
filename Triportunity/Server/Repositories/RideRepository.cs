@@ -45,7 +45,7 @@ namespace Server.Repositories
             if (exceptionMessage != "") throw new RideException(exceptionMessage);
         }
 
-        private static Ride GetRideById(Guid rideId)
+        public static Ride GetRideById(Guid rideId)
         {
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 

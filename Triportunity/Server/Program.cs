@@ -35,6 +35,7 @@ namespace Server
                 Socket clientSocketServerSide = _serverSocket.Accept();
 
                 string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
+                Console.WriteLine(connectedMsg);
 
                 NetworkHelper.SendMessage(clientSocketServerSide, connectedMsg);
                 int actualUser = users;
@@ -78,7 +79,8 @@ namespace Server
 
                             User user = new User(ci, username, password, repeatedPassword, null);
                             _userRepository.RegisterUser(user);
-                            string response = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + user.Id;
+                            string response = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" +
+                                              user.Id;
                             NetworkHelper.SendMessage(clientSocketServerSide, response);
                             break;
 
@@ -93,10 +95,10 @@ namespace Server
                                 userFound.DriverAspects = new DriverInfo(vehicles);
                             }
 
-                            string destinationFilePath = NetworkHelper.ReceiveImageToServer(clientSocketServerSide);
+                            string destinationFilePath = NetworkHelper.ReceiveImage(clientSocketServerSide);
 
                             Vehicle vehicle = new Vehicle();
-                            vehicle.DestinationFilePath = destinationFilePath;
+                            vehicle.ImageAllocatedAtAServer = destinationFilePath;
 
                             userFound.DriverAspects.Vehicles.Add(vehicle);
 
@@ -139,6 +141,16 @@ namespace Server
                             Guid rideId = Guid.Parse(rideArray[3]);
 
                             RideRepository.JoinRide(userId, rideId);
+
+                            break;
+                        case CommandsConstraints.GetCarImage:
+
+                            userId = Guid.Parse(messageArray[2]);
+                            Guid vehicleId = Guid.Parse(messageArray[3]);
+
+                            Vehicle vehicleFound = _userRepository.GetVehicleById(userId, vehicleId);
+
+                            NetworkHelper.SendImage(clientSocketServerSide, vehicleFound.ImageAllocatedAtAServer);
 
                             break;
 
