@@ -151,7 +151,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                UserService.RegisterClient(clientSocket, clientToRegister);
+                _userService.RegisterClient(clientSocket, clientToRegister);
             }
             catch (Exception exception)
             {
@@ -170,7 +170,7 @@ namespace Client
                 string password = Console.ReadLine();
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
-                _userLogged = UserService.LoginClient(clientSocket, loginUserRequest);
+                _userLogged = _userService.LoginClient(clientSocket, loginUserRequest);
             }
             catch (Exception exception)
             {
@@ -265,12 +265,14 @@ namespace Client
                     Console.WriteLine("Please enter the path of the vehicle image");
                     string path = Console.ReadLine();
 
-                    UserService.CreateDriver(clientSocket, userRegisteredId);
-                    UserService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    _userService.CreateDriver(clientSocket, userRegisteredId);
+                    _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
                     addNewVehicle = Console.ReadLine();
+                    
+                    _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 }
             }
             catch (Exception e)
@@ -370,7 +372,7 @@ namespace Client
         {
             Console.WriteLine("Select the vehicle you will use for this ride");
 
-            ICollection<VehicleClient> vehicles = UserService.GetVehiclesByUserId(_userLogged.Id);
+            ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
 
             foreach (var vehicle in vehicles)
             {

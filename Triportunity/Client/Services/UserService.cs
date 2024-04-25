@@ -20,7 +20,7 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
-        public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
+        public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace Client.Services
             }
         }
 
-        public static UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
+        public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace Client.Services
         }
 
 
-        public static void CreateDriver(Socket socket, Guid userId)
+        public void CreateDriver(Socket socket, Guid userId)
         {
             try
             {
@@ -124,7 +124,7 @@ namespace Client.Services
             }
         }
 
-        public static void AddVehicle(Socket clientSocket, Guid userRegisteredId, string carModel, string path)
+        public void AddVehicle(Socket clientSocket, Guid userRegisteredId, string carModel, string path)
         {
             UserClient userFound = GetUserById(_clientSocket, userRegisteredId);
             if (userFound.DriverAspects != null)
@@ -154,7 +154,7 @@ namespace Client.Services
             }
         }
 
-        public static void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)
+        public void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)
         {
             try
             {
@@ -169,7 +169,7 @@ namespace Client.Services
             }
         }
 
-        public static UserClient GetUserById(Socket clientSocket, Guid userId)
+        public UserClient GetUserById(Socket clientSocket, Guid userId)
         {
             try
             {
@@ -249,7 +249,7 @@ namespace Client.Services
             }
         }
 
-        public static ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
+        public ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
         {
             try
             {
