@@ -27,10 +27,10 @@ namespace Server
         private static RideController _rideController;
 
         public static Socket _serverSocket;
+
         public static void Main(string[] args)
         {
             _serverSocket = NetworkHelper.DeployServerSocket();
-
             _userRepository = new UserRepository();
             _rideRepository = new RideRepository();
 
@@ -40,6 +40,7 @@ namespace Server
             {
                 Socket clientSocketServerSide = _serverSocket.Accept();
                 _userController = new UserController(clientSocketServerSide);
+                _rideController = new RideController(clientSocketServerSide);
                 string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
                 Console.WriteLine(connectedMsg);
 
@@ -142,14 +143,13 @@ namespace Server
                             _rideController.GetDriverReviews(messageArray);
                             break;
 
-                         case CommandsConstraints.DisableRide:
+                        case CommandsConstraints.DisableRide:
                             _rideController.DisableRide(messageArray);
                             break;
 
                         case CommandsConstraints.GetRideById:
                             _rideController.GetRideById(messageArray);
                             break;
-                       
                     }
                 }
 
@@ -157,6 +157,10 @@ namespace Server
                 {
                     Console.WriteLine("Error" + exceptionNotExpected.Message);
                     break;
+                }
+                catch (Exception exception)
+                {
+                    throw new Exception(exception.Message);
                 }
             }
 

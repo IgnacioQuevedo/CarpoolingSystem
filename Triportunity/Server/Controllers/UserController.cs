@@ -106,8 +106,7 @@ namespace Server.Controllers
         public void AddVehicle(string[] messageArray)
         {
             try
-            {
-                List<Vehicle> vehicles = new List<Vehicle>();
+            { ;
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
                 
@@ -116,12 +115,9 @@ namespace Server.Controllers
                 
                 _userRepository.AddVehicle(userId, vehicleToAdd);
                 
-                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";";
-                foreach (var vehicle in vehicles)
-                {
-                    responseMsg += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer +",";
-                }
-
+                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";" 
+                                     + vehicleToAdd.Id + ";" + vehicleToAdd.VehicleModel + ";" + vehicleToAdd.ImageAllocatedAtAServer;
+                
                 NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
             catch (UserException exceptionCaught)
