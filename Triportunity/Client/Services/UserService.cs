@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using Client.Objects.ReviewModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleModels;
@@ -18,7 +19,9 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
-        public static UserClient RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
+        #region Quedaron
+
+        public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
             {
@@ -28,24 +31,13 @@ namespace Client.Services
                                       registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
                 NetworkHelper.SendMessage(socket, registerInfo);
-
-                string registerResult = NetworkHelper.ReceiveMessage(socket);
-
-                string[] registerResultArray =
-                    registerResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                UserClient userClientRegistered = new UserClient(Guid.Parse(registerResultArray[2]),
-                    registerUserRequest.Ci, registerUserRequest.Username, registerUserRequest.Password, null);
-
-                return userClientRegistered;
             }
-            
+
             catch (Exception exceptionCaught)
             {
                 Console.WriteLine(exceptionCaught.Message);
                 throw new Exception(exceptionCaught.Message);
             }
-
-         
         }
 
         public static UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
@@ -55,6 +47,8 @@ namespace Client.Services
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
                                  loginUserRequest.Username + ";" + loginUserRequest.Password;
                 NetworkHelper.SendMessage(socket, message);
+
+
                 string loginResult = NetworkHelper.ReceiveMessage(socket);
 
                 string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -63,26 +57,35 @@ namespace Client.Services
                 string ci = loginArray[3];
                 string username = loginArray[4];
                 string password = loginArray[5];
-                int puntuation = int.Parse(loginArray[6]);
-                List<ReviewClient> reviews = new List<ReviewClient>();
-                List<VehicleClient> vehicles = new List<VehicleClient>();
-                foreach (var review in loginArray[7].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    string[] reviewArray = review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                    ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]),
-                        double.Parse(reviewArray[1]), reviewArray[2]);
-                    reviews.Add(reviewClient);
-                }
+                DriverInfoClient driverInfo = null;
 
-                foreach (var vehicle in loginArray[8]
-                             .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
+                if (loginArray.Length > 6)
                 {
-                    string[] vehicleArray = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                    VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1]);
-                    vehicles.Add(vehicleClient);
-                }
+                    List<ReviewClient> reviews = new List<ReviewClient>();
+                    List<VehicleClient> vehicles = new List<VehicleClient>();
 
-                DriverInfoClient driverInfo = new DriverInfoClient(puntuation, reviews, vehicles);
+                    foreach (var review in loginArray[6]
+                                 .Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string[] reviewArray =
+                            review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                        ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]),
+                            double.Parse(reviewArray[1]), reviewArray[2]);
+                        reviews.Add(reviewClient);
+                    }
+
+                    foreach (var vehicle in loginArray[7]
+                                 .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string[] vehicleArray =
+                            vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                        VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1],
+                            vehicleArray[2]);
+                        vehicles.Add(vehicleClient);
+                    }
+
+                    driverInfo = new DriverInfoClient(reviews, vehicles);
+                }
 
                 UserClient user = new UserClient(id, ci, username, password, driverInfo);
 
@@ -94,54 +97,144 @@ namespace Client.Services
             }
         }
 
-        public static void SetDriverVehicles(Socket socket, Guid userId)
+
+        public static void CreateDriver(Socket socket, Guid userId)
         {
-            Console.WriteLine("Please enter the path of the vehicle image");
-            string path = Console.ReadLine();
+            UserClient userToBeDriver = GetUserById(_clientSocket, userId);
 
-            string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
-            NetworkHelper.SendMessage(socket, message);
+            if (userToBeDriver.DriverAspects == null)
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                NetworkHelper.SendMessage(socket, message);
 
-            NetworkHelper.SendImageFromClient(socket, path);
+                string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
+                if (messageArray == null)
+                {
+                    throw new Exception("Error creating driver");
+                }
+            }
+            else
+            {
+                Console.WriteLine("You are already a driver");
+            }
         }
 
-        public static UserClient FindUserById(Socket socket, Guid id)
+        public static void AddVehicle(Socket clientSocket, Guid userRegisteredId, string carModel, string path)
+        {
+            UserClient userFound = GetUserById(_clientSocket, userRegisteredId);
+            if (userFound.DriverAspects != null)
+            {
+                SetDriverVehicles(clientSocket, userRegisteredId, carModel, path);
+
+                ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
+
+                string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
+
+                string[] driverInfoArray =
+                    messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                string[] vehicles =
+                    driverInfoArray[3].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var vehicle in vehicles)
+                {
+                    string[] vehicleInfo = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+                    Guid vehicleId = Guid.Parse(vehicleInfo[0]);
+                    string vehicleModel = vehicleInfo[1];
+                    string imageAllocatedAtAServer = vehicleInfo[2];
+
+                    VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
+                    vehiclesOfUser.Add(vehicleClient);
+                }
+
+                DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
+
+                userFound.DriverAspects = driverInfo;
+            }
+            else
+            {
+                Console.WriteLine("You are not a driver");
+            }
+        }
+
+        public static void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)
+        {
+            string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
+                             carModel;
+            NetworkHelper.SendMessage(socket, message);
+            NetworkHelper.SendImage(socket, path);
+        }
+
+        public static UserClient GetUserById(Socket clientSocket, Guid userId)
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FindUserById + ";" +
-                                 id.ToString();
-                NetworkHelper.SendMessage(socket, message);
+                double generalPunctuation = -1;
+                
+                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetUserById + ";" + userId;
+                NetworkHelper.SendMessage(clientSocket, message);
 
-                string userResult = NetworkHelper.ReceiveMessage(socket);
+                string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
 
-                string[] userArray = userResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] userArray = messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-                string ci = userArray[2];
-                string username = userArray[3];
-                string password = userArray[4];
-                int puntuation = int.Parse(userArray[5]);
-                List<ReviewClient> reviews = new List<ReviewClient>();
-                List<VehicleClient> vehicles = new List<VehicleClient>();
-                foreach (var review in userArray[6].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                Guid id = Guid.Parse(userArray[2]);
+                string ci = userArray[3];
+                string username = userArray[4];
+                string password = userArray[5];
+
+                DriverInfoClient driverInfo = null;
+
+                if (userArray.Length > 6)
                 {
-                    string[] reviewArray = review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                    ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]),
-                        double.Parse(reviewArray[1]), reviewArray[2]);
-                    reviews.Add(reviewClient);
+                    generalPunctuation = double.Parse(userArray[6]);
+                    List<ReviewClient> reviews = new List<ReviewClient>();
+                    List<VehicleClient> vehicles = new List<VehicleClient>();
+
+                    if (!userArray[7].Equals("#"))
+                    {
+                        string[] reviewsArray =
+                            userArray[7].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var review in reviewsArray)
+                        {
+                            string[] reviewArray =
+                                review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+
+                            Guid reviewId = Guid.Parse(reviewArray[0]);
+                            int punctuation = int.Parse(reviewArray[1]);
+                            string comment = reviewArray[2];
+
+                            ReviewClient reviewClient = new ReviewClient(reviewId, punctuation, comment);
+                            reviews.Add(reviewClient);
+                        }
+                    }
+
+                    if (!userArray[8].Equals("#"))
+                    {
+                        string[] vehiclesArray =
+                            userArray[8].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var vehicle in vehiclesArray)
+                        {
+                            string[] vehicleArray =
+                                vehicle.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+
+                            Guid vehicleId = Guid.Parse(vehicleArray[0]);
+                            string vehicleModel = vehicleArray[1];
+                            string imageAllocatedAtAServer = vehicleArray[2];
+                            VehicleClient vehicleClient =
+                                new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
+                            vehicles.Add(vehicleClient);
+                        }
+                    }
+                    driverInfo = new DriverInfoClient(reviews, vehicles);
                 }
-
-                foreach (var vehicle in userArray[7].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    string[] vehicleArray = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                    VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1]);
-                    vehicles.Add(vehicleClient);
-                }
-
-                DriverInfoClient driverInfo = new DriverInfoClient(puntuation, reviews, vehicles);
-
                 UserClient user = new UserClient(id, ci, username, password, driverInfo);
 
+                if (generalPunctuation != -1)
+                {
+                    user.DriverAspects.Punctuation = generalPunctuation;
+                }
                 return user;
             }
             catch (Exception e)
@@ -149,5 +242,14 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
+
+        public static ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
+        {
+            UserClient user = GetUserById(_clientSocket, userLoggedId);
+            if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
+            return null;
+        }
+
+        #endregion
     }
 }

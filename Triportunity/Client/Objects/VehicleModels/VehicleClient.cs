@@ -5,13 +5,14 @@ namespace Client.Objects.VehicleModels
     public class VehicleClient
     {
         public Guid Id { get; set; }
-        public string ImageFileName { get; set; }
-        
+        public string CarModel { get; set; }
+        public string ImageAllocatedAtAServer { get; set; }
 
-        public VehicleClient(Guid id, string imageFileName)
+        public VehicleClient(Guid id, string carModel,string imageAllocatedAtAServer)
         {
             Id = id;
-            ImageFileName = imageFileName;
+            CarModel = carModel;
+            ImageAllocatedAtAServer = imageAllocatedAtAServer;
         }
     }
 }

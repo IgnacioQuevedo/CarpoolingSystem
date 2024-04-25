@@ -1,5 +1,4 @@
-﻿using Server.Objects.Domain.ClientModels;
-using Server.Objects.DTOs.ClientModelDtos;
+﻿using Server.Objects.DTOs.ClientModelDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Server.Exceptions;
 using Server.Objects.Domain.VehicleModels;
 
-namespace Server.Objects.Domain.ClientModels
+namespace Server.Objects.Domain.UserModels
 {
     public class DriverInfo
     {

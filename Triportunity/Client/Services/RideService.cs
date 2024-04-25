@@ -23,15 +23,16 @@ namespace Client.Services
         {
             try
             {
-                string message = request.Driver.Id.ToString() + ";" + request.InitialLocation.ToString() + ";" + request.EndingLocation.ToString()
-              + ";" + request.DepartureTime.ToString() + ";" + request.PricePerPerson.ToString() + ";";
+                string message = request.Driver.Id.ToString() + ";" + request.InitialLocation.ToString() + ";" +
+                                 request.EndingLocation.ToString()
+                                 + ";" + request.DepartureTime.ToString() + ";" + request.PricePerPerson.ToString() +
+                                 ";";
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-
         }
 
         public void JoinRide(JoinRideRequest request)
@@ -45,7 +46,6 @@ namespace Client.Services
             {
                 Console.WriteLine(e.Message);
             }
-
         }
 
         public void DeleteRide(Guid id)
@@ -79,8 +79,9 @@ namespace Client.Services
             try
             {
                 string message = request.Id.ToString() + ";" + request.InitialLocation.ToString() + ";" +
-                request.EndingLocation.ToString() + ";" + request.DepartureTime.ToString() + ";" +
-                request.PricePerPerson.ToString() + ";" + request.PetsAllowed.ToString() + ";" + request.PhotoPath + ";";
+                                 request.EndingLocation.ToString() + ";" + request.DepartureTime.ToString() + ";" +
+                                 request.PricePerPerson.ToString() + ";" + request.PetsAllowed.ToString() + ";" +
+                                 request.PhotoPath + ";";
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
@@ -122,7 +123,6 @@ namespace Client.Services
                     DepartureTime = DateTime.Parse(rideData[8]),
                     PricePerPerson = double.Parse(rideData[9]),
                     PetsAllowed = bool.Parse(rideData[10]),
-                    PhotoPath = rideData[11]
                 };
             }
             catch (Exception e)
@@ -136,7 +136,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" + minPrize.ToString() + ";" + maxPrice.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" +
+                                 minPrize.ToString() + ";" + maxPrice.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -154,10 +155,10 @@ namespace Client.Services
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
                         PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8]),
-                        PhotoPath = ridesData[i + 9]
+                        PetsAllowed = bool.Parse(ridesData[i + 8])
                     });
                 }
+
                 return rides;
             }
             catch (Exception e)
@@ -171,7 +172,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByInitialLocation + ";" + ((int)initialLocation).ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByInitialLocation +
+                                 ";" + ((int)initialLocation).ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -189,10 +191,10 @@ namespace Client.Services
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
                         PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8]),
-                        PhotoPath = ridesData[i + 9]
+                        PetsAllowed = bool.Parse(ridesData[i + 8])
                     });
                 }
+
                 return rides;
             }
             catch (Exception e)
@@ -206,7 +208,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByEndingLocation + ";" + ((int)endingLocation).ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByEndingLocation +
+                                 ";" + ((int)endingLocation).ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -224,10 +227,10 @@ namespace Client.Services
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
                         PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8]),
-                        PhotoPath = ridesData[i + 9]
+                        PetsAllowed = bool.Parse(ridesData[i + 8])
                     });
                 }
+
                 return rides;
             }
             catch (Exception e)
@@ -241,7 +244,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" + rideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
+                                 rideId.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -255,6 +259,7 @@ namespace Client.Services
                         Comment = reviewsData[i + 4]
                     });
                 }
+
                 return reviews;
             }
             catch (Exception e)
@@ -269,10 +274,12 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
-                    rideWithUpdates.Id.ToString() + ";" + rideWithUpdates.AvailableSeats.ToString() +
-                    ";" + rideWithUpdates.DepartureTime.ToString() + ";" + rideWithUpdates.EndingLocation.ToString() +
-                    ";" + rideWithUpdates.InitialLocation.ToString() + ";" + rideWithUpdates.PricePerPerson.ToString()
-                    + ";" + rideWithUpdates.PetsAllowed.ToString() + ";" + rideWithUpdates.PhotoPath;
+                                 rideWithUpdates.Id.ToString() + ";" + rideWithUpdates.AvailableSeats.ToString() +
+                                 ";" + rideWithUpdates.DepartureTime.ToString() + ";" +
+                                 rideWithUpdates.EndingLocation.ToString() +
+                                 ";" + rideWithUpdates.InitialLocation.ToString() + ";" +
+                                 rideWithUpdates.PricePerPerson.ToString()
+                                 + ";" + rideWithUpdates.PetsAllowed.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
@@ -281,7 +288,7 @@ namespace Client.Services
             }
         }
 
-        public ICollection<RideClient> GetAllRides() 
+        public ICollection<RideClient> GetAllRides()
         {
             try
             {
@@ -303,10 +310,10 @@ namespace Client.Services
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
                         PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8]),
-                        PhotoPath = ridesData[i + 9]
+                        PetsAllowed = bool.Parse(ridesData[i + 8])
                     });
                 }
+
                 return rides;
             }
             catch (Exception e)
@@ -314,6 +321,19 @@ namespace Client.Services
                 Console.WriteLine(e.Message);
                 return null;
             }
+        }
+
+        public void GetCarImageById(Guid rideSelectedId)
+        {
+            RideClient ride = GetRideById(rideSelectedId);
+
+            string getImage = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + ride.Driver.Id.ToString() +
+                              ";" + ride.VehicleId.ToString();
+
+            NetworkHelper.SendMessage(_clientSocket, getImage);
+
+            NetworkHelper.ReceiveImage(_clientSocket);
+            Console.WriteLine("Image received!, see it at your destination folder.");
         }
     }
 }

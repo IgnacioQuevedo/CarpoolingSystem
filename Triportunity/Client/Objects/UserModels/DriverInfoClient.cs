@@ -6,13 +6,20 @@ namespace Client.Objects.UserModels
 {
     public class DriverInfoClient
     {
-        public double Punctuation { get; set; }
+        public double Punctuation { get; set; } = 5.0;
         public ICollection<ReviewClient> Reviews { get; set; }
         public ICollection<VehicleClient> Vehicles { get; set; }
 
-        public DriverInfoClient(double punctuation, ICollection<ReviewClient> reviews, ICollection<VehicleClient> vehicles)
+        //When creating
+        public DriverInfoClient(ICollection<VehicleClient> vehicles)
         {
-            Punctuation = punctuation;
+            Reviews = new List<ReviewClient>();
+            Vehicles = vehicles;
+        }
+
+        //When login
+        public DriverInfoClient(List<ReviewClient> reviews, List<VehicleClient> vehicles)
+        {
             Reviews = reviews;
             Vehicles = vehicles;
         }

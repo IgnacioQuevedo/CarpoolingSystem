@@ -2,7 +2,6 @@
 using System;
 using System.Text.RegularExpressions;
 using Server.Exceptions;
-using Server.Objects.Domain.ClientModels;
 
 namespace Server.Objects.Domain.UserModels
 {

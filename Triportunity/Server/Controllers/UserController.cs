@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using Client.Objects.ReviewModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleModels;
+using Common;
 using Server.Exceptions;
 using Server.Objects.Domain;
-using Server.Objects.Domain.ClientModels;
 using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.VehicleModels;
 using Server.Objects.DTOs.UserModelDtos;
@@ -15,16 +16,29 @@ using Server.Repositories;
 
 namespace Server.Controllers
 {
-    public static class UserController
+    public class UserController
     {
-        
         private static UserRepository _userRepository = new UserRepository();
+        private static RideRepository _rideRepository = new RideRepository();
+        private static Socket _serverSocket;
 
-        public static void RegisterUser(RegisterUserRequestDto request)
+        public UserController(Socket socket)
+        {
+            _serverSocket = socket;
+        }
+
+        #region COMPLETADOS
+
+        public void RegisterUser(string[] requestArray)
         {
             try
             {
-                User userToRegister = new User(request.Ci, request.Username, request.Password,request.PasswordRepeated, null);
+                string ci = requestArray[2];
+                string username = requestArray[3];
+                string password = requestArray[4];
+                string repeatedPassword = requestArray[5];
+
+                User userToRegister = new User(ci, username, password, repeatedPassword, null);
                 _userRepository.RegisterUser(userToRegister);
             }
             catch (UserException exception)
@@ -33,41 +47,36 @@ namespace Server.Controllers
             }
         }
 
-        public static bool LoginUser(string username, string password)
+        public void LoginUser(string[] requestArray)
         {
             try
             {
-                return _userRepository.Login(username, password);
-            }
-            catch (UserException exceptionCaught)
-            {
-                throw new Exception(exceptionCaught.Message);
-            }
-        }
+                string username = requestArray[2];
+                string password = requestArray[3];
 
-        public static UserClient GetUserById(Guid userId)
-        {
-            try
-            {
-                User userInDb = _userRepository.GetUserById(userId);
-                DriverInfo driverInfoOfUser = userInDb.DriverAspects;
+                User userLogged = _userRepository.Login(username, password);
 
-                List<ReviewClient> reviewsClient = null;
-                List<VehicleClient> vehiclesClient = null;
+                string messageLogin = ProtocolConstants.Response + ";" + CommandsConstraints.Login + ";" +
+                                      userLogged.Id + ";" +
+                                      userLogged.Ci + ";" + userLogged.Username + ";" + userLogged.Password;
 
-                if (userInDb.DriverAspects != null)
+                if (userLogged.DriverAspects != null)
                 {
-                    reviewsClient = userInDb.DriverAspects.Reviews
-                        .Select(review => new ReviewClient(review.Id, review.Punctuation, review.Comment)).ToList();
+                    foreach (var review in userLogged.DriverAspects.Reviews)
+                    {
+                        messageLogin += review.Id + ":" + review.Punctuation + ":" +
+                                        review.Comment + ",";
+                    }
 
-                    vehiclesClient = userInDb.DriverAspects.Vehicles
-                        .Select(vehicle => new VehicleClient(vehicle.Id, vehicle.DestinationFilePath)).ToList();
+                    messageLogin += ";";
+                    foreach (var vehicleLogin in userLogged.DriverAspects.Vehicles)
+                    {
+                        messageLogin += vehicleLogin.Id + ":" + vehicleLogin.VehicleModel + ":" +
+                                        vehicleLogin.ImageAllocatedAtAServer + ",";
+                    }
                 }
 
-                UserClient userToReturn = new UserClient(userInDb.Id,userInDb.Ci, userInDb.Username, userInDb.Password,
-                    new DriverInfoClient(driverInfoOfUser.Puntuation, reviewsClient, vehiclesClient));
-
-                return userToReturn;
+                NetworkHelper.SendMessage(_serverSocket, messageLogin);
             }
 
             catch (UserException exceptionCaught)
@@ -76,27 +85,93 @@ namespace Server.Controllers
             }
         }
 
-        public static void RateDriver(Guid driverId, ReviewClient reviewToAdd)
+        
+        public void CreateDriver(string[] messageArray)
         {
             try
             {
-                _userRepository.RateDriver(driverId, new Review(reviewToAdd.Punctuation, reviewToAdd.Comment));
+                Guid userId = Guid.Parse(messageArray[2]);
+                DriverInfo driverInfo = new DriverInfo(new List<Vehicle>());
+                _userRepository.RegisterDriver(userId, driverInfo);
+
+                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
             catch (UserException exceptionCaught)
             {
                 throw new Exception(exceptionCaught.Message);
             }
         }
-        public static void SetVehicle(Guid driverId, VehicleClient vehicleToAdd)
+        
+        public void AddVehicle(string[] messageArray)
         {
             try
             {
-                _userRepository.SetVehicle(driverId, new Vehicle());
+                List<Vehicle> vehicles = new List<Vehicle>();
+                Guid userId = Guid.Parse(messageArray[2]);
+                string vehicleModel = messageArray[3];
+                
+                string imageAllocatedAtAServer = NetworkHelper.ReceiveImage(_serverSocket);
+                Vehicle vehicleToAdd = new Vehicle(vehicleModel, imageAllocatedAtAServer);
+                
+                _userRepository.AddVehicle(userId, vehicleToAdd);
+                
+                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";";
+                foreach (var vehicle in vehicles)
+                {
+                    responseMsg += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer +",";
+                }
+
+                NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
             catch (UserException exceptionCaught)
             {
                 throw new Exception(exceptionCaught.Message);
             }
         }
+
+      
+
+        public void GetUserById(string[] messageArray)
+        {
+            Guid userId = Guid.Parse(messageArray[2]);
+            User userFound = _userRepository.GetUserById(userId);
+
+            string message = ProtocolConstants.Response + ";" + CommandsConstraints.GetUserById + ";" + userId + ";" +
+                             userFound.Ci + ";" + userFound.Username + ";" + userFound.Password + ";";
+
+            if (userFound.DriverAspects != null)
+            {
+                message = message + userFound.DriverAspects.Puntuation + ";";
+                if(userFound.DriverAspects.Reviews.Count == 0) message += "#";
+                foreach (var review in userFound.DriverAspects.Reviews)
+                {
+                    message += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
+                }
+
+                message += ";";
+                if(userFound.DriverAspects.Vehicles.Count == 0) message += "#";
+                foreach (var vehicle in userFound.DriverAspects.Vehicles)
+                {
+                    message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer + ",";
+                }
+            
+            }
+            NetworkHelper.SendMessage(_serverSocket, message);
+        }
+
+        #endregion
+        
+        // public static void AddReview(Guid driverId, ReviewClient reviewToAdd)
+        // {
+        //     try
+        //     {
+        //         _userRepository.AddReview(driverId, new Review(reviewToAdd.Punctuation, reviewToAdd.Comment));
+        //     }
+        //     catch (UserException exceptionCaught)
+        //     {
+        //         throw new Exception(exceptionCaught.Message);
+        //     }
+        // }
     }
 }

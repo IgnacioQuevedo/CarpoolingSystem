@@ -39,8 +39,8 @@ namespace Client
         {
             clientSocket = NetworkHelper.ConnectWithServer();
             _userService = new UserService(clientSocket);
-            _rideService = new RideService(clientSocket);
-            
+            // _rideService = new RideService(clientSocket);
+
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
 
@@ -77,6 +77,7 @@ namespace Client
 
                 else
                 {
+                    //This is when the user is logged in
                     PossibleActionsToBeDoneByLoggedUser();
                 }
             }
@@ -150,14 +151,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                _userLogged = UserService.RegisterClient(clientSocket, clientToRegister);
-
-                Console.WriteLine("Do you want to be register as a driver? -- 'Y' for Yes or 'N' for No");
-                string beDriver = Console.ReadLine();
-                if (beDriver == "Y")
-                {
-                    SetVehicles(usernameRegister);
-                }
+                UserService.RegisterClient(clientSocket, clientToRegister);
             }
             catch (Exception exception)
             {
@@ -176,7 +170,6 @@ namespace Client
                 string password = Console.ReadLine();
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
-
                 _userLogged = UserService.LoginClient(clientSocket, loginUserRequest);
             }
             catch (Exception exception)
@@ -188,24 +181,7 @@ namespace Client
 
         #endregion
 
-        #region Driver creation
-
-        private static void SetVehicles(string usernameRegistered)
-        {
-            string addNewVehicle = "Y";
-            ICollection<VehicleClient> vehicles = new List<VehicleClient>();
-
-            while (addNewVehicle.Equals("Y"))
-            {
-                UserService.SetDriverVehicles(clientSocket, _userLogged.Id);
-
-                Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
-                Console.WriteLine("If yes - Enter 'Y'");
-                Console.WriteLine("If not - Enter 'N'");
-                addNewVehicle = Console.ReadLine();
-            }
-        }
-
+        #region Logged Options
 
         public static void PossibleActionsToBeDoneByLoggedUser()
         {
@@ -242,7 +218,7 @@ namespace Client
                     if (_userLogged.DriverAspects != null)
                         CreateRide();
                     else
-                        SetVehicles(_userLogged.Username);
+                        CreateDriver(_userLogged.Id);
                     break;
 
                 case 2:
@@ -273,6 +249,32 @@ namespace Client
 
         #endregion
 
+
+        #region Driver creation
+
+        private static void CreateDriver(Guid userRegisteredId)
+        {
+            string addNewVehicle = "Y";
+
+            while (addNewVehicle.Equals("Y"))
+            {
+                Console.WriteLine("Please enter the model of the vehicle");
+                string carModel = Console.ReadLine();
+                Console.WriteLine("Please enter the path of the vehicle image");
+                string path = Console.ReadLine();
+                
+                UserService.CreateDriver(clientSocket, userRegisteredId);
+                UserService.AddVehicle(clientSocket, userRegisteredId,carModel,path);
+                Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
+                Console.WriteLine("If yes - Enter 'Y'");
+                Console.WriteLine("If not - Enter 'N'");
+                addNewVehicle = Console.ReadLine();
+            }
+        }
+
+        #endregion
+
+
         #region Create Ride
 
         private static void CreateRide()
@@ -281,6 +283,8 @@ namespace Client
                 "You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
             List<UserClient> passengers = new List<UserClient>();
+
+            Guid vehicleIdSelected = Guid.Parse(PickVehicle());
 
             string locationMode = "initial";
             CitiesEnum initialLocation = PickLocation(locationMode);
@@ -298,11 +302,13 @@ namespace Client
 
             string photoPath = IntroducePhotoPath();
 
-            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, passengers, initialLocation, endingLocation,
+            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, vehicleIdSelected, passengers,
+                initialLocation, endingLocation,
                 departureDate, availableSeats, pricePerPerson, petsAllowed, photoPath);
 
             _rideService.CreateRide(rideReq);
         }
+
 
         private static string IntroducePhotoPath()
         {
@@ -350,6 +356,23 @@ namespace Client
                 Console.WriteLine("Please introduce a numeric value for the price, try again...");
                 return pricePerPerson;
             }
+        }
+
+        private static string PickVehicle()
+        {
+            Console.WriteLine("Select the vehicle you will use for this ride");
+
+            ICollection<VehicleClient> vehicles = UserService.GetVehiclesByUserId(_userLogged.Id);
+
+            foreach (var vehicle in vehicles)
+            {
+                Console.WriteLine("Vehicle Id: " + vehicle.Id);
+                Console.WriteLine("Vehicle Model: " + vehicle.CarModel);
+            }
+
+            string vehicleIdSelected = Console.ReadLine();
+
+            return vehicleIdSelected;
         }
 
         private static int PickAmountOfAvailableSeats()
@@ -487,6 +510,7 @@ namespace Client
 
             RideClient selectedRide = SelectRideFromList(rides);
 
+
             JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
 
             _rideService.JoinRide(joinReq);
@@ -507,21 +531,33 @@ namespace Client
                 {
                     RideClient rideSelected = rides[optionValue - 1];
                     Console.WriteLine(
-                        $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation} with departure time on: {rideSelected.DepartureTime.ToShortDateString()} and price: ${rideSelected.PricePerPerson}");
+                        $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
+                    Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
+                    Console.WriteLine("Price: ${rideSelected.PricePerPerson}");
+
+                    Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
+                    string seeDetails = Console.ReadLine();
+                    if (seeDetails == "Y")
+                    {
+                        Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats);
+                        Console.WriteLine("Pets allowed: " + "rideSelected.PetsAllowed");
+
+                        Console.WriteLine("Do you want to see the car image?");
+                        if (seeDetails == "Y")
+                        {
+                            _rideService.GetCarImageById(rideSelected.Id);
+                        }
+                    }
 
                     return rideSelected;
                 }
-                else
-                {
-                    Console.WriteLine("You must introduce a valid digit for the ride");
-                    return SelectRideFromList(rides);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Introduce a valid number");
+
+                Console.WriteLine("You must introduce a valid digit for the ride");
                 return SelectRideFromList(rides);
             }
+
+            Console.WriteLine("Introduce a valid number");
+            return SelectRideFromList(rides);
         }
 
         private static void DisplayAllRides(List<RideClient> rides)
@@ -541,6 +577,7 @@ namespace Client
         #endregion
 
         #region Modify Ride
+
         private static void ModifyRide()
         {
             ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
