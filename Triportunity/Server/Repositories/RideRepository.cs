@@ -19,19 +19,24 @@ namespace Server.Repositories
         public void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
+
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
+
             LockManager.StopWriting();
         }
 
         public void JoinRide(Guid userId, Guid rideId)
         {
-            LockManager.StartWriting();
             Ride rideToJoin = GetRideById(rideId);
             User user = _userRepository.GetUserById(userId);
 
             ValidateJoinRide(userId, rideToJoin);
+
+            LockManager.StartWriting();
+
             rideToJoin.Passengers.Add(userId);
             rideToJoin.AvailableSeats--;
+
             LockManager.StopWriting();
         }
 
@@ -49,7 +54,11 @@ namespace Server.Repositories
 
         public Ride GetRideById(Guid rideId)
         {
+            LockManager.StartReading();
+
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
+
+            LockManager.StopReading();
 
             if (rideToFind == null)
             {
@@ -61,7 +70,6 @@ namespace Server.Repositories
 
         public void QuitRide(Guid userId, Guid rideId)
         {
-            LockManager.StartWriting();
             Ride rideToQuit = GetRideById(rideId);
             User user = _userRepository.GetUserById(userId);
 
@@ -75,8 +83,11 @@ namespace Server.Repositories
                 throw new RideException("Cannot quit the ride as the departure time has passed.");
             }
 
+            LockManager.StartWriting();
+
             rideToQuit.Passengers.Remove(userId);
             rideToQuit.AvailableSeats++;
+
             LockManager.StopWriting();
         }
 
@@ -89,25 +100,26 @@ namespace Server.Repositories
 
             foreach (var ride in rides)
             {
-                if (ride.Published == true && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
+                if (ride.Published && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
                 {
                     availableRides.Add(ride);
                 }
             }
 
-            if (rides.Count == 0)
+            if (availableRides.Count == 0)
             {
                 throw new RideException("No rides found");
             }
 
-            return rides;
+            return availableRides;
         }
+
 
         public void DeleteRide(Guid rideId)
         {
             Ride rideToDelete = new Ride();
             rideToDelete = GetRideById(rideId);
-            
+
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
             LockManager.StopWriting();
@@ -121,17 +133,20 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
+
         public ICollection<Ride> FilterByPrice(double minPrice, double maxPrice)
         {
-            LockManager.StartReading();
             ICollection<Ride> filteredRides = new List<Ride>();
             var rides = GetRides();
+
+            LockManager.StartReading();
 
             filteredRides = rides
                 .Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
                 .ToList();
 
             LockManager.StopReading();
+
             return filteredRides;
         }
 
@@ -159,17 +174,21 @@ namespace Server.Repositories
 
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
-            LockManager.StartReading();
             Ride rideToGetReviews = GetRideById(ride);
+
+            LockManager.StartReading();
+
             User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
+
             LockManager.StopReading();
+
             return user.DriverAspects.Reviews;
         }
 
         public void UpdateRide(Ride rideWithUpdates)
         {
-            LockManager.StartWriting();
             Ride rideToUpdate = GetRideById(rideWithUpdates.Id);
+            LockManager.StartWriting();
             rideToUpdate.AvailableSeats = rideWithUpdates.AvailableSeats;
             rideToUpdate.DepartureTime = rideWithUpdates.DepartureTime;
             rideToUpdate.EndingLocation = rideWithUpdates.EndingLocation;

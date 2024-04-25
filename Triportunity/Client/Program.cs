@@ -103,40 +103,55 @@ namespace Client
 
         private static void CloseAppOption()
         {
-            Console.WriteLine("");
-            Console.WriteLine("Closed App with success!");
-            NetworkHelper.CloseSocketConnections(clientSocket);
-            _closeApp = true;
+            try
+            {
+                Console.WriteLine("");
+                Console.WriteLine("Closed App with success!");
+                NetworkHelper.CloseSocketConnections(clientSocket);
+                _closeApp = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try again to close the app");
+                MainMenuOptions();
+            }
         }
 
         private static void AboutUsOption()
         {
-            var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
-
-            if (directoryInfo != null)
+            try
             {
-                string startDirectory = directoryInfo?.Parent.Parent.FullName;
-                string subrouteOfFile = "AboutUs/CompanyInfo.txt";
-                var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
-                Console.WriteLine(File.ReadAllText(fileRoute));
-            }
-            else
-            {
-                Console.WriteLine("Triportunity is a travel web app");
-            }
+                var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent;
 
-            Console.WriteLine("Enter any key to go back to the main menu");
-            Console.ReadKey();
-            Console.ReadLine();
-            Console.WriteLine();
+                if (directoryInfo != null)
+                {
+                    string startDirectory = directoryInfo?.Parent.Parent.FullName;
+                    string subrouteOfFile = "AboutUs/CompanyInfo.txt";
+                    var fileRoute = Path.Combine(startDirectory, subrouteOfFile);
+                    Console.WriteLine(File.ReadAllText(fileRoute));
+                }
+                else
+                {
+                    Console.WriteLine("Triportunity is a travel web app");
+                }
+
+                Console.WriteLine("Enter any key to go back to the main menu");
+                Console.ReadKey();
+                Console.ReadLine();
+                Console.WriteLine();
+            }
+            catch (Exception e)
+            {
+                MainMenuOptions();
+            }
         }
 
         private static void RegisterOption()
         {
-            DriverInfoClient driverAspectsOfClient = null;
-
             try
             {
+                DriverInfoClient driverAspectsOfClient = null;
                 Console.WriteLine("Insert your Ci for the registration");
                 string ci = Console.ReadLine();
 
@@ -157,7 +172,7 @@ namespace Client
             catch (Exception exception)
             {
                 Console.WriteLine("Redo all again but without this error: " + exception.Message);
-                RegisterOption();
+                MainMenuOptions();
             }
         }
 
@@ -176,7 +191,8 @@ namespace Client
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
-                LoginOption();
+                Console.WriteLine();
+                MainMenuOptions();
             }
         }
 
@@ -232,7 +248,7 @@ namespace Client
 
                 case 4:
                     if (_userLogged.DriverAspects != null)
-                        ModifyRide();
+                        ViewYourRides();
                     else
                         CloseAppOption();
                     break;
@@ -561,13 +577,15 @@ namespace Client
                     string seeDetails = Console.ReadLine();
                     if (seeDetails == "Y")
                     {
-                        Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats);
+                        Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
                         Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                         Console.WriteLine("Do you want to see the car image?");
+                        seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
-                            _rideService.GetCarImageById(rideSelected.Id);
+                            Console.WriteLine(@"Your Image is Allocated At: " +
+                                              _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
                         }
                     }
 
@@ -581,6 +599,7 @@ namespace Client
             Console.WriteLine("Introduce a valid number");
             return SelectRideFromList(rides);
         }
+
 
         private static void DisplayAllRides(List<RideClient> rides)
         {
@@ -599,19 +618,89 @@ namespace Client
 
         #endregion
 
-        #region Modify Ride
-
-        private static void ModifyRide()
+        private static void ViewYourRides()
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+                int index = 0;
+                List<RideClient> rideListOfUser = _rideService.GetRidesByUser(_userLogged.Id).ToList();
 
-                DisplayAllRides(ridesList);
+                DisplayAllRides(rideListOfUser.ToList());
 
-                RideClient rideSelected = SelectRideFromList(ridesList);
+                Console.WriteLine("Select the ride you want to edit: ");
+                _optionSelected = Console.ReadLine();
+                string[] parts = _optionSelected.Split('-');
 
+                int optionValue;
+
+                if (int.TryParse(parts[0].Trim(), out optionValue))
+                {
+                    if (optionValue <= rideListOfUser.Count)
+                    {
+                        RideClient rideSelected = rideListOfUser[optionValue];
+                        Console.WriteLine(
+                            $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
+                        Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
+                        Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
+                        Console.WriteLine("");
+
+                        Console.WriteLine("Select the respective action do you want to do with this ride: ");
+                        Console.WriteLine("1- Modify Ride");
+                        Console.WriteLine("2- Delete Ride");
+                        Console.WriteLine("3- Disable Ride");
+                        Console.WriteLine("4- Get Ride Info");
+                        Console.WriteLine("5- Get Rides By Price");
+                        Console.WriteLine("6- Get Rides By Initial Location");
+                        Console.WriteLine("7- Get Rides By Ending Location");
+                        Console.WriteLine("8- Go back to the main menu");
+
+                        _optionSelected = Console.ReadLine();
+                        if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 8)
+                        {
+                            switch (optionToDo)
+                            {
+                                case 1:
+                                    ModifyRide(rideSelected);
+                                    break;
+                                case 2:
+                                    DeleteRide();
+                                    break;
+                                case 3:
+                                    DisableRide(rideSelected);
+                                    break;
+                                case 4:
+                                    GetRideInfo();
+                                    break;
+                                case 5:
+                                    GetRidesByPrice();
+                                    break;
+                                case 6:
+                                    PossibleActionsToBeDoneByLoggedUser();
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Please introduce a valid digit");
+                            ViewYourRides();
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
+        }
+
+
+        #region Modify Ride
+
+        public static void ModifyRide(RideClient rideSelected)
+        {
+            try
+            {
                 Console.WriteLine("You will have to complete the following steps to have your ride edited");
 
                 string locationMode = "initial";
@@ -631,12 +720,14 @@ namespace Client
                 Guid vehicleId = Guid.Parse(PickVehicle());
 
 
-                ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id, rideSelected.Passengers,
+                ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id,
+                    rideSelected.Passengers,
                     initialLocation, endingLocation, departureDate,
                     pricePerPerson, petsAllowed, vehicleId);
 
                 _rideService.ModifyRide(modifyRideReq);
             }
+
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
@@ -698,17 +789,10 @@ namespace Client
 
         #region Disable Ride
 
-        private static void DisableRide()
+        private static void DisableRide(RideClient rideSelected)
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
-
-                DisplayAllRides(ridesList);
-
-                RideClient rideSelected = SelectRideFromList(ridesList);
-
                 _rideService.DisableRide(rideSelected.Id);
             }
             catch (Exception e)
