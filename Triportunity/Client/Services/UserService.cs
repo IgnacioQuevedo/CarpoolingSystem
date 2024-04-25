@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.AccessControl;
 using System.Text.RegularExpressions;
 using Client.Objects.ReviewModels;
 using Client.Objects.UserModels;
@@ -19,8 +20,6 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
-        #region Quedaron
-
         public static void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
@@ -35,7 +34,6 @@ namespace Client.Services
 
             catch (Exception exceptionCaught)
             {
-                Console.WriteLine(exceptionCaught.Message);
                 throw new Exception(exceptionCaught.Message);
             }
         }
@@ -100,22 +98,29 @@ namespace Client.Services
 
         public static void CreateDriver(Socket socket, Guid userId)
         {
-            UserClient userToBeDriver = GetUserById(_clientSocket, userId);
-
-            if (userToBeDriver.DriverAspects == null)
+            try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
-                NetworkHelper.SendMessage(socket, message);
+                UserClient userToBeDriver = GetUserById(_clientSocket, userId);
 
-                string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
-                if (messageArray == null)
+                if (userToBeDriver.DriverAspects == null)
                 {
-                    throw new Exception("Error creating driver");
+                    string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                    NetworkHelper.SendMessage(socket, message);
+
+                    string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
+                    if (messageArray == null)
+                    {
+                        throw new Exception("Error creating driver");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("You are already a driver");
                 }
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("You are already a driver");
+                throw new Exception(e.Message);
             }
         }
 
@@ -129,7 +134,7 @@ namespace Client.Services
                 ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
 
                 string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
-                
+
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -138,7 +143,7 @@ namespace Client.Services
                 string imageAllocatedAtAServer = vehicleInfoArray[4];
 
                 VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
-                
+
                 vehiclesOfUser.Add(vehicleClient);
                 DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
                 userFound.DriverAspects = driverInfo;
@@ -151,10 +156,17 @@ namespace Client.Services
 
         public static void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)
         {
-            string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
-                             carModel;
-            NetworkHelper.SendMessage(socket, message);
-            NetworkHelper.SendImage(socket, path);
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
+                                 carModel;
+                NetworkHelper.SendMessage(socket, message);
+                NetworkHelper.SendImage(socket, path);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public static UserClient GetUserById(Socket clientSocket, Guid userId)
@@ -162,8 +174,8 @@ namespace Client.Services
             try
             {
                 double generalPunctuation = -1;
-                
-                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetUserById + ";" + userId;
+
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetUserById + ";" + userId;
                 NetworkHelper.SendMessage(clientSocket, message);
 
                 string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
@@ -218,14 +230,17 @@ namespace Client.Services
                             vehicles.Add(vehicleClient);
                         }
                     }
+
                     driverInfo = new DriverInfoClient(reviews, vehicles);
                 }
+
                 UserClient user = new UserClient(id, ci, username, password, driverInfo);
 
                 if (generalPunctuation != -1)
                 {
                     user.DriverAspects.Punctuation = generalPunctuation;
                 }
+
                 return user;
             }
             catch (Exception e)
@@ -236,11 +251,16 @@ namespace Client.Services
 
         public static ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
         {
-            UserClient user = GetUserById(_clientSocket, userLoggedId);
-            if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
-            return null;
+            try
+            {
+                UserClient user = GetUserById(_clientSocket, userLoggedId);
+                if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
+                return null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
-
-        #endregion
     }
 }

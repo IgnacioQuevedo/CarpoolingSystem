@@ -39,7 +39,7 @@ namespace Client
         {
             clientSocket = NetworkHelper.ConnectWithServer();
             _userService = new UserService(clientSocket);
-            // _rideService = new RideService(clientSocket);
+            _rideService = new RideService(clientSocket);
 
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
@@ -254,21 +254,29 @@ namespace Client
 
         private static void CreateDriver(Guid userRegisteredId)
         {
-            string addNewVehicle = "Y";
-
-            while (addNewVehicle.Equals("Y"))
+            try
             {
-                Console.WriteLine("Please enter the model of the vehicle");
-                string carModel = Console.ReadLine();
-                Console.WriteLine("Please enter the path of the vehicle image");
-                string path = Console.ReadLine();
-                
-                UserService.CreateDriver(clientSocket, userRegisteredId);
-                UserService.AddVehicle(clientSocket, userRegisteredId,carModel,path);
-                Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
-                Console.WriteLine("If yes - Enter 'Y'");
-                Console.WriteLine("If not - Enter 'N'");
-                addNewVehicle = Console.ReadLine();
+                string addNewVehicle = "Y";
+
+                while (addNewVehicle.Equals("Y"))
+                {
+                    Console.WriteLine("Please enter the model of the vehicle");
+                    string carModel = Console.ReadLine();
+                    Console.WriteLine("Please enter the path of the vehicle image");
+                    string path = Console.ReadLine();
+
+                    UserService.CreateDriver(clientSocket, userRegisteredId);
+                    UserService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
+                    Console.WriteLine("If yes - Enter 'Y'");
+                    Console.WriteLine("If not - Enter 'N'");
+                    addNewVehicle = Console.ReadLine();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -279,33 +287,41 @@ namespace Client
 
         private static void CreateRide()
         {
-            Console.WriteLine(
-                "You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
+            try
+            {
+                Console.WriteLine(
+                    "You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
-            List<Guid> passengers = new List<Guid>();
+                List<Guid> passengers = new List<Guid>();
 
-            Guid vehicleIdSelected = Guid.Parse(PickVehicle());
+                Guid vehicleIdSelected = Guid.Parse(PickVehicle());
 
-            string locationMode = "initial";
-            CitiesEnum initialLocation = PickLocation(locationMode);
+                string locationMode = "initial";
+                CitiesEnum initialLocation = PickLocation(locationMode);
 
-            locationMode = "ending";
-            CitiesEnum endingLocation = PickLocation(locationMode);
+                locationMode = "ending";
+                CitiesEnum endingLocation = PickLocation(locationMode);
 
-            DateTime departureDate = PickDepartureDate();
+                DateTime departureDate = PickDepartureDate();
 
-            int availableSeats = PickAmountOfAvailableSeats();
+                int availableSeats = PickAmountOfAvailableSeats();
 
-            double pricePerPerson = IntroducePricePerPerson();
+                double pricePerPerson = IntroducePricePerPerson();
 
-            bool petsAllowed = DecideIfPetsAreAllowed();
+                bool petsAllowed = DecideIfPetsAreAllowed();
 
 
-            CreateRideRequest rideReq = new CreateRideRequest(_userLogged.Id, passengers,
-                initialLocation, endingLocation,
-                departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
+                CreateRideRequest rideReq = new CreateRideRequest(_userLogged.Id, passengers,
+                    initialLocation, endingLocation,
+                    departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
-            _rideService.CreateRide(rideReq);
+                _rideService.CreateRide(rideReq);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         private static bool DecideIfPetsAreAllowed()
@@ -498,14 +514,24 @@ namespace Client
 
         private static void JoinRide()
         {
-            List<RideClient> rides = (List<RideClient>)_rideService.GetAllRides();
+            try
+            {
+                ICollection<RideClient> rides = _rideService.GetAllRides();
 
-            RideClient selectedRide = SelectRideFromList(rides);
+                List<RideClient> rideClients = new List<RideClient>(rides);
+
+                RideClient selectedRide = SelectRideFromList(rideClients);
 
 
-            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
+                JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
-            _rideService.JoinRide(joinReq);
+                _rideService.JoinRide(joinReq);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         private static RideClient SelectRideFromList(List<RideClient> rides)
@@ -572,36 +598,45 @@ namespace Client
 
         private static void ModifyRide()
         {
-            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+            try
+            {
+                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            DisplayAllRides(ridesList);
+                DisplayAllRides(ridesList);
 
-            RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(ridesList);
 
-            Console.WriteLine("You will have to complete the following steps to have your ride edited");
+                Console.WriteLine("You will have to complete the following steps to have your ride edited");
 
-            string locationMode = "initial";
-            CitiesEnum initialLocation = PickLocation(locationMode);
+                string locationMode = "initial";
+                CitiesEnum initialLocation = PickLocation(locationMode);
 
-            locationMode = "ending";
-            CitiesEnum endingLocation = PickLocation(locationMode);
+                locationMode = "ending";
+                CitiesEnum endingLocation = PickLocation(locationMode);
 
-            DateTime departureDate = PickDepartureDate();
+                DateTime departureDate = PickDepartureDate();
 
-            int availableSeats = PickAmountOfAvailableSeats();
+                int availableSeats = PickAmountOfAvailableSeats();
 
-            double pricePerPerson = IntroducePricePerPerson();
+                double pricePerPerson = IntroducePricePerPerson();
 
-            bool petsAllowed = DecideIfPetsAreAllowed();
+                bool petsAllowed = DecideIfPetsAreAllowed();
 
-            Guid vehicleId = Guid.Parse(PickVehicle());
+                Guid vehicleId = Guid.Parse(PickVehicle());
 
 
-            ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id, rideSelected.Passengers,initialLocation, endingLocation, departureDate,
-                pricePerPerson, petsAllowed, vehicleId);
+                ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id, rideSelected.Passengers,
+                    initialLocation, endingLocation, departureDate,
+                    pricePerPerson, petsAllowed, vehicleId);
 
-            _rideService.ModifyRide(modifyRideReq);
+                _rideService.ModifyRide(modifyRideReq);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -610,16 +645,24 @@ namespace Client
 
         private static void QuitRide()
         {
-            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+            try
+            {
+                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            DisplayAllRides(ridesList);
+                DisplayAllRides(ridesList);
 
-            RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(ridesList);
 
-            QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
+                QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
-            _rideService.QuitRide(quitRideReq);
+                _rideService.QuitRide(quitRideReq);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -628,14 +671,22 @@ namespace Client
 
         private static void DeleteRide()
         {
-            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+            try
+            {
+                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            DisplayAllRides(ridesList);
+                DisplayAllRides(ridesList);
 
-            RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(ridesList);
 
-            _rideService.DeleteRide(rideSelected.Id);
+                _rideService.DeleteRide(rideSelected.Id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -644,14 +695,22 @@ namespace Client
 
         private static void DisableRide()
         {
-            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+            try
+            {
+                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            DisplayAllRides(ridesList);
+                DisplayAllRides(ridesList);
 
-            RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(ridesList);
 
-            _rideService.DisableRide(rideSelected.Id);
+                _rideService.DisableRide(rideSelected.Id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -660,14 +719,22 @@ namespace Client
 
         private static void GetRideInfo()
         {
-            ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-            List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+            try
+            {
+                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
 
-            DisplayAllRides(ridesList);
+                DisplayAllRides(ridesList);
 
-            RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(ridesList);
 
-            _rideService.GetRideById(rideSelected.Id);
+                _rideService.GetRideById(rideSelected.Id);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -676,15 +743,23 @@ namespace Client
 
         private static void GetRidesByPrice()
         {
-            Console.WriteLine("Introduce the minumun and maximum price you want to filter the rides by");
+            try
+            {
+                Console.WriteLine("Introduce the minumun and maximum price you want to filter the rides by");
 
-            Console.WriteLine("Introduce the minimum price");
-            double minPrice = double.Parse(Console.ReadLine());
+                Console.WriteLine("Introduce the minimum price");
+                double minPrice = double.Parse(Console.ReadLine());
 
-            Console.WriteLine("Introduce the maximum price");
-            double maxPrice = double.Parse(Console.ReadLine());
+                Console.WriteLine("Introduce the maximum price");
+                double maxPrice = double.Parse(Console.ReadLine());
 
-            _rideService.GetRidesFilteredByPrice(minPrice, maxPrice);
+                _rideService.GetRidesFilteredByPrice(minPrice, maxPrice);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -693,15 +768,23 @@ namespace Client
 
         private static void GetRidesByInitialLocation()
         {
-            Console.WriteLine("Introduce the initial location you want to filter the rides by");
+            try
+            {
+                Console.WriteLine("Introduce the initial location you want to filter the rides by");
 
-            ShowCities();
+                ShowCities();
 
-            _optionSelected = Console.ReadLine();
+                _optionSelected = Console.ReadLine();
 
-            CitiesEnum initialLocation = PossibleCasesWhenPickingLocation(_optionSelected, "initial");
+                CitiesEnum initialLocation = PossibleCasesWhenPickingLocation(_optionSelected, "initial");
 
-            _rideService.GetRidesFilteredByInitialLocation(initialLocation);
+                _rideService.GetRidesFilteredByInitialLocation(initialLocation);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion
@@ -710,15 +793,23 @@ namespace Client
 
         private static void GetRidesByEndingLocation()
         {
-            Console.WriteLine("Introduce the ending location you want to filter the rides by");
+            try
+            {
+                Console.WriteLine("Introduce the ending location you want to filter the rides by");
 
-            ShowCities();
+                ShowCities();
 
-            _optionSelected = Console.ReadLine();
+                _optionSelected = Console.ReadLine();
 
-            CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
+                CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
 
-            _rideService.GetRidesFilteredByEndingLocation(endingLocation);
+                _rideService.GetRidesFilteredByEndingLocation(endingLocation);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
         }
 
         #endregion

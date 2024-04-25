@@ -24,7 +24,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateRide + ";" +
-                    request.DriverId;
+                                 request.DriverId;
 
                 foreach (var passenger in request.Passengers)
                 {
@@ -32,14 +32,14 @@ namespace Client.Services
                 }
 
                 message += ";" + request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
-                    ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
-                    + ";" + request.VehicleId;
+                           ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
+                           + ";" + request.VehicleId;
 
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -48,12 +48,12 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.JoinRide + ";" +
-                    request.RideId + ";" + request.PassengerToJoin;
+                                 request.RideId + ";" + request.PassengerToJoin;
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -66,7 +66,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -79,7 +79,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
-                    request.Id + ";";
+                                 request.Id + ";";
 
                 foreach (var passenger in request.Passengers)
                 {
@@ -96,14 +96,14 @@ namespace Client.Services
                 }
 
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" +
-                    request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
-                    + ";" + request.PetsAllowed + ";" + request.VehicleId
+                           request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
+                           + ";" + request.PetsAllowed + ";" + request.VehicleId
                     ;
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -116,7 +116,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -124,7 +124,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" + id.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
+                                 id.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -146,8 +147,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" +
-                                                 minPrize.ToString() + ";" + maxPrice.ToString();
+                                 minPrize.ToString() + ";" + maxPrice.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -182,8 +182,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -218,8 +217,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -255,8 +253,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -264,7 +261,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" + rideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
+                                 rideId.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -283,8 +281,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -294,9 +291,13 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetAllRides;
+                
                 NetworkHelper.SendMessage(_clientSocket, message);
+                
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                
                 ICollection<RideClient> rides = new List<RideClient>();
                 for (int i = 0; i < ridesData.Length; i += 7)
                 {
@@ -320,8 +321,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return null;
+                throw new Exception(e.Message);
             }
         }
 
@@ -329,12 +329,13 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + rideSelectedId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" +
+                                 rideSelectedId.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
         }
     }
