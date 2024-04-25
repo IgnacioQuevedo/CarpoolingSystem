@@ -55,17 +55,17 @@ namespace Server.Repositories
 
         public User GetUserById(Guid id)
         {
-            LockManager.StartReading();
-            var clientFound = MemoryDatabase.GetInstance().Users
-                .FirstOrDefault(x => x.Id.Equals(id));
+                LockManager.StartReading();
+                var clientFound = MemoryDatabase.GetInstance().Users
+                    .FirstOrDefault(x => x.Id.Equals(id));
 
-            if (clientFound == null)
-            {
-                throw new UserException("User not found");
-            }
+                if (clientFound == null)
+                {
+                    throw new UserException("User not found");
+                }
 
-            LockManager.StopReading();
-            return clientFound;
+                LockManager.StopReading();
+                return clientFound;
         }
 
         public void RegisterDriver(Guid userId, DriverInfo driveInfo)

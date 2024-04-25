@@ -133,7 +133,6 @@ namespace Client
         private static void RegisterOption()
         {
             DriverInfoClient driverAspectsOfClient = null;
-
             try
             {
                 Console.WriteLine("Insert your Ci for the registration");
@@ -155,7 +154,7 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Redo all again but without this error: " + exception.Message);
+                Console.WriteLine(exception.Message);
                 RegisterOption();
             }
         }

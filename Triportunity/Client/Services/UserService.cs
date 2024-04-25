@@ -22,19 +22,28 @@ namespace Client.Services
 
         public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
-            try
-            {
-                string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
-                                      registerUserRequest.Ci + ";" +
-                                      registerUserRequest.Username + ";" +
-                                      registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
+            string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
+                                  registerUserRequest.Ci + ";" +
+                                  registerUserRequest.Username + ";" +
+                                  registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
-                NetworkHelper.SendMessage(socket, registerInfo);
+            NetworkHelper.SendMessage(socket, registerInfo);
+
+            string serverResponse = NetworkHelper.ReceiveMessage(socket);
+            
+            string[] responseArray = serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            
+            if (responseArray[0] == ProtocolConstants.Exception)
+            {
+                throw new Exception(responseArray[2]);
             }
-
-            catch (Exception exceptionCaught)
+            else if (responseArray[0] == ProtocolConstants.Response)
             {
-                throw new Exception(exceptionCaught.Message);
+                Console.WriteLine("User registered successfully");
+            }
+            else
+            {
+                throw new Exception("Error registering user");
             }
         }
 
@@ -45,12 +54,12 @@ namespace Client.Services
             NetworkHelper.SendMessage(socket, message);
 
             UserClient resultUser = null;
-            
+
             string loginResult = NetworkHelper.ReceiveMessage(socket);
 
             string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (loginArray[0] != "EXC")
+            if (loginArray[0] != ProtocolConstants.Exception)
             {
                 Guid id = Guid.Parse(loginArray[2]);
                 string ci = loginArray[3];
@@ -92,38 +101,30 @@ namespace Client.Services
             }
             else
             {
-                Console.WriteLine(loginArray[2]);
+                throw new Exception(loginArray[2]);
             }
 
             return resultUser;
         }
 
-
+//REVISADO
         public void CreateDriver(Socket socket, Guid userId)
         {
-            try
+            UserClient userToBeDriver = GetUserById(_clientSocket, userId);
+            if (userToBeDriver.DriverAspects == null)
             {
-                UserClient userToBeDriver = GetUserById(_clientSocket, userId);
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                NetworkHelper.SendMessage(socket, message);
 
-                if (userToBeDriver.DriverAspects == null)
+                string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
+                if (messageArray == null)
                 {
-                    string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
-                    NetworkHelper.SendMessage(socket, message);
-
-                    string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
-                    if (messageArray == null)
-                    {
-                        throw new Exception("Error creating driver");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("You are already a driver");
+                    throw new Exception("Error creating driver");
                 }
             }
-            catch (Exception e)
+            else
             {
-                throw new Exception(e.Message);
+                Console.WriteLine("You are already a driver");
             }
         }
 

@@ -40,10 +40,15 @@ namespace Server.Controllers
 
                 User userToRegister = new User(ci, username, password, repeatedPassword, null);
                 _userRepository.RegisterUser(userToRegister);
+                
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; //Ok response
+                NetworkHelper.SendMessage(_serverSocket, message);
+                
             }
             catch (UserException exception)
             {
-                throw new Exception(exception.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exception.Message;
+                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
 
@@ -81,8 +86,8 @@ namespace Server.Controllers
 
             catch (UserException exceptionCaught)
             {
-                string excpetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_serverSocket, excpetionMessageToClient);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
 
@@ -100,14 +105,15 @@ namespace Server.Controllers
             }
             catch (UserException exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
             }
         }
         
         public void AddVehicle(string[] messageArray)
         {
             try
-            { ;
+            {
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
                 
@@ -123,7 +129,8 @@ namespace Server.Controllers
             }
             catch (UserException exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
 
@@ -131,30 +138,43 @@ namespace Server.Controllers
 
         public void GetUserById(string[] messageArray)
         {
-            Guid userId = Guid.Parse(messageArray[2]);
-            User userFound = _userRepository.GetUserById(userId);
-
-            string message = ProtocolConstants.Response + ";" + CommandsConstraints.GetUserById + ";" + userId + ";" +
-                             userFound.Ci + ";" + userFound.Username + ";" + userFound.Password + ";";
-
-            if (userFound.DriverAspects != null)
+            try
             {
-                message = message + userFound.DriverAspects.Puntuation + ";";
-                if(userFound.DriverAspects.Reviews.Count == 0) message += "#";
-                foreach (var review in userFound.DriverAspects.Reviews)
+
+                Guid userId = Guid.Parse(messageArray[2]);
+                User userFound = _userRepository.GetUserById(userId);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.GetUserById + ";" + userId +
+                                 ";" +
+                                 userFound.Ci + ";" + userFound.Username + ";" + userFound.Password + ";";
+
+
+                if (userFound.DriverAspects != null)
                 {
-                    message += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
+                    message = message + userFound.DriverAspects.Puntuation + ";";
+                    if (userFound.DriverAspects.Reviews.Count == 0) message += "#";
+                    foreach (var review in userFound.DriverAspects.Reviews)
+                    {
+                        message += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
+                    }
+
+                    message += ";";
+                    if (userFound.DriverAspects.Vehicles.Count == 0) message += "#";
+                    foreach (var vehicle in userFound.DriverAspects.Vehicles)
+                    {
+                        message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer +
+                                   ",";
+                    }
+
                 }
 
-                message += ";";
-                if(userFound.DriverAspects.Vehicles.Count == 0) message += "#";
-                foreach (var vehicle in userFound.DriverAspects.Vehicles)
-                {
-                    message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer + ",";
-                }
-            
+                NetworkHelper.SendMessage(_serverSocket, message);
             }
-            NetworkHelper.SendMessage(_serverSocket, message);
+            catch (UserException exceptionCaught)
+            {
+                string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
+            }
         }
 
         #endregion
