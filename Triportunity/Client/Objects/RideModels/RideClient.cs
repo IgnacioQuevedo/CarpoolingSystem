@@ -13,10 +13,10 @@ namespace Client.Objects.RideModels
     {
         public Guid Id { get; set; }
         public UserClient Driver { get; set; }
-        
+
         public Guid VehicleId { get; set; }
-        
-        public List<UserClient> Passengers { get; set; }
+
+        public ICollection<Guid> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
