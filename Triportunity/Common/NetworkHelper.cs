@@ -1,5 +1,3 @@
-using Client;
-using Server;
 using System;
 using System.CodeDom;
 using System.IO;
@@ -15,14 +13,16 @@ namespace Common
         private static readonly SettingsManager settingsManager = new SettingsManager();
         public static Socket ConnectWithServer()
         {
+            
             IPEndPoint local = new IPEndPoint(
                 IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ClientConfig.LocalPort))
             );
-
+            
             IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ServerConfig.LocalPort))
+                IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.RemoteIp)), 
+                int.Parse(settingsManager.ReadSettings(ClientConfig.RemotePort))
             );
-
+            
             Socket newClientSocket = new Socket(
                 AddressFamily.InterNetwork,
                 SocketType.Stream,
@@ -63,7 +63,7 @@ namespace Common
         {
             var localEndPoint = new IPEndPoint(
                 IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)),
-                int.Parse(settingsManager.ReadSettings(settingsManager.ReadSettings(ServerConfig.LocalPort)))
+                int.Parse(settingsManager.ReadSettings(ServerConfig.LocalPort))
             );
 
             var serverSocket = new Socket(

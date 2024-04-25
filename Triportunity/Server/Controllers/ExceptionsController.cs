@@ -1,15 +1,14 @@
 ﻿using System.Net.Sockets;
-using Common;
-using Server.Repositories;
 
-namespace Server.Controllers;
-
-public class ExceptionsController
+namespace Server.Controllers
 {
-    private static Socket _clientSocket;
-
-    public ExceptionsController(Socket clientSocket)
+    public class ExceptionsController
     {
-        _clientSocket = clientSocket;
+        private static Socket _clientSocket;
+
+        public ExceptionsController(Socket clientSocket)
+        {
+            _clientSocket = clientSocket;
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace Common
             try
             {
                 var appSettings = ConfigurationManager.AppSettings;
-               return appSettings[key] ?? String.Empty;
+                return appSettings[key] ?? String.Empty;
             }
             catch (ConfigurationErrorsException e)
             {

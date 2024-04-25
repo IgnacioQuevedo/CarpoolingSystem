@@ -37,10 +37,6 @@ namespace Server.Objects.Domain
 
             RideValidations();
         }
-        public Ride()
-        {
-        }
-
         private void RideValidations()
         {
             LocationValidator();
