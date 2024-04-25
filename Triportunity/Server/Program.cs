@@ -150,9 +150,6 @@ namespace Server
                         case CommandsConstraints.GetRideById:
                             _rideController.GetRideById(messageArray);
                             break;
-                        case CommandsConstraints.ManageException:
-                            ExceptionsController.HandleException(messageArray);
-                            break;
                     }
                 }
 
@@ -161,10 +158,10 @@ namespace Server
                     Console.WriteLine("Error" + exceptionNotExpected.Message);
                     break;
                 }
-                catch (Exception exception)
-                {
-                    throw new Exception(exception.Message);
-                }
+                //catch (Exception exception)
+                //{
+                //    throw new Exception(exception.Message);
+                //}
             }
 
             NetworkHelper.CloseSocketConnections(clientSocketServerSide);

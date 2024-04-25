@@ -12,10 +12,4 @@ public class ExceptionsController
     {
         _clientSocket = clientSocket;
     }
-    
-    public static void HandleException(string[] messageArray)
-    {
-        string message = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + messageArray;
-        NetworkHelper.SendMessage(_clientSocket, message);
-    }
 }

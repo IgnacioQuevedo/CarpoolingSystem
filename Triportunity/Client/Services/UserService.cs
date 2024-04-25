@@ -30,10 +30,11 @@ namespace Client.Services
 
             NetworkHelper.SendMessage(socket, registerInfo);
 
+            Console.WriteLine("aca se queda");
             string serverResponse = NetworkHelper.ReceiveMessage(socket);
-            
+
             string[] responseArray = serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-            
+
             if (responseArray[0] == ProtocolConstants.Exception)
             {
                 throw new Exception(responseArray[2]);
@@ -47,7 +48,7 @@ namespace Client.Services
                 throw new Exception("Error registering user");
             }
         }
-        
+
         //ok checked
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
@@ -118,9 +119,9 @@ namespace Client.Services
                 NetworkHelper.SendMessage(socket, messageToSend);
 
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
-                
+
                 string[] messageArray = messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
+
                 if (messageArray[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(messageArray[2]);

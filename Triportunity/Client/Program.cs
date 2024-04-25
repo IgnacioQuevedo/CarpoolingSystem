@@ -175,7 +175,7 @@ namespace Client
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
-                LoginOption();
+                MainMenuOptions();
             }
         }
 
@@ -271,7 +271,7 @@ namespace Client
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
                     addNewVehicle = Console.ReadLine();
-                    
+
                     _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 }
             }

@@ -28,7 +28,7 @@ namespace Server.Controllers
         }
 
         #region COMPLETADOS
-        
+
         //ok checked
         public void RegisterUser(string[] requestArray)
         {
@@ -40,11 +40,11 @@ namespace Server.Controllers
                 string repeatedPassword = requestArray[5];
 
                 User userToRegister = new User(ci, username, password, repeatedPassword, null);
+
                 _userRepository.RegisterUser(userToRegister);
-                
+
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; //Ok response
                 NetworkHelper.SendMessage(_serverSocket, message);
-                
             }
             catch (Exception exception)
             {
@@ -52,7 +52,7 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
-        
+
         //ok checked
         public void LoginUser(string[] requestArray)
         {
@@ -111,22 +111,22 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
             }
         }
-        
+
         public void AddVehicle(string[] messageArray)
         {
             try
             {
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
-                
+
                 string imageAllocatedAtAServer = NetworkHelper.ReceiveImage(_serverSocket);
                 Vehicle vehicleToAdd = new Vehicle(vehicleModel, imageAllocatedAtAServer);
-                
+
                 _userRepository.AddVehicle(userId, vehicleToAdd);
-                
-                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";" 
+
+                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
                                      + vehicleToAdd.Id + ";" + vehicleToAdd.VehicleModel + ";" + vehicleToAdd.ImageAllocatedAtAServer;
-                
+
                 NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
             catch (Exception exceptionCaught)
@@ -136,13 +136,12 @@ namespace Server.Controllers
             }
         }
 
-      
+
 
         public void GetUserById(string[] messageArray)
         {
             try
             {
-
                 Guid userId = Guid.Parse(messageArray[2]);
                 User userFound = _userRepository.GetUserById(userId);
 
@@ -180,7 +179,7 @@ namespace Server.Controllers
         }
 
         #endregion
-        
+
         // public static void AddReview(Guid driverId, ReviewClient reviewToAdd)
         // {
         //     try
