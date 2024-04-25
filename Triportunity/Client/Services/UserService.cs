@@ -129,27 +129,18 @@ namespace Client.Services
                 ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
 
                 string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
-
-                string[] driverInfoArray =
+                
+                string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-                string[] vehicles =
-                    driverInfoArray[3].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
+                string vehicleModel = vehicleInfoArray[3];
+                string imageAllocatedAtAServer = vehicleInfoArray[4];
 
-                foreach (var vehicle in vehicles)
-                {
-                    string[] vehicleInfo = vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-
-                    Guid vehicleId = Guid.Parse(vehicleInfo[0]);
-                    string vehicleModel = vehicleInfo[1];
-                    string imageAllocatedAtAServer = vehicleInfo[2];
-
-                    VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
-                    vehiclesOfUser.Add(vehicleClient);
-                }
-
+                VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
+                
+                vehiclesOfUser.Add(vehicleClient);
                 DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
-
                 userFound.DriverAspects = driverInfo;
             }
             else

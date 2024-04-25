@@ -70,7 +70,6 @@ namespace Server.Repositories
 
         public void RegisterDriver(Guid userId, DriverInfo driveInfo)
         {
-            //Ya me avive, el tema es  no se arreglarlo
             User userFound = GetUserById(userId);
             LockManager.StartWriting();
             if (userFound.DriverAspects != null)
@@ -99,8 +98,8 @@ namespace Server.Repositories
 
         public void AddVehicle(Guid id, Vehicle vehicle)
         {
-            LockManager.StartWriting();
             User user = GetUserById(id);
+            LockManager.StartWriting();
             if (user.DriverAspects == null)
             {
                 throw new UserException("User is not a driver");
