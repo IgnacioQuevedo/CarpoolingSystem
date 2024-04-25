@@ -30,7 +30,6 @@ namespace Client.Services
 
             NetworkHelper.SendMessage(socket, registerInfo);
 
-            Console.WriteLine("aca se queda");
             string serverResponse = NetworkHelper.ReceiveMessage(socket);
 
             string[] responseArray = serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -154,6 +153,11 @@ namespace Client.Services
 
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (vehicleInfoArray[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(vehicleInfoArray[2]);
+                }
 
                 Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
                 string vehicleModel = vehicleInfoArray[3];
