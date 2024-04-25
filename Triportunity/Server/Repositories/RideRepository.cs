@@ -7,6 +7,8 @@ using System.Linq;
 using Client.Services;
 using Server.Exceptions;
 using Server.Objects.Domain.UserModels;
+using Server.Objects.Domain.Enums;
+using Server.Objects.Domain.VehicleModels;
 
 namespace Server.Repositories
 {
@@ -14,26 +16,26 @@ namespace Server.Repositories
     {
         public static UserRepository _userRepository = new UserRepository();
 
-        public static void CreateRide(Ride rideToAdd)
+        public  void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
             LockManager.StopWriting();
         }
 
-        public static void JoinRide(Guid userId, Guid rideId)
+        public  void JoinRide(Guid userId, Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToJoin = GetRideById(rideId);
             User user = _userRepository.GetUserById(userId);
 
-            ValidateJoinRide(user, rideToJoin);
-            rideToJoin.Passengers.Add(user);
+            ValidateJoinRide(userId, rideToJoin);
+            rideToJoin.Passengers.Add(userId);
             rideToJoin.AvailableSeats--;
             LockManager.StopWriting();
         }
 
-        private static void ValidateJoinRide(User user, Ride rideToJoin)
+        private  void ValidateJoinRide(Guid user, Ride rideToJoin)
         {
             string exceptionMessage = "";
 
@@ -45,7 +47,7 @@ namespace Server.Repositories
             if (exceptionMessage != "") throw new RideException(exceptionMessage);
         }
 
-        public static Ride GetRideById(Guid rideId)
+        public  Ride GetRideById(Guid rideId)
         {
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
@@ -63,7 +65,7 @@ namespace Server.Repositories
             Ride rideToQuit = GetRideById(rideId);
             User user = _userRepository.GetUserById(userId);
 
-            if (!rideToQuit.Passengers.Contains(user))
+            if (!rideToQuit.Passengers.Contains(userId))
             {
                 throw new RideException("User is not in the ride");
             }
@@ -73,7 +75,7 @@ namespace Server.Repositories
                 throw new RideException("Cannot quit the ride as the departure time has passed.");
             }
 
-            rideToQuit.Passengers.Remove(user);
+            rideToQuit.Passengers.Remove(userId);
             rideToQuit.AvailableSeats++;
             LockManager.StopWriting();
         }
@@ -107,7 +109,7 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public static void DisablePublishedRide(Guid rideId)
+        public void DisablePublishedRide(Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToCancel = GetRideById(rideId);
@@ -129,11 +131,10 @@ namespace Server.Repositories
             return filteredRides;
         }
 
-        public ICollection<Ride> FilterByInitialLocation(string initialLocation)
+        public ICollection<Ride> FilterByInitialLocation(CitiesEnum initialLocation)
         {
             LockManager.StartReading();
             ICollection<Ride> filteredRides = new List<Ride>();
-
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.InitialLocation.Equals(initialLocation))
                 .ToList();
@@ -155,21 +156,13 @@ namespace Server.Repositories
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
             LockManager.StartReading();
-            ICollection<Review> reviews = new List<Review>();
-
-            Ride actualRide = GetRideById(ride);
-            reviews = actualRide.Driver.DriverAspects.Reviews;
-
-            if (reviews == null)
-            {
-                throw new DriverInfoException("No reviews found");
-            }
-
+            Ride rideToGetReviews = GetRideById(ride);
+            User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
             LockManager.StopReading();
-            return reviews;
+            return user.DriverAspects.Reviews;
         }
 
-        public static void UpdateRide(Ride rideWithUpdates)
+        public void UpdateRide(Ride rideWithUpdates)
         {
             LockManager.StartWriting();
             Ride rideToUpdate = GetRideById(rideWithUpdates.Id);
@@ -179,7 +172,7 @@ namespace Server.Repositories
             rideToUpdate.InitialLocation = rideWithUpdates.InitialLocation;
             rideToUpdate.PricePerPerson = rideWithUpdates.PricePerPerson;
             rideToUpdate.PetsAllowed = rideWithUpdates.PetsAllowed;
-            rideToUpdate.PhotoPath = rideWithUpdates.PhotoPath;
+            rideToUpdate.VehicleId = rideWithUpdates.VehicleId;
             LockManager.StopWriting();
         }
     }

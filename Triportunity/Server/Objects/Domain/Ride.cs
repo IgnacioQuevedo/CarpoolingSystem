@@ -9,31 +9,29 @@ namespace Server.Objects.Domain
     public class Ride
     {
         public Guid Id { get; set; }
-        public User Driver { get; set; }
+        public Guid DriverId { get; set; }
         public bool Published { get; set; }
-        public List<User> Passengers { get; set; }
+        public List<Guid> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
         public int AvailableSeats { get; set; }
-        public int TotalSeats { get; set; }
         public double PricePerPerson { get; set; }
         public bool PetsAllowed { get; set; }
-        public string PhotoPath { get; set; }
+        public Guid VehicleId { get; set; }
 
-        public Ride(User driver, List<User> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, int totalSeats, double pricePerPerson, bool petsAllowed, string photoPath)
+        public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed,Guid vehicleId)
         {
             Id = new Guid();
-            Driver = driver;
+            DriverId = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
             EndingLocation = endingLocation;
             DepartureTime = departureTime;
             AvailableSeats = availableSeats;
-            TotalSeats = totalSeats;
             PricePerPerson = pricePerPerson;
             PetsAllowed = petsAllowed;
-            PhotoPath = photoPath;
+            VehicleId = vehicleId;
             Published = true;
 
             RideValidations();
@@ -43,7 +41,6 @@ namespace Server.Objects.Domain
         {
             LocationValidator();
             SeatsValidator();
-            PhotoPathValidator();
         }
 
         private void LocationValidator()
@@ -60,17 +57,9 @@ namespace Server.Objects.Domain
         {
             int minSeatsRequired = 1;
 
-            if (AvailableSeats < minSeatsRequired || TotalSeats < minSeatsRequired)
+            if (AvailableSeats < minSeatsRequired)
             {
                 throw new RideException("You must have at least " + minSeatsRequired + " seat available");
-            }
-        }
-
-        private void PhotoPathValidator()
-        {
-            if (PhotoPath.Length < 1)
-            {
-                throw new RideException("You must add a photo of your car");
             }
         }
 

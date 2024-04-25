@@ -24,11 +24,13 @@ namespace Server
         private static UserController _userController;
         private static UserRepository _userRepository;
         private static RideRepository _rideRepository;
+        private static RideController _rideController;
+
         public static Socket _serverSocket;
         public static void Main(string[] args)
         {
             _serverSocket = NetworkHelper.DeployServerSocket();
-            
+
             _userRepository = new UserRepository();
             _rideRepository = new RideRepository();
 
@@ -82,108 +84,72 @@ namespace Server
                             _userController.CreateDriver(messageArray);
                             break;
                         case CommandsConstraints.GetUserById:
-                            
+
                             _userController.GetUserById(messageArray);
                             break;
 
-                        case CommandsConstraints.GetCarImage:
-
-                            userId = Guid.Parse(messageArray[2]);
-                            Guid vehicleId = Guid.Parse(messageArray[3]);
-
-                            Vehicle vehicleFound = _userRepository.GetVehicleById(userId, vehicleId);
-
-                            NetworkHelper.SendImage(clientSocketServerSide, vehicleFound.ImageAllocatedAtAServer);
-
-                            break;
-
                         case CommandsConstraints.AddVehicle:
-                            
+
                             _userController.AddVehicle(messageArray);
                             break;
 
                         case CommandsConstraints.CreateRide:
 
-                            string[] rideInfoArray = message.Split(new string[] { ";" },
-                                StringSplitOptions.RemoveEmptyEntries);
-
-                            List<Guid> passengers = new List<Guid>();
-                            for (int i = 8; i < rideInfoArray.Length; i++)
-                            {
-                                Guid passengerId = Guid.Parse(rideInfoArray[i]);
-                                passengers.Add(passengerId);
-                            }
-
-                            Guid id = Guid.Parse(rideInfoArray[2]);
-                            CitiesEnum initialLocation = (CitiesEnum)int.Parse(rideInfoArray[3]);
-                            CitiesEnum endingLocation = (CitiesEnum)int.Parse(rideInfoArray[4]);
-                            DateTime departureTime = DateTime.Parse(rideInfoArray[5]);
-                            int availableSeats = int.Parse(rideInfoArray[6]);
-                            double price = double.Parse(rideInfoArray[7]);
-                            bool pets = bool.Parse(rideInfoArray[8]);
-                            string path = rideInfoArray[9];
-
-                            // Ride ride = new Ride(id, initialLocation, endingLocation, departureTime, availableSeats
-                            //     , price, pets, path, passengers);
-
-                            // RideRepository.CreateRide(ride);
+                            _rideController.CreateRide(messageArray);
 
                             break;
 
                         case CommandsConstraints.JoinRide:
-                            string joinRideInfo = NetworkHelper.ReceiveMessage(_serverSocket);
 
-                            string[] rideArray = joinRideInfo.Split(new string[] { ";" },
-                                StringSplitOptions.RemoveEmptyEntries);
-
-                            userId = Guid.Parse(rideArray[2]);
-                            Guid rideId = Guid.Parse(rideArray[3]);
-
-                            RideRepository.JoinRide(userId, rideId);
+                            _rideController.JoinRide(messageArray);
 
                             break;
 
                         case CommandsConstraints.EditRide:
-                            string editedRide = NetworkHelper.ReceiveMessage(_serverSocket);
-
-                            string[] editInfo = editedRide.Split(new string[] { ";" },
-                                StringSplitOptions.RemoveEmptyEntries);
-
-                            Guid originalId = Guid.Parse(editInfo[2]);
-                            CitiesEnum initialLocationEdit = (CitiesEnum)int.Parse(editInfo[3]);
-                            CitiesEnum finalLocation = (CitiesEnum)int.Parse(editInfo[4]);
-                            DateTime deapartureTimeEdit = DateTime.Parse(editInfo[5]);
-                            int priceEdit = int.Parse(editInfo[6]);
-                            bool petsAllowed = bool.Parse(editInfo[7]);
-                            string photoPath = editInfo[8];
-                            bool published = bool.Parse(editInfo[9]);
-
-                            // ModifyRideRequestDto udaptedRide = new ModifyRideRequestDto(originalId, initialLocationEdit,
-                            //     finalLocation, deapartureTimeEdit, priceEdit, petsAllowed, photoPath, published);
-                            //
-                            // _rideRepository.UpdateRide(udaptedRide);
+                            _rideController.EditRide(messageArray);
 
                             break;
 
                         case CommandsConstraints.DeleteRide:
-                            Guid rideToDeleteId = Guid.Parse(NetworkHelper.ReceiveMessage(_serverSocket));
-
-                            _rideRepository.DeleteRide(rideToDeleteId);
+                            _rideController.DeleteRide(messageArray);
 
                             break;
 
                         case CommandsConstraints.QuitRide:
-                            string quitRideInfo = NetworkHelper.ReceiveMessage(_serverSocket);
-
-                            string[] quitRideArray = quitRideInfo.Split(new string[] { ";" },
-                                StringSplitOptions.RemoveEmptyEntries);
-
-                            Guid userQuitId = Guid.Parse(quitRideArray[2]);
-                            Guid rideQuitId = Guid.Parse(quitRideArray[3]);
-
-                            _rideRepository.QuitRide(userQuitId, rideQuitId);
+                            _rideController.QuitRide(messageArray);
 
                             break;
+
+                        case CommandsConstraints.FilterRidesByInitialLocation:
+                            _rideController.FilterRidesByInitialLocation(messageArray);
+                            break;
+                        case CommandsConstraints.FilterRidesByEndingLocation:
+                            _rideController.FilterRidesByEndingLocation(messageArray);
+                            break;
+
+                        case CommandsConstraints.FilterRidesByPrice:
+                            _rideController.FilterRidesByPrice(messageArray);
+                            break;
+                        case CommandsConstraints.GetAllRides:
+                            _rideController.GetAllRides();
+                            break;
+
+                        case CommandsConstraints.GetCarImage:
+                            _rideController.GetCarImage(messageArray);
+                            break;
+
+                        case CommandsConstraints.GetDriverReviews:
+                            _rideController.GetDriverReviews(messageArray);
+                            break;
+
+                         case CommandsConstraints.DisableRide:
+                            _rideController.DisableRide(messageArray);
+                            break;
+
+                        case CommandsConstraints.GetRideById:
+                            _rideController.GetRideById(messageArray);
+                            break;
+                       
                     }
                 }
 

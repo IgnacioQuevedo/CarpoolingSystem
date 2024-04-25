@@ -20,9 +20,8 @@ namespace Common
         public const int GetAllRides = 13;
         public const int GetUserById = 14;
         public const int GetCarImage = 15;
-   
-        
-        
         public const int AddVehicle = 16;
+        public const int DisableRide = 17;
+        public const int GetRideById = 18;
     }
 }

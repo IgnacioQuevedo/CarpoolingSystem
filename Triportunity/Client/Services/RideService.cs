@@ -23,10 +23,18 @@ namespace Client.Services
         {
             try
             {
-                string message = request.Driver.Id.ToString() + ";" + request.InitialLocation.ToString() + ";" +
-                                 request.EndingLocation.ToString()
-                                 + ";" + request.DepartureTime.ToString() + ";" + request.PricePerPerson.ToString() +
-                                 ";";
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateRide + ";" +
+                    request.DriverId;
+
+                foreach (var passenger in request.Passengers)
+                {
+                    message += ";" + passenger;
+                }
+
+                message += ";" + request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
+                    ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
+                    + ";" + request.VehicleId;
+
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
@@ -39,7 +47,8 @@ namespace Client.Services
         {
             try
             {
-                string message = request.PassengerToJoin.Id.ToString() + ";" + request.RideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.JoinRide + ";" +
+                    request.RideId + ";" + request.PassengerToJoin;
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
@@ -78,10 +87,18 @@ namespace Client.Services
         {
             try
             {
-                string message = request.Id.ToString() + ";" + request.InitialLocation.ToString() + ";" +
-                                 request.EndingLocation.ToString() + ";" + request.DepartureTime.ToString() + ";" +
-                                 request.PricePerPerson.ToString() + ";" + request.PetsAllowed.ToString() + ";" +
-                                 request.PhotoPath + ";";
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
+                    request.Id + ";";
+
+                foreach (var passenger in request.Passengers)
+                {
+                    message += passenger + ",";
+                }
+
+                message += request.InitialLocation + ";" + request.EndingLocation + ";" +
+                    request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
+                    + ";" + request.PetsAllowed + ";" + request.VehicleId
+                    ;
                 NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
@@ -107,23 +124,25 @@ namespace Client.Services
         {
             try
             {
-                string message = id.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" + id.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                return new RideClient
+                RideClient ride = new RideClient
                 {
                     Id = Guid.Parse(rideData[2]),
                     Driver = new UserClient
                     {
                         Username = rideData[3]
                     },
-                    InitialLocation = (CitiesEnum)(int.Parse(rideData[6])),
-                    EndingLocation = (CitiesEnum)(int.Parse(rideData[7])),
-                    DepartureTime = DateTime.Parse(rideData[8]),
-                    PricePerPerson = double.Parse(rideData[9]),
-                    PetsAllowed = bool.Parse(rideData[10]),
+                    InitialLocation = (CitiesEnum)(int.Parse(rideData[4])),
+                    EndingLocation = (CitiesEnum)(int.Parse(rideData[5])),
+                    DepartureTime = DateTime.Parse(rideData[6]),
+                    PricePerPerson = double.Parse(rideData[7]),
+                    PetsAllowed = bool.Parse(rideData[8])
                 };
+
+                return ride;
             }
             catch (Exception e)
             {
@@ -137,7 +156,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" +
-                                 minPrize.ToString() + ";" + maxPrice.ToString();
+                                                 minPrize.ToString() + ";" + maxPrice.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -204,6 +223,7 @@ namespace Client.Services
             }
         }
 
+
         public ICollection<RideClient> GetRidesFilteredByEndingLocation(CitiesEnum endingLocation)
         {
             try
@@ -244,8 +264,7 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
-                                 rideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" + rideId.ToString();
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -269,24 +288,6 @@ namespace Client.Services
             }
         }
 
-        public void UpdateRide(RideClient rideWithUpdates)
-        {
-            try
-            {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
-                                 rideWithUpdates.Id.ToString() + ";" + rideWithUpdates.AvailableSeats.ToString() +
-                                 ";" + rideWithUpdates.DepartureTime.ToString() + ";" +
-                                 rideWithUpdates.EndingLocation.ToString() +
-                                 ";" + rideWithUpdates.InitialLocation.ToString() + ";" +
-                                 rideWithUpdates.PricePerPerson.ToString()
-                                 + ";" + rideWithUpdates.PetsAllowed.ToString();
-                NetworkHelper.SendMessage(_clientSocket, message);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
 
         public ICollection<RideClient> GetAllRides()
         {
@@ -310,7 +311,8 @@ namespace Client.Services
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
                         PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8])
+                        PetsAllowed = bool.Parse(ridesData[i + 8]),
+                        VehicleId = Guid.Parse(ridesData[i + 9])
                     });
                 }
 
@@ -325,15 +327,15 @@ namespace Client.Services
 
         public void GetCarImageById(Guid rideSelectedId)
         {
-            RideClient ride = GetRideById(rideSelectedId);
-
-            string getImage = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + ride.Driver.Id.ToString() +
-                              ";" + ride.VehicleId.ToString();
-
-            NetworkHelper.SendMessage(_clientSocket, getImage);
-
-            NetworkHelper.ReceiveImage(_clientSocket);
-            Console.WriteLine("Image received!, see it at your destination folder.");
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + rideSelectedId.ToString();
+                NetworkHelper.SendMessage(_clientSocket, message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }

@@ -282,7 +282,7 @@ namespace Client
             Console.WriteLine(
                 "You will have to complete the following steps to have your ride created. Let's start with the creation of your ride!");
 
-            List<UserClient> passengers = new List<UserClient>();
+            List<Guid> passengers = new List<Guid>();
 
             Guid vehicleIdSelected = Guid.Parse(PickVehicle());
 
@@ -300,20 +300,12 @@ namespace Client
 
             bool petsAllowed = DecideIfPetsAreAllowed();
 
-            string photoPath = IntroducePhotoPath();
 
-            CreateRideRequest rideReq = new CreateRideRequest(_userLogged, vehicleIdSelected, passengers,
+            CreateRideRequest rideReq = new CreateRideRequest(_userLogged.Id, passengers,
                 initialLocation, endingLocation,
-                departureDate, availableSeats, pricePerPerson, petsAllowed, photoPath);
+                departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
             _rideService.CreateRide(rideReq);
-        }
-
-
-        private static string IntroducePhotoPath()
-        {
-            Console.Write("Introduce your photo path");
-            return Console.ReadLine();
         }
 
         private static bool DecideIfPetsAreAllowed()
@@ -511,7 +503,7 @@ namespace Client
             RideClient selectedRide = SelectRideFromList(rides);
 
 
-            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged);
+            JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
             _rideService.JoinRide(joinReq);
         }
@@ -603,10 +595,11 @@ namespace Client
 
             bool petsAllowed = DecideIfPetsAreAllowed();
 
-            string photoPath = IntroducePhotoPath();
+            Guid vehicleId = Guid.Parse(PickVehicle());
 
-            ModifyRideRequest modifyRideReq = new ModifyRideRequest(initialLocation, endingLocation, departureDate,
-                pricePerPerson, petsAllowed, photoPath);
+
+            ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id, rideSelected.Passengers,initialLocation, endingLocation, departureDate,
+                pricePerPerson, petsAllowed, vehicleId);
 
             _rideService.ModifyRide(modifyRideReq);
         }
