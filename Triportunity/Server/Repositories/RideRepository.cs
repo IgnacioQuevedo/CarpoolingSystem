@@ -16,14 +16,14 @@ namespace Server.Repositories
     {
         public static UserRepository _userRepository = new UserRepository();
 
-        public  void CreateRide(Ride rideToAdd)
+        public void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
             LockManager.StopWriting();
         }
 
-        public  void JoinRide(Guid userId, Guid rideId)
+        public void JoinRide(Guid userId, Guid rideId)
         {
             LockManager.StartWriting();
             Ride rideToJoin = GetRideById(rideId);
@@ -35,7 +35,7 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        private  void ValidateJoinRide(Guid user, Ride rideToJoin)
+        private void ValidateJoinRide(Guid user, Ride rideToJoin)
         {
             string exceptionMessage = "";
 
@@ -47,7 +47,7 @@ namespace Server.Repositories
             if (exceptionMessage != "") throw new RideException(exceptionMessage);
         }
 
-        public  Ride GetRideById(Guid rideId)
+        public Ride GetRideById(Guid rideId)
         {
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
@@ -82,29 +82,33 @@ namespace Server.Repositories
 
         public ICollection<Ride> GetRides()
         {
-            LockManager.StartReading();
-            ICollection<Ride> rides = (ICollection<Ride>)MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Published == true);
-            if (rides == null)
+            ICollection<Ride> rides = new List<Ride>();
+            rides = MemoryDatabase.GetInstance().Rides;
+
+            ICollection<Ride> availableRides = new List<Ride>();
+
+            foreach (var ride in rides)
+            {
+                if (ride.Published == true && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
+                {
+                    availableRides.Add(ride);
+                }
+            }
+
+            if (rides.Count == 0)
             {
                 throw new RideException("No rides found");
             }
 
-            foreach (var ride in rides)
-            {
-                if (ride.DepartureTime <= DateTime.Now)
-                {
-                    DeleteRide(ride.Id);
-                }
-            }
-
-            LockManager.StopReading();
             return rides;
         }
 
         public void DeleteRide(Guid rideId)
         {
+            Ride rideToDelete = new Ride();
+            rideToDelete = GetRideById(rideId);
+            
             LockManager.StartWriting();
-            Ride rideToDelete = GetRideById(rideId);
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
             LockManager.StopWriting();
         }
