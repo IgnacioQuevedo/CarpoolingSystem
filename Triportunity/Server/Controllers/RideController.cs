@@ -204,48 +204,20 @@ namespace Server.Controllers
             }
         }
 
-        public void GetDriverReviews(string[] messageArray)
-        {
-            try
-            {
-                Guid userId = Guid.Parse(messageArray[2]);
-                User user = _userRepository.GetUserById(userId);
-
-                if (user.DriverAspects == null)
-                {
-                    throw new Exception("User is not a driver");
-                }
-
-                string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetDriverReviews + ";";
-
-                foreach (var review in user.DriverAspects.Reviews)
-                {
-                    response += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
-                }
-
-                NetworkHelper.SendMessage(_clientSocket, response);
-            }
-            catch (Exception exceptionCaught)
-            {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
-            }
-        }
-
         public void DisableRide(string[] messageArray)
         {
             try
             {
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DisablePublishedRide(rideId);
-        
+
             }
             catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
         }
-        
+
         public void FilterRidesByPrice(string[] messageArray)
         {
             try
@@ -275,6 +247,37 @@ namespace Server.Controllers
                                 ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
                                 + ride.VehicleId + ",";
+                }
+
+                NetworkHelper.SendMessage(_clientSocket, response);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error: " + e.Message);
+            }
+        }
+
+        public void GetDriverReviews(string[] messageArray)
+        {
+            try
+            {
+                Guid rideId = Guid.Parse(messageArray[2]);
+                Ride ride = _rideRepository.GetRideById(rideId);
+
+                string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetDriverReviews + ";";
+
+                User user = _userRepository.GetUserById(ride.DriverId);
+
+                ICollection<Review> reviews = user.DriverAspects.Reviews;
+
+                if (reviews.Count == 0)
+                {
+                    response += "#";
+                }
+
+                foreach (var review in reviews)
+                {
+                    response += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
@@ -316,7 +319,25 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
-        
-        
+        public void AddReview(string[] messageArray)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(messageArray[2]);
+                double punctuation = double.Parse(messageArray[3]);
+                string comment = messageArray[4];
+
+                Review review = new Review(punctuation, comment);
+
+                _rideRepository.AddReview(userId, review);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error: " + e.Message);
+            }
+        }
+
+
+
     }
 }

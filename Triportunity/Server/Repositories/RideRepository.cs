@@ -172,19 +172,6 @@ namespace Server.Repositories
             return filteredRides;
         }
 
-        public ICollection<Review> GetDriverReviews(Guid ride)
-        {
-            Ride rideToGetReviews = GetRideById(ride);
-
-            LockManager.StartReading();
-
-            User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
-
-            LockManager.StopReading();
-
-            return user.DriverAspects.Reviews;
-        }
-
         public void UpdateRide(Ride rideWithUpdates)
         {
             Ride rideToUpdate = GetRideById(rideWithUpdates.Id);
@@ -197,6 +184,24 @@ namespace Server.Repositories
             rideToUpdate.PetsAllowed = rideWithUpdates.PetsAllowed;
             rideToUpdate.VehicleId = rideWithUpdates.VehicleId;
             LockManager.StopWriting();
+        }
+
+        public void AddReview(Guid rideId, Review review)
+        {
+            Ride ride = GetRideById(rideId);
+            User driver = _userRepository.GetUserById(ride.DriverId);
+            LockManager.StartWriting();
+            driver.DriverAspects.Reviews.Add(review);
+            LockManager.StopWriting();
+        }
+
+        public ICollection<Review> GetDriverReviews(Guid ride)
+        {
+            LockManager.StartReading();
+            Ride rideToGetReviews = GetRideById(ride);
+            User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
+            LockManager.StopReading();
+            return user.DriverAspects.Reviews;
         }
     }
 }

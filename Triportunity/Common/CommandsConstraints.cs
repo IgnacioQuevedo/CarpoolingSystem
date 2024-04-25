@@ -5,9 +5,9 @@ namespace Common
         public const int Login = 1;
         public const int Register = 2;
         public const int CreateRide = 3;
-        
-        
-        
+
+
+
         public const int JoinRide = 4;
         public const int EditRide = 5;
         public const int DeleteRide = 6;
@@ -24,5 +24,6 @@ namespace Common
         public const int DisableRide = 17;
         public const int GetRideById = 18;
         public const int ManageException = 19;
+        public const int AddReview = 20;
     }
 }

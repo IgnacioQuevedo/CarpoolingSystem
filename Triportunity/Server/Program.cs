@@ -143,6 +143,10 @@ namespace Server
                         case CommandsConstraints.GetRideById:
                             _rideController.GetRideById(messageArray);
                             break;
+
+                        case CommandsConstraints.AddReview:
+                            _rideController.AddReview(messageArray);
+                            break;
                     }
                 }
 
