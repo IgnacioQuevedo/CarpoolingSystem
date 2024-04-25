@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using Client.Objects.EnumsModels;
@@ -519,10 +520,7 @@ namespace Client
             try
             {
                 ICollection<RideClient> rides = _rideService.GetAllRides();
-
-                List<RideClient> rideClients = new List<RideClient>(rides);
-
-                RideClient selectedRide = SelectRideFromList(rideClients);
+                RideClient selectedRide = SelectRideFromList(rides.ToList());
 
 
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
@@ -545,22 +543,26 @@ namespace Client
 
             _optionSelected = Console.ReadLine();
 
-            if (int.TryParse(_optionSelected, out int optionValue))
+            string[] parts = _optionSelected.Split('-');
+
+            int optionValue;
+
+            if (int.TryParse(parts[0].Trim(), out optionValue))
             {
                 if (optionValue <= rides.Count)
                 {
-                    RideClient rideSelected = rides[optionValue - 1];
+                    RideClient rideSelected = rides[optionValue];
                     Console.WriteLine(
                         $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
                     Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
-                    Console.WriteLine("Price: ${rideSelected.PricePerPerson}");
+                    Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
 
                     Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
                     string seeDetails = Console.ReadLine();
                     if (seeDetails == "Y")
                     {
                         Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats);
-                        Console.WriteLine("Pets allowed: " + "rideSelected.PetsAllowed");
+                        Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                         Console.WriteLine("Do you want to see the car image?");
                         if (seeDetails == "Y")
@@ -590,7 +592,8 @@ namespace Client
             {
                 actualRide = rides[i];
                 Console.WriteLine(
-                    $"1- From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} Date of departure: {actualRide.DepartureTime.ToShortDateString()} Price per person: ${actualRide.PricePerPerson}");
+                    $" {i} - From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} With date of departure: " +
+                    $"{actualRide.DepartureTime.ToShortDateString()} and with a Price per person of : ${actualRide.PricePerPerson}");
             }
         }
 

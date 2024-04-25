@@ -38,8 +38,8 @@ namespace Client.Services
                     message += "#";
                 }
 
-                message = ";";
-                
+                message += ";";
+
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
                            ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
                            + ";" + request.VehicleId;
@@ -138,19 +138,29 @@ namespace Client.Services
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
                 RideClient ride = new RideClient
                 {
                     Id = Guid.Parse(rideData[2]),
-                    Driver = new UserClient
-                    {
-                        Username = rideData[3]
-                    },
+                    DriverId = Guid.Parse(rideData[3]),
+                    Passengers = new List<Guid>(),
                     InitialLocation = (CitiesEnum)(int.Parse(rideData[4])),
                     EndingLocation = (CitiesEnum)(int.Parse(rideData[5])),
                     DepartureTime = DateTime.Parse(rideData[6]),
-                    PricePerPerson = double.Parse(rideData[7]),
-                    PetsAllowed = bool.Parse(rideData[8])
+                    AvailableSeats = int.Parse(rideData[7]),
+                    PricePerPerson = double.Parse(rideData[8]),
+                    PetsAllowed = bool.Parse(rideData[9])
                 };
+
+                if (rideData[4] != "#")
+                {
+                    string[] passengers =
+                        rideData[4].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var passenger in passengers)
+                    {
+                        ride.Passengers.Add(Guid.Parse(passenger));
+                    }
+                }
 
                 return ride;
             }
@@ -175,10 +185,7 @@ namespace Client.Services
                     rides.Add(new RideClient
                     {
                         Id = Guid.Parse(ridesData[i + 2]),
-                        Driver = new UserClient
-                        {
-                            Username = ridesData[i + 3]
-                        },
+                        DriverId = Guid.Parse(ridesData[i + 3]),
                         InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
@@ -210,10 +217,7 @@ namespace Client.Services
                     rides.Add(new RideClient
                     {
                         Id = Guid.Parse(ridesData[i + 2]),
-                        Driver = new UserClient
-                        {
-                            Username = ridesData[i + 3]
-                        },
+                        DriverId = Guid.Parse(ridesData[i + 3]),
                         InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
@@ -246,10 +250,7 @@ namespace Client.Services
                     rides.Add(new RideClient
                     {
                         Id = Guid.Parse(ridesData[i + 2]),
-                        Driver = new UserClient
-                        {
-                            Username = ridesData[i + 3]
-                        },
+                        DriverId = Guid.Parse(ridesData[i + 3]),
                         InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
                         EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
                         DepartureTime = DateTime.Parse(ridesData[i + 6]),
@@ -299,30 +300,47 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetAllRides;
-                
-                NetworkHelper.SendMessage(_clientSocket, message);
-                
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
                 ICollection<RideClient> rides = new List<RideClient>();
-                for (int i = 0; i < ridesData.Length; i += 7)
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetAllRides;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
+
+                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                string[] allRides = ridesData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+
+                for (int i = 0; i < allRides.Length; i++)
                 {
+                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    ICollection<Guid> passengers = new List<Guid>();
+
+                    if (!rideInfo[2].Equals("#"))
+                    {
+                        string[] passengersString =
+                            rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var passenger in passengersString)
+                        {
+                            passengers.Add(Guid.Parse(passenger));
+                        }
+                    }
+
+                    DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
+
                     rides.Add(new RideClient
                     {
-                        Id = Guid.Parse(ridesData[i + 2]),
-                        Driver = new UserClient
-                        {
-                            Username = ridesData[i + 3]
-                        },
-                        InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
-                        EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
-                        DepartureTime = DateTime.Parse(ridesData[i + 6]),
-                        PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8]),
-                        VehicleId = Guid.Parse(ridesData[i + 9])
+                        Id = Guid.Parse(rideInfo[0]),
+                        DriverId = Guid.Parse(rideInfo[1]),
+                        Passengers = passengers,
+                        InitialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideInfo[3]),
+                        EndingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideInfo[4]),
+                        DepartureTime = departureTime,
+                        AvailableSeats = int.Parse(rideInfo[8]),
+                        PricePerPerson = double.Parse(rideInfo[9]),
+                        PetsAllowed = bool.Parse(rideInfo[10]),
+                        VehicleId = Guid.Parse(rideInfo[11])
                     });
                 }
 

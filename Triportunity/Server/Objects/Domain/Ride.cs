@@ -8,7 +8,7 @@ namespace Server.Objects.Domain
 {
     public class Ride
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } 
         public Guid DriverId { get; set; }
         public bool Published { get; set; }
         public List<Guid> Passengers { get; set; }
@@ -23,7 +23,7 @@ namespace Server.Objects.Domain
         public Ride() { }
         public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed, Guid vehicleId)
         {
-            Id = new Guid();
+            Id = Guid.NewGuid();
             DriverId = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
@@ -37,6 +37,9 @@ namespace Server.Objects.Domain
 
             RideValidations();
         }
+        public Ride()
+        {
+        }
 
         private void RideValidations()
         {
@@ -48,7 +51,7 @@ namespace Server.Objects.Domain
         {
             bool bothLocationsBelongToCitiesEnum = Enum.IsDefined(typeof(CitiesEnum), EndingLocation) && Enum.IsDefined(typeof(CitiesEnum), InitialLocation);
 
-            if (bothLocationsBelongToCitiesEnum)
+            if (!bothLocationsBelongToCitiesEnum)
             {
                 throw new RideException("Locations must match with one city");
             }

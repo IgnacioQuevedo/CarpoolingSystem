@@ -105,17 +105,25 @@ namespace Server.Repositories
 
             foreach (var ride in rides)
             {
-                if (ride.DepartureTime <= DateTime.Now)
+                if (ride.Published == true && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
                 {
-                    DeleteRide(ride.Id);
+                    availableRides.Add(ride);
                 }
             }
+
+            if (rides.Count == 0)
+            {
+                throw new RideException("No rides found");
+            }
+
             return rides;
         }
 
         public void DeleteRide(Guid rideId)
         {
+
             Ride rideToDelete = GetRideById(rideId);
+
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
             LockManager.StopWriting();

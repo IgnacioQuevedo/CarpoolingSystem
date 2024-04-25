@@ -27,24 +27,29 @@ namespace Server.Controllers
         {
             try
             {
-                Guid id = Guid.Parse(messageArray[2]);
-                
-                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
-                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
-                DateTime departureTime = DateTime.Parse(messageArray[5]);
-                int availableSeats = int.Parse(messageArray[6]);
-                double price = double.Parse(messageArray[7]);
-                bool pets = bool.Parse(messageArray[8]);
-                Guid vehicleId = Guid.Parse(messageArray[9]);
-
-
                 List<Guid> passengers = new List<Guid>();
+                
+                Guid id = Guid.Parse(messageArray[2]);
 
-                foreach (var passenger in messageArray[10].Split(new string[] { "," },
-                             StringSplitOptions.RemoveEmptyEntries))
+                if (messageArray[3] != "#")
                 {
-                    passengers.Add(Guid.Parse(passenger));
+                    foreach (var passenger in messageArray[10].Split(new string[] { "," },
+                                 StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        passengers.Add(Guid.Parse(passenger));
+                    }
                 }
+                
+                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
+                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[5]);
+                DateTime departureTime = DateTime.Parse(messageArray[6]);
+                int availableSeats = int.Parse(messageArray[7]);
+                double price = double.Parse(messageArray[8]);
+                bool pets = bool.Parse(messageArray[9]);
+                Guid vehicleId = Guid.Parse(messageArray[10]);
+
+
+              
 
                 Ride ride = new Ride(id, passengers, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
@@ -247,6 +252,10 @@ namespace Server.Controllers
                 {
                     response += ride.Id + ":" + ride.DriverId + ":";
 
+                    if (ride.Passengers.Count == 0)
+                    {
+                        response += "#";
+                    }
                     foreach (var passenger in ride.Passengers)
                     {
                         response += passenger + ",";
