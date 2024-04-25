@@ -28,7 +28,8 @@ namespace Server.Controllers
         }
 
         #region COMPLETADOS
-
+        
+        //ok checked
         public void RegisterUser(string[] requestArray)
         {
             try
@@ -45,13 +46,14 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_serverSocket, message);
                 
             }
-            catch (UserException exception)
+            catch (Exception exception)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exception.Message;
                 NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
-
+        
+        //ok checked
         public void LoginUser(string[] requestArray)
         {
             try
@@ -84,14 +86,14 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_serverSocket, messageLogin);
             }
 
-            catch (UserException exceptionCaught)
+            catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }
         }
 
-        
+        //en proceso
         public void CreateDriver(string[] messageArray)
         {
             try
@@ -103,7 +105,7 @@ namespace Server.Controllers
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userId;
                 NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
-            catch (UserException exceptionCaught)
+            catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
@@ -127,7 +129,7 @@ namespace Server.Controllers
                 
                 NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
-            catch (UserException exceptionCaught)
+            catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
@@ -170,7 +172,7 @@ namespace Server.Controllers
 
                 NetworkHelper.SendMessage(_serverSocket, message);
             }
-            catch (UserException exceptionCaught)
+            catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);

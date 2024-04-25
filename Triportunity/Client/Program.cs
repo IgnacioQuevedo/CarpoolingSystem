@@ -170,6 +170,7 @@ namespace Client
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
                 _userLogged = _userService.LoginClient(clientSocket, loginUserRequest);
+                PossibleActionsToBeDoneByLoggedUser();
             }
             catch (Exception exception)
             {

@@ -20,6 +20,7 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
+        //ok checked
         public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
@@ -46,7 +47,8 @@ namespace Client.Services
                 throw new Exception("Error registering user");
             }
         }
-
+        
+        //ok checked
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
             string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
@@ -59,6 +61,7 @@ namespace Client.Services
 
             string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
+            //Validamos exception
             if (loginArray[0] != ProtocolConstants.Exception)
             {
                 Guid id = Guid.Parse(loginArray[2]);
@@ -94,10 +97,8 @@ namespace Client.Services
                     }
 
                     driverInfo = new DriverInfoClient(reviews, vehicles);
-
-
-                    resultUser = new UserClient(id, ci, username, password, driverInfo);
                 }
+                resultUser = new UserClient(id, ci, username, password, driverInfo);
             }
             else
             {
@@ -107,17 +108,28 @@ namespace Client.Services
             return resultUser;
         }
 
-//REVISADO
+        //proceso
         public void CreateDriver(Socket socket, Guid userId)
         {
             UserClient userToBeDriver = GetUserById(_clientSocket, userId);
             if (userToBeDriver.DriverAspects == null)
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
-                NetworkHelper.SendMessage(socket, message);
+                string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                NetworkHelper.SendMessage(socket, messageToSend);
 
-                string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
-                if (messageArray == null)
+                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                
+                string[] messageArray = messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                
+                if (messageArray[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(messageArray[2]);
+                }
+                else if (messageArray[0] == ProtocolConstants.Response)
+                {
+                    Console.WriteLine("You are now a driver");
+                }
+                else
                 {
                     throw new Exception("Error creating driver");
                 }
