@@ -210,7 +210,8 @@ namespace Client
                 Console.WriteLine("Select 2 - To join a Ride");
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To view, edit and delete your created rides");
-                Console.WriteLine("Select 5 - To close the app");
+                Console.WriteLine("Select 5 - To add a review");
+                Console.WriteLine("Select 6 - To close the app");
 
                 _optionSelected = Console.ReadLine();
             }
@@ -219,11 +220,12 @@ namespace Client
                 Console.WriteLine("Select 1 - If you want to be registered as a driver");
                 Console.WriteLine("Select 2 - To join a Ride");
                 Console.WriteLine("Select 3 - To Quit a Ride");
-                Console.WriteLine("Select 4 - To close the app");
+                Console.WriteLine("Select 4 - To add a review");
+                Console.WriteLine("Select 5 - To close the app");
                 _optionSelected = Console.ReadLine();
             }
 
-            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 5)
+            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 6)
             {
                 WrongDigitInserted();
                 return;
@@ -250,10 +252,18 @@ namespace Client
                     if (_userLogged.DriverAspects != null)
                         ViewYourRides();
                     else
-                        CloseAppOption();
+                        AddReview();
                     break;
 
                 case 5:
+                    if (_userLogged.DriverAspects != null)
+                        AddReview();
+                    else
+                    {
+                        CloseAppOption();
+                    }
+                    break;
+                case 6:
                     if (_userLogged.DriverAspects != null)
                         CloseAppOption();
                     break;
@@ -552,67 +562,85 @@ namespace Client
 
         private static RideClient SelectRideFromList(List<RideClient> rides)
         {
-            Console.WriteLine("Select the ride you are aiming into");
-            Console.WriteLine();
-
-            DisplayAllRides(rides);
-
-            _optionSelected = Console.ReadLine();
-
-            string[] parts = _optionSelected.Split('-');
-
-            int optionValue;
-
-            if (int.TryParse(parts[0].Trim(), out optionValue))
+            try
             {
-                if (optionValue <= rides.Count)
+                Console.WriteLine("Select the ride you are aiming into");
+                Console.WriteLine();
+
+                DisplayAllRides(rides);
+
+                _optionSelected = Console.ReadLine();
+
+                string[] parts = _optionSelected.Split('-');
+
+                int optionValue;
+
+                if (int.TryParse(parts[0].Trim(), out optionValue))
                 {
-                    RideClient rideSelected = rides[optionValue];
-                    Console.WriteLine(
-                        $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
-                    Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
-                    Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
-
-                    Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
-                    string seeDetails = Console.ReadLine();
-                    if (seeDetails == "Y")
+                    if (optionValue <= rides.Count)
                     {
-                        Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
-                        Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
+                        RideClient rideSelected = rides[optionValue];
+                        Console.WriteLine(
+                            $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
+                        Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
+                        Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
 
-                        Console.WriteLine("Do you want to see the car image?");
-                        seeDetails = Console.ReadLine();
+                        Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
+                        string seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
-                            Console.WriteLine(@"Your Image is Allocated At: " +
-                                              _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
+                            Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
+                            Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
+
+                            Console.WriteLine("Do you want to see the car image?");
+                            seeDetails = Console.ReadLine();
+                            if (seeDetails == "Y")
+                            {
+                                Console.WriteLine(@"Your Image is Allocated At: " +
+                                                  _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
+                            }
                         }
+
+                        return rideSelected;
                     }
 
-                    return rideSelected;
+                    Console.WriteLine("You must introduce a valid digit for the ride");
+                    return SelectRideFromList(rides);
                 }
 
-                Console.WriteLine("You must introduce a valid digit for the ride");
+                Console.WriteLine("Introduce a valid number");
+                return SelectRideFromList(rides);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
                 return SelectRideFromList(rides);
             }
 
-            Console.WriteLine("Introduce a valid number");
-            return SelectRideFromList(rides);
+
         }
 
 
         private static void DisplayAllRides(List<RideClient> rides)
         {
-            int amountOfRides = rides.Count;
-
-            RideClient actualRide = new RideClient();
-
-            for (int i = 0; i < amountOfRides; i++)
+            try
             {
-                actualRide = rides[i];
-                Console.WriteLine(
-                    $" {i} - From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} With date of departure: " +
-                    $"{actualRide.DepartureTime.ToShortDateString()} and with a Price per person of : ${actualRide.PricePerPerson}");
+                int amountOfRides = rides.Count;
+
+                RideClient actualRide = new RideClient();
+
+                for (int i = 0; i < amountOfRides; i++)
+                {
+                    actualRide = rides[i];
+                    Console.WriteLine(
+                        $" {i} - From: {actualRide.InitialLocation} To: {actualRide.EndingLocation} With date of departure: " +
+                        $"{actualRide.DepartureTime.ToShortDateString()} and with a Price per person of : ${actualRide.PricePerPerson}");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                DisplayAllRides(rides);
             }
         }
 
@@ -650,12 +678,10 @@ namespace Client
                         Console.WriteLine("3- Disable Ride");
                         Console.WriteLine("4- Get Ride Info");
                         Console.WriteLine("5- Get Rides By Price");
-                        Console.WriteLine("6- Get Rides By Initial Location");
-                        Console.WriteLine("7- Get Rides By Ending Location");
-                        Console.WriteLine("8- Go back to the main menu");
+                        Console.WriteLine("6- Go back to the main menu");
 
                         _optionSelected = Console.ReadLine();
-                        if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 8)
+                        if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 6)
                         {
                             switch (optionToDo)
                             {
@@ -663,13 +689,13 @@ namespace Client
                                     ModifyRide(rideSelected);
                                     break;
                                 case 2:
-                                    DeleteRide();
+                                    DeleteRide(rideSelected);
                                     break;
                                 case 3:
                                     DisableRide(rideSelected);
                                     break;
                                 case 4:
-                                    GetRideInfo();
+                                    GetRideInfo(rideSelected);
                                     break;
                                 case 5:
                                     GetRidesByPrice();
@@ -765,17 +791,10 @@ namespace Client
 
         #region Delete Ride
 
-        private static void DeleteRide()
+        private static void DeleteRide(RideClient rideSelected)
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
-
-                DisplayAllRides(ridesList);
-
-                RideClient rideSelected = SelectRideFromList(ridesList);
-
                 _rideService.DeleteRide(rideSelected.Id);
             }
             catch (Exception e)
@@ -806,17 +825,10 @@ namespace Client
 
         #region Get Ride Info
 
-        private static void GetRideInfo()
+        private static void GetRideInfo(RideClient rideSelected)
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
-
-                DisplayAllRides(ridesList);
-
-                RideClient rideSelected = SelectRideFromList(ridesList);
-
                 _rideService.GetRideById(rideSelected.Id);
             }
             catch (Exception e)
@@ -902,5 +914,72 @@ namespace Client
         }
 
         #endregion
+
+        #region Add Review
+
+        public static void AddReview()
+        {
+            try
+            {
+                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides().ToList());
+
+                Console.WriteLine("");
+                Console.WriteLine("Introduce the rating you want to give to the driver");
+                double rating = double.Parse(Console.ReadLine());
+
+                Console.WriteLine("Introduce the comment you want to give to the driver");
+                string comment = Console.ReadLine();
+
+                ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
+
+                _rideService.AddReview(reviewRequest);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
+        }
+
+        #endregion
+
+        #region GetDriverReview
+
+        public static void GetDriverReviews()
+        {
+            try
+            {
+                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides().ToList());
+
+                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(rideClient.Id);
+
+                List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
+
+                DisplayAllReviews(reviewsList);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                PossibleActionsToBeDoneByLoggedUser();
+            }
+        }
+
+        public static void DisplayAllReviews(List<ReviewClient> reviews)
+        {
+            int amountOfReviews = reviews.Count;
+
+            ReviewClient actualReview = new ReviewClient();
+
+            for (int i = 0; i < amountOfReviews; i++)
+            {
+                actualReview = reviews[i];
+                Console.WriteLine(
+                                   $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
+
+            }
+        }
+
+        #endregion 
     }
 }

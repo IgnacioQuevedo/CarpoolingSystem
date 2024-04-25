@@ -99,7 +99,7 @@ namespace Client.Services
         {
             try
             {
-                string message = id.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.DeleteRide + ";" + id;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string messageRecevied = NetworkHelper.ReceiveMessage(_clientSocket);
@@ -126,7 +126,8 @@ namespace Client.Services
         {
             try
             {
-                string message = request.UserToExit.Id.ToString() + ";" + request.RideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + request.UserToExit.Id.ToString() + ";" + request.RideId.ToString();
+
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
@@ -191,22 +192,10 @@ namespace Client.Services
         {
             try
             {
-                string message = id.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.DisableRide + ";" +
+                                 id;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
-
-                string[] messageArrayResponse =
-                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (messageArrayResponse[0] == ProtocolConstants.Exception)
-                {
-                    throw new Exception(messageArrayResponse[2]);
-                }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Ride disabled successfully");
-                }
             }
             catch (Exception e)
             {
@@ -323,12 +312,12 @@ namespace Client.Services
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
-                if(ridesData[0] == ProtocolConstants.Exception)
+
+                if (ridesData[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(ridesData[2]);
                 }
-                
+
                 ICollection<RideClient> rides = new List<RideClient>();
                 for (int i = 0; i < ridesData.Length; i += 7)
                 {
@@ -351,7 +340,7 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
-        
+
         public ICollection<RideClient> GetRidesByUser(Guid userLoggedId)
         {
             List<RideClient> allRides = GetAllRides().ToList();
@@ -371,8 +360,8 @@ namespace Client.Services
                 NetworkHelper.SendMessage(_clientSocket, message);
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
-                if(ridesData[0] == ProtocolConstants.Exception)
+
+                if (ridesData[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(ridesData[2]);
                 }
@@ -393,40 +382,6 @@ namespace Client.Services
                 }
 
                 return rides;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
-        public ICollection<ReviewClient> GetDriverReviews(Guid rideId)
-        {
-            try
-            {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
-                                 rideId.ToString();
-                NetworkHelper.SendMessage(_clientSocket, message);
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
-                if(reviewsData[0] == ProtocolConstants.Exception)
-                {
-                    throw new Exception(reviewsData[2]);
-                }
-                
-                ICollection<ReviewClient> reviews = new List<ReviewClient>();
-                for (int i = 0; i < reviewsData.Length; i += 3)
-                {
-                    reviews.Add(new ReviewClient
-                    {
-                        Id = Guid.Parse(reviewsData[i + 2]),
-                        Punctuation = int.Parse(reviewsData[i + 3]),
-                        Comment = reviewsData[i + 4]
-                    });
-                }
-
-                return reviews;
             }
             catch (Exception e)
             {
@@ -452,7 +407,7 @@ namespace Client.Services
                 {
                     throw new Exception(ridesData[2]);
                 }
-                
+
                 string[] allRides = ridesData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
 
@@ -473,7 +428,7 @@ namespace Client.Services
 
                     DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
 
-                    rides.Add(new RideClient    
+                    rides.Add(new RideClient
                     {
                         Id = Guid.Parse(rideInfo[0]),
                         DriverId = Guid.Parse(rideInfo[1]),
@@ -507,14 +462,14 @@ namespace Client.Services
 
 
                 string imagePath = NetworkHelper.ReceiveImage(_clientSocket);
-                
+
                 string[] messageArray = imagePath.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                
-                if(messageArray[0] == ProtocolConstants.Exception)
+
+                if (messageArray[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(messageArray[2]);
                 }
-                
+
                 return imagePath;
             }
             catch (Exception e)
@@ -522,5 +477,61 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
+
+        public void AddReview(ReviewClient request)
+        {
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
+                NetworkHelper.SendMessage(_clientSocket, message);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+
+        public ICollection<ReviewClient> GetDriverReviews(Guid rideId)
+        {
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
+                                 rideId.ToString();
+                NetworkHelper.SendMessage(_clientSocket, message);
+
+                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                ICollection<ReviewClient> reviews = new List<ReviewClient>();
+
+                string[] allReviews = reviewsData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (allReviews[0].Equals("#"))
+                {
+                    return reviews;
+                }
+
+                for (int i = 0; i < allReviews.Length; i++)
+                {
+                    string[] reviewInfo = allReviews[i].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    reviews.Add(new ReviewClient
+                    {
+                        DriverId = Guid.Parse(reviewInfo[0]),
+                        Punctuation = double.Parse(reviewInfo[1]),
+                        Comment = reviewInfo[2],
+                    });
+                }
+
+                return reviews;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
     }
 }
