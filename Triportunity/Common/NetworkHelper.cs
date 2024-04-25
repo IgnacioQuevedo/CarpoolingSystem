@@ -1,3 +1,5 @@
+using Client;
+using Server;
 using System;
 using System.IO;
 using System.Net;
@@ -9,14 +11,15 @@ namespace Common
 {
     public static class NetworkHelper
     {
+        private static readonly SettingsManager settingsManager = new SettingsManager();
         public static Socket ConnectWithServer()
         {
             IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 0
+                IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ClientConfig.LocalPort))
             );
 
             IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
+                IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ServerConfig.LocalPort))
             );
 
             Socket newClientSocket = new Socket(
@@ -58,7 +61,8 @@ namespace Common
         public static Socket DeployServerSocket()
         {
             var localEndPoint = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
+                IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)),
+                int.Parse(settingsManager.ReadSettings(settingsManager.ReadSettings(ServerConfig.LocalPort)))
             );
 
             var serverSocket = new Socket(
