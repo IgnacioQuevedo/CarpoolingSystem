@@ -4,7 +4,6 @@ using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain;
 using Server.Exceptions;
 using System;
-using Server.Objects.Domain.ClientModels;
 using Server.Objects.Domain.VehicleModels;
 
 namespace Server.Repositories
@@ -18,7 +17,7 @@ namespace Server.Repositories
             MemoryDatabase.GetInstance().Users.Add(userToRegister);
             LockManager.StopWriting();
         }
-        
+
         private void UserAlreadyExists(string usernameToValidate)
         {
             if (MemoryDatabase.GetInstance().Users.Any(x => x.Username.Equals(usernameToValidate)))
@@ -27,22 +26,21 @@ namespace Server.Repositories
             }
         }
 
-        public bool Login(string username, string password)
+        public User Login(string username, string password)
         {
-            LockManager.StartReading();
             User possibleLogin = GetUserByUsername(username);
 
             if (possibleLogin.Password.Equals(password))
             {
-                return true;
+                return possibleLogin;
             }
 
-            LockManager.StopReading();
-            return false;
+            throw new UserException("Invalid credentials");
         }
 
         public User GetUserByUsername(string usernameOfClient)
         {
+            LockManager.StartReading();
             User clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
@@ -51,11 +49,13 @@ namespace Server.Repositories
                 throw new UserException("User not found");
             }
 
+            LockManager.StopReading();
             return clientFound;
         }
 
         public User GetUserById(Guid id)
         {
+            LockManager.StartReading();
             var clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Id.Equals(id));
 
@@ -64,13 +64,15 @@ namespace Server.Repositories
                 throw new UserException("User not found");
             }
 
+            LockManager.StopReading();
             return clientFound;
         }
 
-        public void RegisterDriver(string userName, DriverInfo driveInfo)
+        public void RegisterDriver(Guid userId, DriverInfo driveInfo)
         {
+            //Ya me avive, el tema es  no se arreglarlo
+            User userFound = GetUserById(userId);
             LockManager.StartWriting();
-            User userFound = GetUserByUsername(userName);
             if (userFound.DriverAspects != null)
             {
                 throw new UserException("User is already a driver");
@@ -82,8 +84,8 @@ namespace Server.Repositories
 
         public void RateDriver(Guid id, Review review)
         {
-            LockManager.StartWriting();
             User user = GetUserById(id);
+            LockManager.StartWriting();
             if (user.DriverAspects == null)
             {
                 throw new UserException("User is not a driver");
@@ -95,7 +97,7 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public void SetVehicle(Guid id, Vehicle vehicle)
+        public void AddVehicle(Guid id, Vehicle vehicle)
         {
             LockManager.StartWriting();
             User user = GetUserById(id);
@@ -120,9 +122,11 @@ namespace Server.Repositories
                 {
                     throw new UserException("Vehicle not found");
                 }
+
                 return vehicle;
             }
-            LockManager.StopWriting();
+
+            LockManager.StopReading();
             throw new UserException("User is not a driver");
         }
     }

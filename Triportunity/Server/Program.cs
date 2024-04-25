@@ -4,8 +4,8 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using Common;
+using Server.Controllers;
 using Server.Objects.Domain;
-using Server.Objects.Domain.ClientModels;
 using Server.Objects.Domain.Enums;
 using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.VehicleModels;
@@ -20,20 +20,24 @@ namespace Server
         private static bool _listenToNewClients = true;
         private static bool _clientWantsToContinueSendingData = true;
 
-        private static Socket _serverSocket;
 
-        private static UserRepository _userRepository = new UserRepository();
-        private static RideRepository _rideRepository = new RideRepository();
-
+        private static UserController _userController;
+        private static UserRepository _userRepository;
+        private static RideRepository _rideRepository;
+        public static Socket _serverSocket;
         public static void Main(string[] args)
         {
             _serverSocket = NetworkHelper.DeployServerSocket();
+            
+            _userRepository = new UserRepository();
+            _rideRepository = new RideRepository();
+
 
             int users = 1;
             while (_listenToNewClients)
             {
                 Socket clientSocketServerSide = _serverSocket.Accept();
-
+                _userController = new UserController(clientSocketServerSide);
                 string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
                 Console.WriteLine(connectedMsg);
 
@@ -65,44 +69,39 @@ namespace Server
                     switch (command)
                     {
                         case CommandsConstraints.Login:
-                            username = messageArray[2];
-                            password = messageArray[3];
-                            _userRepository.Login(username, password);
+                            _userController.LoginUser(messageArray);
                             break;
 
                         case CommandsConstraints.Register:
 
-                            string ci = messageArray[2];
-                            username = messageArray[3];
-                            password = messageArray[4];
-                            string repeatedPassword = messageArray[5];
-
-                            User user = new User(ci, username, password, repeatedPassword, null);
-                            _userRepository.RegisterUser(user);
-                            string response = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" +
-                                              user.Id;
-                            NetworkHelper.SendMessage(clientSocketServerSide, response);
+                            _userController.RegisterUser(messageArray);
                             break;
 
                         case CommandsConstraints.CreateDriver:
 
+                            _userController.CreateDriver(messageArray);
+                            break;
+                        case CommandsConstraints.GetUserById:
+                            
+                            _userController.GetUserById(messageArray);
+                            break;
+
+                        case CommandsConstraints.GetCarImage:
+
                             userId = Guid.Parse(messageArray[2]);
-                            User userFound = _userRepository.GetUserById(userId);
+                            Guid vehicleId = Guid.Parse(messageArray[3]);
 
-                            if (userFound.DriverAspects == null)
-                            {
-                                List<Vehicle> vehicles = new List<Vehicle>();
-                                userFound.DriverAspects = new DriverInfo(vehicles);
-                            }
+                            Vehicle vehicleFound = _userRepository.GetVehicleById(userId, vehicleId);
 
-                            string destinationFilePath = NetworkHelper.ReceiveImage(clientSocketServerSide);
-
-                            Vehicle vehicle = new Vehicle();
-                            vehicle.ImageAllocatedAtAServer = destinationFilePath;
-
-                            userFound.DriverAspects.Vehicles.Add(vehicle);
+                            NetworkHelper.SendImage(clientSocketServerSide, vehicleFound.ImageAllocatedAtAServer);
 
                             break;
+
+                        case CommandsConstraints.AddVehicle:
+                            
+                            _userController.AddVehicle(messageArray);
+                            break;
+
                         case CommandsConstraints.CreateRide:
 
                             string[] rideInfoArray = message.Split(new string[] { ";" },
@@ -141,16 +140,6 @@ namespace Server
                             Guid rideId = Guid.Parse(rideArray[3]);
 
                             RideRepository.JoinRide(userId, rideId);
-
-                            break;
-                        case CommandsConstraints.GetCarImage:
-
-                            userId = Guid.Parse(messageArray[2]);
-                            Guid vehicleId = Guid.Parse(messageArray[3]);
-
-                            Vehicle vehicleFound = _userRepository.GetVehicleById(userId, vehicleId);
-
-                            NetworkHelper.SendImage(clientSocketServerSide, vehicleFound.ImageAllocatedAtAServer);
 
                             break;
 

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
-using Server.Objects.Domain.ClientModels;
 using Server.Objects.Domain.UserModels;
 
 namespace Server.DataContext

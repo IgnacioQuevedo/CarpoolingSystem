@@ -38,7 +38,7 @@ namespace Client
         public static void Main(string[] args)
         {
             clientSocket = NetworkHelper.ConnectWithServer();
-            // _userService = new UserService(clientSocket);
+            _userService = new UserService(clientSocket);
             // _rideService = new RideService(clientSocket);
 
             Console.WriteLine("Waiting for the server to be ready");
@@ -258,8 +258,13 @@ namespace Client
 
             while (addNewVehicle.Equals("Y"))
             {
-                CreateDriver(userRegisteredId);
-                UserService.SetDriverVehicles(clientSocket, userRegisteredId);
+                Console.WriteLine("Please enter the model of the vehicle");
+                string carModel = Console.ReadLine();
+                Console.WriteLine("Please enter the path of the vehicle image");
+                string path = Console.ReadLine();
+                
+                UserService.CreateDriver(clientSocket, userRegisteredId);
+                UserService.AddVehicle(clientSocket, userRegisteredId,carModel,path);
                 Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                 Console.WriteLine("If yes - Enter 'Y'");
                 Console.WriteLine("If not - Enter 'N'");
