@@ -40,17 +40,18 @@ namespace Client.Services
 
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
-            try
+            string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
+                             loginUserRequest.Username + ";" + loginUserRequest.Password;
+            NetworkHelper.SendMessage(socket, message);
+
+            UserClient resultUser = null;
+            
+            string loginResult = NetworkHelper.ReceiveMessage(socket);
+
+            string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (loginArray[0] != "EXC")
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
-                                 loginUserRequest.Username + ";" + loginUserRequest.Password;
-                NetworkHelper.SendMessage(socket, message);
-
-
-                string loginResult = NetworkHelper.ReceiveMessage(socket);
-
-                string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
                 Guid id = Guid.Parse(loginArray[2]);
                 string ci = loginArray[3];
                 string username = loginArray[4];
@@ -77,22 +78,24 @@ namespace Client.Services
                     {
                         string[] vehicleArray =
                             vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                        VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1],
+                        VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]),
+                            vehicleArray[1],
                             vehicleArray[2]);
                         vehicles.Add(vehicleClient);
                     }
 
                     driverInfo = new DriverInfoClient(reviews, vehicles);
+
+
+                    resultUser = new UserClient(id, ci, username, password, driverInfo);
                 }
-
-                UserClient user = new UserClient(id, ci, username, password, driverInfo);
-
-                return user;
             }
-            catch (Exception e)
+            else
             {
-                throw new Exception(e.Message);
+                Console.WriteLine(loginArray[2]);
             }
+
+            return resultUser;
         }
 
 

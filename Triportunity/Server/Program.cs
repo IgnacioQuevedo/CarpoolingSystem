@@ -150,6 +150,9 @@ namespace Server
                         case CommandsConstraints.GetRideById:
                             _rideController.GetRideById(messageArray);
                             break;
+                        case CommandsConstraints.ManageException:
+                            ExceptionsController.HandleException(messageArray);
+                            break;
                     }
                 }
 

@@ -81,7 +81,8 @@ namespace Server.Controllers
 
             catch (UserException exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                string excpetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_serverSocket, excpetionMessageToClient);
             }
         }
 
