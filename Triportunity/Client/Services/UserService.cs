@@ -20,37 +20,50 @@ namespace Client.Services
             _clientSocket = socketClient;
         }
 
+        //ok checked
         public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
-            try
-            {
-                string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
-                                      registerUserRequest.Ci + ";" +
-                                      registerUserRequest.Username + ";" +
-                                      registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
+            string registerInfo = ProtocolConstants.Request + ";" + CommandsConstraints.Register + ";" +
+                                  registerUserRequest.Ci + ";" +
+                                  registerUserRequest.Username + ";" +
+                                  registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
-                NetworkHelper.SendMessage(socket, registerInfo);
+            NetworkHelper.SendMessage(socket, registerInfo);
+
+            string serverResponse = NetworkHelper.ReceiveMessage(socket);
+
+            string[] responseArray = serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (responseArray[0] == ProtocolConstants.Exception)
+            {
+                throw new Exception(responseArray[2]);
             }
-
-            catch (Exception exceptionCaught)
+            else if (responseArray[0] == ProtocolConstants.Response)
             {
-                throw new Exception(exceptionCaught.Message);
+                Console.WriteLine("User registered successfully");
+            }
+            else
+            {
+                throw new Exception("Error registering user");
             }
         }
 
+        //ok checked
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
-            try
+            string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
+                             loginUserRequest.Username + ";" + loginUserRequest.Password;
+            NetworkHelper.SendMessage(socket, message);
+
+            UserClient resultUser = null;
+
+            string loginResult = NetworkHelper.ReceiveMessage(socket);
+
+            string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+            //Validamos exception
+            if (loginArray[0] != ProtocolConstants.Exception)
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
-                                 loginUserRequest.Username + ";" + loginUserRequest.Password;
-                NetworkHelper.SendMessage(socket, message);
-
-
-                string loginResult = NetworkHelper.ReceiveMessage(socket);
-
-                string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
                 Guid id = Guid.Parse(loginArray[2]);
                 string ci = loginArray[3];
                 string username = loginArray[4];
@@ -77,50 +90,53 @@ namespace Client.Services
                     {
                         string[] vehicleArray =
                             vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                        VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]), vehicleArray[1],
+                        VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]),
+                            vehicleArray[1],
                             vehicleArray[2]);
                         vehicles.Add(vehicleClient);
                     }
 
                     driverInfo = new DriverInfoClient(reviews, vehicles);
                 }
-
-                UserClient user = new UserClient(id, ci, username, password, driverInfo);
-
-                return user;
+                resultUser = new UserClient(id, ci, username, password, driverInfo);
             }
-            catch (Exception e)
+            else
             {
-                throw new Exception(e.Message);
+                throw new Exception(loginArray[2]);
             }
+
+            return resultUser;
         }
 
-
+        //proceso
         public void CreateDriver(Socket socket, Guid userId)
         {
-            try
+            UserClient userToBeDriver = GetUserById(_clientSocket, userId);
+            if (userToBeDriver.DriverAspects == null)
             {
-                UserClient userToBeDriver = GetUserById(_clientSocket, userId);
+                string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
+                NetworkHelper.SendMessage(socket, messageToSend);
 
-                if (userToBeDriver.DriverAspects == null)
+                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] messageArray = messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (messageArray[0] == ProtocolConstants.Exception)
                 {
-                    string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" + userId;
-                    NetworkHelper.SendMessage(socket, message);
-
-                    string messageArray = NetworkHelper.ReceiveMessage(_clientSocket);
-                    if (messageArray == null)
-                    {
-                        throw new Exception("Error creating driver");
-                    }
+                    throw new Exception(messageArray[2]);
+                }
+                else if (messageArray[0] == ProtocolConstants.Response)
+                {
+                    Console.WriteLine("You are now a driver");
                 }
                 else
                 {
-                    Console.WriteLine("You are already a driver");
+                    throw new Exception("Error creating driver");
                 }
             }
-            catch (Exception e)
+            else
             {
-                throw new Exception(e.Message);
+                Console.WriteLine("You are already a driver");
             }
         }
 
@@ -138,6 +154,11 @@ namespace Client.Services
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (vehicleInfoArray[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(vehicleInfoArray[2]);
+                }
+
                 Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
                 string vehicleModel = vehicleInfoArray[3];
                 string imageAllocatedAtAServer = vehicleInfoArray[4];
@@ -152,6 +173,7 @@ namespace Client.Services
             {
                 Console.WriteLine("You are not a driver");
             }
+
         }
 
         public void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)

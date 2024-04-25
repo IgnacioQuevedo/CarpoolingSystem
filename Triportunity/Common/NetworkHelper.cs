@@ -1,4 +1,7 @@
+using Client;
+using Server;
 using System;
+using System.CodeDom;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -9,14 +12,15 @@ namespace Common
 {
     public static class NetworkHelper
     {
+        private static readonly SettingsManager settingsManager = new SettingsManager();
         public static Socket ConnectWithServer()
         {
             IPEndPoint local = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 0
+                IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ClientConfig.LocalPort))
             );
 
             IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
+                IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ServerConfig.LocalPort))
             );
 
             Socket newClientSocket = new Socket(
@@ -58,7 +62,8 @@ namespace Common
         public static Socket DeployServerSocket()
         {
             var localEndPoint = new IPEndPoint(
-                IPAddress.Parse("127.0.0.1"), 5000
+                IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)),
+                int.Parse(settingsManager.ReadSettings(settingsManager.ReadSettings(ServerConfig.LocalPort)))
             );
 
             var serverSocket = new Socket(
@@ -146,8 +151,7 @@ namespace Common
                 FileInfo fileInfo = new FileInfo(filePath);
                 if (!fileInfo.Exists)
                 {
-                    Console.WriteLine("The specific file does not exit.");
-                    return;
+                    throw new Exception("The specific file does not exit.");
                 }
 
                 SendMessage(socket, fileInfo.Name);
@@ -174,11 +178,11 @@ namespace Common
                 }
 
                 Console.WriteLine(
-                    $"Termin� de enviar archivo {fileInfo.Name}, de tama�o {fileLength} bytes, desde {filePath}");
+                    $"File sent {fileInfo.Name}, size: {fileLength} bytes, from path: {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error durante la transmisi�n del archivo: {ex.Message}");
+                throw new Exception($"Error during : the transmision of the file, {ex.Message}");
             }
         }
 
@@ -219,7 +223,7 @@ namespace Common
                             isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
 
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
-                        Console.WriteLine($"Recibiendo parte #{currentPart}, de {byteAmountToReceive} bytes");
+                        Console.WriteLine($"Recieving part #{currentPart}, of {byteAmountToReceive} bytes");
                         byte[] buffer = Receive(socket, byteAmountToReceiveInBytes);
                         fileStream.Write(buffer, 0, buffer.Length);
 

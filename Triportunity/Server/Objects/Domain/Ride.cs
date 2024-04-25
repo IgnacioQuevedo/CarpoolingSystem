@@ -20,7 +20,8 @@ namespace Server.Objects.Domain
         public bool PetsAllowed { get; set; }
         public Guid VehicleId { get; set; }
 
-        public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed,Guid vehicleId)
+        public Ride() { }
+        public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed, Guid vehicleId)
         {
             Id = Guid.NewGuid();
             DriverId = driver;

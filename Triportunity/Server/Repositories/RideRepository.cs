@@ -49,7 +49,13 @@ namespace Server.Repositories
 
         public Ride GetRideById(Guid rideId)
         {
-            var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
+            Ride rideToFind = new Ride();
+
+            LockManager.StartReading();
+
+            rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
+
+            LockManager.StopReading();
 
             if (rideToFind == null)
             {
@@ -61,9 +67,10 @@ namespace Server.Repositories
 
         public void QuitRide(Guid userId, Guid rideId)
         {
-            LockManager.StartWriting();
             Ride rideToQuit = GetRideById(rideId);
-            User user = _userRepository.GetUserById(userId);
+
+            User user = new User();
+            user = _userRepository.GetUserById(userId);
 
             if (!rideToQuit.Passengers.Contains(userId))
             {
@@ -75,17 +82,26 @@ namespace Server.Repositories
                 throw new RideException("Cannot quit the ride as the departure time has passed.");
             }
 
+            LockManager.StartWriting();
+
             rideToQuit.Passengers.Remove(userId);
             rideToQuit.AvailableSeats++;
+
             LockManager.StopWriting();
         }
 
         public ICollection<Ride> GetRides()
         {
-            ICollection<Ride> rides = new List<Ride>();
-            rides = MemoryDatabase.GetInstance().Rides;
+            LockManager.StartReading();
 
-            ICollection<Ride> availableRides = new List<Ride>();
+            ICollection<Ride> rides = (ICollection<Ride>)MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Published == true);
+
+            LockManager.StopReading();
+
+            if (rides == null)
+            {
+                throw new RideException("No rides found");
+            }
 
             foreach (var ride in rides)
             {
@@ -105,9 +121,9 @@ namespace Server.Repositories
 
         public void DeleteRide(Guid rideId)
         {
-            Ride rideToDelete = new Ride();
-            rideToDelete = GetRideById(rideId);
-            
+
+            Ride rideToDelete = GetRideById(rideId);
+
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
             LockManager.StopWriting();
@@ -115,8 +131,8 @@ namespace Server.Repositories
 
         public void DisablePublishedRide(Guid rideId)
         {
-            LockManager.StartWriting();
             Ride rideToCancel = GetRideById(rideId);
+            LockManager.StartWriting();
             rideToCancel.Published = false;
             LockManager.StopWriting();
         }
@@ -132,44 +148,56 @@ namespace Server.Repositories
                 .ToList();
 
             LockManager.StopReading();
+
             return filteredRides;
         }
 
         public ICollection<Ride> FilterByInitialLocation(CitiesEnum initialLocation)
         {
             LockManager.StartReading();
+
             ICollection<Ride> filteredRides = new List<Ride>();
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.InitialLocation.Equals(initialLocation))
                 .ToList();
+
             LockManager.StopReading();
+
             return filteredRides;
         }
 
         public ICollection<Ride> FilterByDestination(string destination)
         {
             LockManager.StartReading();
+
             ICollection<Ride> filteredRides = new List<Ride>();
             filteredRides = MemoryDatabase.GetInstance().Rides
                 .Where(ride => ride.EndingLocation.Equals(destination))
                 .ToList();
+
             LockManager.StopReading();
+
             return filteredRides;
         }
 
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
             LockManager.StartReading();
+
             Ride rideToGetReviews = GetRideById(ride);
             User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
+
             LockManager.StopReading();
+
             return user.DriverAspects.Reviews;
         }
 
         public void UpdateRide(Ride rideWithUpdates)
         {
-            LockManager.StartWriting();
             Ride rideToUpdate = GetRideById(rideWithUpdates.Id);
+
+            LockManager.StartWriting();
+
             rideToUpdate.AvailableSeats = rideWithUpdates.AvailableSeats;
             rideToUpdate.DepartureTime = rideWithUpdates.DepartureTime;
             rideToUpdate.EndingLocation = rideWithUpdates.EndingLocation;
@@ -177,6 +205,7 @@ namespace Server.Repositories
             rideToUpdate.PricePerPerson = rideWithUpdates.PricePerPerson;
             rideToUpdate.PetsAllowed = rideWithUpdates.PetsAllowed;
             rideToUpdate.VehicleId = rideWithUpdates.VehicleId;
+
             LockManager.StopWriting();
         }
     }

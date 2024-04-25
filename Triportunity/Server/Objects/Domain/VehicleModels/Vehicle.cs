@@ -9,7 +9,8 @@ namespace Server.Objects.Domain.VehicleModels
         public string VehicleModel { get; set; }
         public string ImageAllocatedAtAServer { get; set; }
 
-        public Vehicle(string vehicleModel,string imageAllocatedAtAServer)
+        public Vehicle() { }
+        public Vehicle(string vehicleModel, string imageAllocatedAtAServer)
         {
             VehicleModel = vehicleModel;
             ImageAllocatedAtAServer = imageAllocatedAtAServer;

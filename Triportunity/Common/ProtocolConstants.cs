@@ -10,7 +10,7 @@ namespace Common
     {
         public static string Request = "REQ";
         public static string Response = "RES";
-        public static string Image = "IMG";
+        public static string Exception = "EXC";
         public static int DataLengthSize = 4;
         public static int MaxUsersInBackLog = 1000;
 

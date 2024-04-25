@@ -14,6 +14,7 @@ namespace Server.Objects.Domain.UserModels
         public string PasswordRepeated { get; set; }
         public DriverInfo? DriverAspects { get; set; }
 
+        public User() { }
         public User(string ci, string username, string password, string passwordRepeated, DriverInfo? driverAspects)
         {
             Id = Guid.NewGuid();
@@ -46,7 +47,7 @@ namespace Server.Objects.Domain.UserModels
         private void PasswordValidation()
         {
             const int validLengthForPassword = 6;
-            
+
             if (Password != PasswordRepeated)
             {
                 throw new UserException("Passwords must be the same!");
