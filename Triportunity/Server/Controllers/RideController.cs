@@ -23,13 +23,14 @@ namespace Server.Controllers
             _clientSocket = clientSocket;
         }
 
-        public void CreateRide(string [] messageArray)
+        public void CreateRide(string[] messageArray)
         {
             try
             {
                 Guid id = Guid.Parse(messageArray[2]);
-                CitiesEnum initialLocation = (CitiesEnum)int.Parse(messageArray[3]);
-                CitiesEnum endingLocation = (CitiesEnum)int.Parse(messageArray[4]);
+                
+                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
+                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 DateTime departureTime = DateTime.Parse(messageArray[5]);
                 int availableSeats = int.Parse(messageArray[6]);
                 double price = double.Parse(messageArray[7]);
@@ -40,15 +41,17 @@ namespace Server.Controllers
                 List<Guid> passengers = new List<Guid>();
 
                 foreach (var passenger in messageArray[10].Split(new string[] { "," },
-                                   StringSplitOptions.RemoveEmptyEntries))
+                             StringSplitOptions.RemoveEmptyEntries))
                 {
                     passengers.Add(Guid.Parse(passenger));
                 }
 
-                Ride ride = new Ride(id, passengers, initialLocation, endingLocation, departureTime, availableSeats, price, pets, vehicleId);
+                Ride ride = new Ride(id, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                    price, pets, vehicleId);
 
                 _rideRepository.CreateRide(ride);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -62,11 +65,11 @@ namespace Server.Controllers
                 Guid userId = Guid.Parse(messageArray[3]);
 
                 _rideRepository.JoinRide(rideId, userId);
-            } catch (Exception e)
-            {
-               throw new Exception("Error: " + e.Message);
             }
-         
+            catch (Exception e)
+            {
+                throw new Exception("Error: " + e.Message);
+            }
         }
 
         public void EditRide(string[] messageArray)
@@ -85,18 +88,20 @@ namespace Server.Controllers
                 List<Guid> passengers = new List<Guid>();
 
                 foreach (var passenger in messageArray[10].Split(new string[] { "," },
-                                       StringSplitOptions.RemoveEmptyEntries))
+                             StringSplitOptions.RemoveEmptyEntries))
                 {
                     passengers.Add(Guid.Parse(passenger));
                 }
 
-                Ride ride = new Ride(rideId, passengers, initialLocation, endingLocation, departureTime, availableSeats, price, pets, vehicleId);
+                Ride ride = new Ride(rideId, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                    price, pets, vehicleId);
 
                 _rideRepository.UpdateRide(ride);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
-            }   
+            }
         }
 
         public void DeleteRide(string[] messageArray)
@@ -105,8 +110,8 @@ namespace Server.Controllers
             {
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DeleteRide(rideId);
-              
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -120,7 +125,8 @@ namespace Server.Controllers
                 Guid userId = Guid.Parse(messageArray[3]);
 
                 _rideRepository.QuitRide(rideId, userId);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -134,9 +140,9 @@ namespace Server.Controllers
 
                 ICollection<Ride> rides = _rideRepository.FilterByInitialLocation(initialLocation);
 
-                
 
-                string response = ProtocolConstants.Response + ";" + CommandsConstraints.FilterRidesByInitialLocation + ";";
+                string response = ProtocolConstants.Response + ";" + CommandsConstraints.FilterRidesByInitialLocation +
+                                  ";";
 
                 foreach (var ride in rides)
                 {
@@ -147,14 +153,15 @@ namespace Server.Controllers
                         response += passenger + ",";
                     }
 
-                    response += ":" +  ride.InitialLocation +
-                        ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" + ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                        + ride.VehicleId;
+                    response += ":" + ride.InitialLocation +
+                                ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                                ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
+                                + ride.VehicleId;
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -168,7 +175,8 @@ namespace Server.Controllers
 
                 ICollection<Ride> rides = _rideRepository.FilterByDestination(endingLocation.ToString());
 
-                string response = ProtocolConstants.Response + ";" + CommandsConstraints.FilterRidesByEndingLocation + ";";
+                string response = ProtocolConstants.Response + ";" + CommandsConstraints.FilterRidesByEndingLocation +
+                                  ";";
 
                 foreach (var ride in rides)
                 {
@@ -180,19 +188,20 @@ namespace Server.Controllers
                     }
 
                     response += ":" + ride.InitialLocation +
-                        ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" + ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                        + ride.VehicleId;
+                                ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                                ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
+                                + ride.VehicleId;
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
         }
 
-        public void  FilterRidesByPrice(string[] messageArray)
+        public void FilterRidesByPrice(string[] messageArray)
         {
             try
             {
@@ -213,13 +222,14 @@ namespace Server.Controllers
                     }
 
                     response += ":" + ride.InitialLocation +
-                        ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" + ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                        + ride.VehicleId;
+                                ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                                ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
+                                + ride.VehicleId;
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -235,7 +245,7 @@ namespace Server.Controllers
 
                 foreach (var ride in rides)
                 {
-                    response += ride.Id + ":" + ride.DriverId + ":" + ":";
+                    response += ride.Id + ":" + ride.DriverId + ":";
 
                     foreach (var passenger in ride.Passengers)
                     {
@@ -243,13 +253,14 @@ namespace Server.Controllers
                     }
 
                     response += ":" + ride.InitialLocation +
-                        ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" + ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                        + ride.VehicleId;
+                                ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                                ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
+                                + ride.VehicleId + ",";
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -266,8 +277,8 @@ namespace Server.Controllers
                 Vehicle vehicle = _userRepository.GetVehicleById(userId, vehicleId);
 
                 NetworkHelper.SendImage(_clientSocket, vehicle.ImageAllocatedAtAServer);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -293,8 +304,8 @@ namespace Server.Controllers
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -306,7 +317,8 @@ namespace Server.Controllers
             {
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DisablePublishedRide(rideId);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
@@ -329,16 +341,16 @@ namespace Server.Controllers
                 }
 
                 response += ":" + ride.InitialLocation +
-                    ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" + ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                    + ride.VehicleId;
+                            ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                            ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
+                            + ride.VehicleId;
 
                 NetworkHelper.SendMessage(_clientSocket, response);
-
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception("Error: " + e.Message);
             }
         }
-
     }
 }

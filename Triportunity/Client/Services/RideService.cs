@@ -24,14 +24,23 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateRide + ";" +
-                                 request.DriverId;
+                                 request.DriverId + ";";
 
-                foreach (var passenger in request.Passengers)
+                if (request.Passengers.Count > 0)
                 {
-                    message += ";" + passenger;
+                    for (int i = 0; i < request.Passengers.Count; i++)
+                    {
+                        message += request.Passengers[i] + ",";
+                    }
+                }
+                else
+                {
+                    message += "#";
                 }
 
-                message += ";" + request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
+                message = ";";
+                
+                message += request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
                            ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
                            + ";" + request.VehicleId;
 
