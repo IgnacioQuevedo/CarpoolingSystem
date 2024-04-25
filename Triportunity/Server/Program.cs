@@ -158,10 +158,10 @@ namespace Server
                     Console.WriteLine("Error" + exceptionNotExpected.Message);
                     break;
                 }
-                catch (Exception exception)
-                {
-                    throw new Exception(exception.Message);
-                }
+                //catch (Exception exception)
+                //{
+                //    throw new Exception(exception.Message);
+                //}
             }
 
             NetworkHelper.CloseSocketConnections(clientSocketServerSide);

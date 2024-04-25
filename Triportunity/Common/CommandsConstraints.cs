@@ -23,5 +23,6 @@ namespace Common
         public const int AddVehicle = 16;
         public const int DisableRide = 17;
         public const int GetRideById = 18;
+        public const int ManageException = 19;
     }
 }

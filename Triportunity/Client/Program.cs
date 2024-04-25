@@ -133,7 +133,6 @@ namespace Client
         private static void RegisterOption()
         {
             DriverInfoClient driverAspectsOfClient = null;
-
             try
             {
                 Console.WriteLine("Insert your Ci for the registration");
@@ -155,7 +154,7 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Console.WriteLine("Redo all again but without this error: " + exception.Message);
+                Console.WriteLine(exception.Message);
                 RegisterOption();
             }
         }
@@ -171,11 +170,12 @@ namespace Client
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
                 _userLogged = _userService.LoginClient(clientSocket, loginUserRequest);
+                PossibleActionsToBeDoneByLoggedUser();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
-                LoginOption();
+                MainMenuOptions();
             }
         }
 
@@ -271,7 +271,7 @@ namespace Client
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
                     addNewVehicle = Console.ReadLine();
-                    
+
                     _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 }
             }
