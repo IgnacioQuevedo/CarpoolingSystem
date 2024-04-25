@@ -121,13 +121,6 @@ namespace Server
 
                             break;
 
-                        case CommandsConstraints.FilterRidesByInitialLocation:
-                            _rideController.FilterRidesByInitialLocation(messageArray);
-                            break;
-                        case CommandsConstraints.FilterRidesByEndingLocation:
-                            _rideController.FilterRidesByEndingLocation(messageArray);
-                            break;
-
                         case CommandsConstraints.FilterRidesByPrice:
                             _rideController.FilterRidesByPrice(messageArray);
                             break;
