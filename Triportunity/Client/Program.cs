@@ -923,23 +923,31 @@ namespace Client
             {
                 RideClient rideClient = SelectRideFromList(_rideService.GetAllRides().ToList());
 
-                Console.WriteLine("");
-                Console.WriteLine("Introduce the rating you want to give to the driver");
-                double rating = double.Parse(Console.ReadLine());
+                Console.WriteLine("\nIntroduce the rating you want to give to the driver");
+                string ratingInput = Console.ReadLine();
+                double rating;
+
+                while (!double.TryParse(ratingInput, out rating))
+                {
+                    Console.WriteLine("Invalid rating. Please enter a number between 0.0 and 5.0.");
+                    ratingInput = Console.ReadLine();
+                }
+                rating = Double.Parse(ratingInput);
 
                 Console.WriteLine("Introduce the comment you want to give to the driver");
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-
                 _rideService.AddReview(reviewRequest);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                Console.WriteLine("");
+                AddReview();
             }
         }
+
 
         #endregion
 

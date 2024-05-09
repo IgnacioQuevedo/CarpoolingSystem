@@ -484,6 +484,16 @@ namespace Client.Services
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
                 NetworkHelper.SendMessage(_clientSocket, message);
+
+                string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] messageArrayResponse =
+                    messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (messageArrayResponse[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(messageArrayResponse[2]);
+                }
             }
             catch (Exception e)
             {
