@@ -284,8 +284,9 @@ namespace Client
                 string carModel;
                 string path;
                 string addNewVehicle = "Y";
-                bool firstVehicle = true;
+                
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
+                bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
                 while (addNewVehicle.Equals("Y"))
                 {
@@ -309,12 +310,13 @@ namespace Client
                     Console.WriteLine("If not - Enter 'N'");
                     addNewVehicle = Console.ReadLine();
                 }
+                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
             }
             catch (Exception e)
             {
                 Console.WriteLine("");
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                CreateDriver(userRegisteredId);
             }
         }
 

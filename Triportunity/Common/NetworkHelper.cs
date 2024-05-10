@@ -154,6 +154,9 @@ namespace Common
                     throw new Exception("The specific file does not exit.");
                 }
 
+                if (string.IsNullOrEmpty(filePath)) throw new Exception("The path cannot be empty");
+
+                SendMessage(socket, "ImageProcessOkay");
                 SendMessage(socket, fileInfo.Name);
 
                 long fileLength = fileInfo.Length;
@@ -179,7 +182,9 @@ namespace Common
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error during : the transmision of the file, {ex.Message}");
+                SendMessage(socket, "Error");
+                throw new Exception($"Error during : the transmission of the file, {ex.Message}");
+                
             }
         }
 
@@ -187,6 +192,14 @@ namespace Common
         {
             try
             {
+
+                string imageProcessOkay = ReceiveMessage(socket);
+                
+                if(imageProcessOkay.Equals("Error"))
+                {
+                    throw new Exception("The image was not processed correctly");
+                }
+                
                 string pathDirectoryImageAllocated = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
 
                 if (!Directory.Exists(pathDirectoryImageAllocated))
@@ -220,7 +233,7 @@ namespace Common
                             isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
 
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
-                        Console.WriteLine($"Recieving part #{currentPart}, of {byteAmountToReceive} bytes");
+                        Console.WriteLine($"Receiving part #{currentPart}, of {byteAmountToReceive} bytes");
                         byte[] buffer = Receive(socket, byteAmountToReceiveInBytes);
                         fileStream.Write(buffer, 0, buffer.Length);
 

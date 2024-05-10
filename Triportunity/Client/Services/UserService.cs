@@ -184,6 +184,7 @@ namespace Client.Services
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
                                  carModel;
                 NetworkHelper.SendMessage(socket, message);
+                
                 NetworkHelper.SendImage(socket, path);
             }
             catch (Exception e)
