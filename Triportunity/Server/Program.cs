@@ -147,6 +147,9 @@ namespace Server
                         case CommandsConstraints.AddReview:
                             _rideController.AddReview(messageArray);
                             break;
+                        case CommandsConstraints.GetRidesByUser:
+                            _rideController.GetRidesByUser(messageArray);
+                            break;
                     }
                 }
 
