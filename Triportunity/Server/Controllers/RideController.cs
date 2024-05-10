@@ -126,6 +126,11 @@ namespace Server.Controllers
             {
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DeleteRide(rideId);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.DeleteRide;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
+
             }
             catch (Exception exceptionCaught)
             {
