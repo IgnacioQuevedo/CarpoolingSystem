@@ -19,8 +19,7 @@ namespace Client.Services
         {
             _clientSocket = socketClient;
         }
-
-        //ok checked
+        
         public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
@@ -41,7 +40,7 @@ namespace Client.Services
                 {
                     throw new Exception(responseArray[2]);
                 }
-                else if (responseArray[0] == ProtocolConstants.Response)
+                if (responseArray[0] == ProtocolConstants.Response)
                 {
                     Console.WriteLine("User registered successfully");
                 }
@@ -55,8 +54,7 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
-
-        //ok checked
+        
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
             try
@@ -71,7 +69,7 @@ namespace Client.Services
 
                 string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-                //Validamos exception
+                
                 if (loginArray[0] != ProtocolConstants.Exception)
                 {
                     Guid id = Guid.Parse(loginArray[2]);
@@ -123,7 +121,6 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
-
         //proceso
         public void CreateDriver(Socket socket, Guid userId)
         {
@@ -145,7 +142,7 @@ namespace Client.Services
                     {
                         throw new Exception(messageArray[2]);
                     }
-                    else if (messageArray[0] == ProtocolConstants.Response)
+                    if (messageArray[0] == ProtocolConstants.Response)
                     {
                         Console.WriteLine("You are now a driver");
                     }
@@ -319,6 +316,20 @@ namespace Client.Services
             {
                 throw new Exception(e.Message);
             }
+        }
+
+        public void CloseApp(Socket clientSocket)
+        {
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.CloseApp;
+                NetworkHelper.SendMessage(clientSocket, message);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
     }
 }

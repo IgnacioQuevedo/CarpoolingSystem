@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 using Client.Objects.EnumsModels;
 using Client.Objects.ReviewModels;
 using Client.Objects.RideModels;
@@ -97,8 +96,8 @@ namespace Client
 
         private static void WrongDigitInserted()
         {
-            Console.WriteLine("Insert a valid digit, please.");
             Console.WriteLine("");
+            Console.WriteLine("Insert a valid digit, please.");
         }
 
         private static void CloseAppOption()
@@ -107,7 +106,8 @@ namespace Client
             {
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
-                NetworkHelper.CloseSocketConnections(clientSocket);
+                
+                _userService.CloseApp(clientSocket);
                 _closeApp = true;
             }
             catch (Exception e)
@@ -172,7 +172,6 @@ namespace Client
             catch (Exception exception)
             {
                 Console.WriteLine("Redo all again but without this error: " + exception.Message);
-                MainMenuOptions();
             }
         }
 
@@ -190,9 +189,8 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception.Message);
                 Console.WriteLine();
-                MainMenuOptions();
+                Console.WriteLine(exception.Message);
             }
         }
 
