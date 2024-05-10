@@ -19,7 +19,7 @@ namespace Client.Services
         {
             _clientSocket = socketClient;
         }
-        
+
         public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
         {
             try
@@ -40,6 +40,7 @@ namespace Client.Services
                 {
                     throw new Exception(responseArray[2]);
                 }
+
                 if (responseArray[0] == ProtocolConstants.Response)
                 {
                     Console.WriteLine("User registered successfully");
@@ -54,7 +55,7 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
-        
+
         public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
         {
             try
@@ -69,7 +70,7 @@ namespace Client.Services
 
                 string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
-                
+
                 if (loginArray[0] != ProtocolConstants.Exception)
                 {
                     Guid id = Guid.Parse(loginArray[2]);
@@ -121,40 +122,29 @@ namespace Client.Services
                 throw new Exception(e.Message);
             }
         }
-        //proceso
-        public void CreateDriver(Socket socket, Guid userId)
+
+        public void CreateDriver(Socket socket, Guid userId, string carModel, string path)
         {
             try
             {
-                UserClient userToBeDriver = GetUserById(_clientSocket, userId);
-                if (userToBeDriver.DriverAspects == null)
+                string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" +
+                                       userId + ";" + carModel + ";" + path;
+                
+                NetworkHelper.SendMessage(socket, messageToSend);
+
+                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] messageArray =
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (messageArray[0] == ProtocolConstants.Exception)
                 {
-                    string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" +
-                                           userId;
-                    NetworkHelper.SendMessage(socket, messageToSend);
-
-                    string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
-
-                    string[] messageArray =
-                        messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (messageArray[0] == ProtocolConstants.Exception)
-                    {
-                        throw new Exception(messageArray[2]);
-                    }
-                    if (messageArray[0] == ProtocolConstants.Response)
-                    {
-                        Console.WriteLine("You are now a driver");
-                    }
-                    else
-                    {
-                        throw new Exception("Error creating driver");
-                    }
+                    throw new Exception(messageArray[2]);
                 }
-                else
-                {
-                    Console.WriteLine("You are already a driver");
-                }
+
+                Console.WriteLine("You are now a driver");
+                
+                AddVehicle(socket, userId, carModel, path);
             }
             catch (Exception e)
             {
@@ -166,33 +156,30 @@ namespace Client.Services
         {
             try
             {
-                UserClient userFound = GetUserById(_clientSocket, userRegisteredId);
-                if (userFound.DriverAspects != null)
+                SetDriverVehicles(clientSocket, userRegisteredId, carModel, path);
+
+                // ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
+
+                string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
+
+                string[] vehicleInfoArray =
+                    messageArray.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (vehicleInfoArray[0] == ProtocolConstants.Exception)
                 {
-                    SetDriverVehicles(clientSocket, userRegisteredId, carModel, path);
-
-                    ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
-
-                    string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
-
-                    string[] vehicleInfoArray =
-                        messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (vehicleInfoArray[0] == ProtocolConstants.Exception)
-                    {
-                        throw new Exception(vehicleInfoArray[2]);
-                    }
-
-                    Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
-                    string vehicleModel = vehicleInfoArray[3];
-                    string imageAllocatedAtAServer = vehicleInfoArray[4];
-
-                    VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
-
-                    vehiclesOfUser.Add(vehicleClient);
-                    DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
-                    userFound.DriverAspects = driverInfo;
+                    throw new Exception(vehicleInfoArray[2]);
                 }
+
+                // Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
+                // string vehicleModel = vehicleInfoArray[3];
+                // string imageAllocatedAtAServer = vehicleInfoArray[4];
+                //
+                // VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
+                //
+                // vehiclesOfUser.Add(vehicleClient);
+                // DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
+                // userFound.DriverAspects = driverInfo;
+
                 else
                 {
                     Console.WriteLine("You are not a driver");
@@ -329,7 +316,6 @@ namespace Client.Services
             {
                 throw new Exception(e.Message);
             }
-
         }
     }
 }

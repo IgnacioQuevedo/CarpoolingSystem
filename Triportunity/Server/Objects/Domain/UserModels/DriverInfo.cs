@@ -6,16 +6,8 @@ namespace Server.Objects.Domain.UserModels
 {
     public class DriverInfo
     {
-        public double Puntuation { get; set; }
-        public ICollection<Review> Reviews { get; set; }
-        public ICollection<Vehicle> Vehicles { get; set; }
-
-        public DriverInfo(ICollection<Vehicle> driverVehicles)
-        {
-            Puntuation = 5.0;
-            Reviews = new List<Review>();
-            Vehicles = driverVehicles;
-            
-        }
+        public double Puntuation { get; set; } = 5.0;
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
     }
 }

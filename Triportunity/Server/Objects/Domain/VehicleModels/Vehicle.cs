@@ -19,8 +19,8 @@ namespace Server.Objects.Domain.VehicleModels
 
         private void VehicleValidations()
         {
-            if (VehicleModel == null) throw new VehicleException("Vehicle model must not be empty");
-            if(ImageAllocatedAtAServer == null) throw new VehicleException("Image must not be empty");
+            if (string.IsNullOrEmpty(VehicleModel)) throw new VehicleException("Vehicle model must not be empty");
+            if(string.IsNullOrEmpty(ImageAllocatedAtAServer)) throw new VehicleException("Vehicle image cannot be empty");
         }
         
     }

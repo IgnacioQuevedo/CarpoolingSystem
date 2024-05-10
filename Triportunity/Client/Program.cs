@@ -77,7 +77,6 @@ namespace Client
 
                 else
                 {
-                    //This is when the user is logged in
                     PossibleActionsToBeDoneByLoggedUser();
                 }
             }
@@ -290,8 +289,8 @@ namespace Client
                     Console.WriteLine("Please enter the path of the vehicle image");
                     string path = Console.ReadLine();
 
-                    _userService.CreateDriver(clientSocket, userRegisteredId);
-                    _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    _userService.CreateDriver(clientSocket, userRegisteredId,carModel, path);
+                    // _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
@@ -302,6 +301,7 @@ namespace Client
             }
             catch (Exception e)
             {
+                Console.WriteLine("");
                 Console.WriteLine(e.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
