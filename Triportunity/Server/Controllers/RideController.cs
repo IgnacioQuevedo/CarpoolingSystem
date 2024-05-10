@@ -330,10 +330,15 @@ namespace Server.Controllers
                 Review review = new Review(punctuation, comment);
 
                 _rideRepository.AddReview(userId, review);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.AddReview;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 

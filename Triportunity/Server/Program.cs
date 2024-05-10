@@ -65,7 +65,7 @@ namespace Server
                     string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
 
-                    string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.None);
                     command = int.Parse(messageArray[1]);
 
                     Guid userId;
