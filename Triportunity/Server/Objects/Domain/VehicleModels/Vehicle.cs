@@ -6,12 +6,13 @@ namespace Server.Objects.Domain.VehicleModels
 {
     public class Vehicle
     {
-        public Guid Id { get; private set; } = new Guid();
+        public Guid Id { get; set; }
         public string VehicleModel { get; set; }
         public string ImageAllocatedAtAServer { get; set; }
         
         public Vehicle(string vehicleModel, string imageAllocatedAtAServer)
         {
+            Id = Guid.NewGuid();
             VehicleModel = vehicleModel;
             ImageAllocatedAtAServer = imageAllocatedAtAServer;
             VehicleValidations();

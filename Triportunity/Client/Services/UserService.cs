@@ -68,7 +68,7 @@ namespace Client.Services
 
                 string loginResult = NetworkHelper.ReceiveMessage(socket);
 
-                string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.None);
 
 
                 if (loginArray[0] != ProtocolConstants.Exception)
@@ -84,21 +84,24 @@ namespace Client.Services
                         List<ReviewClient> reviews = new List<ReviewClient>();
                         List<VehicleClient> vehicles = new List<VehicleClient>();
 
-                        foreach (var review in loginArray[6]
-                                     .Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        if (loginArray[6] != "")
                         {
-                            string[] reviewArray =
-                                review.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
-                            ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]),
-                                double.Parse(reviewArray[1]), reviewArray[2]);
-                            reviews.Add(reviewClient);
+                            foreach (var review in loginArray[6]
+                                         .Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                string[] reviewArray =
+                                    review.Split(new string[] { ":" }, StringSplitOptions.None);
+                                ReviewClient reviewClient = new ReviewClient(Guid.Parse(reviewArray[0]),
+                                    double.Parse(reviewArray[1]), reviewArray[2]);
+                                reviews.Add(reviewClient);
+                            }
                         }
 
                         foreach (var vehicle in loginArray[7]
-                                     .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries))
+                                     .Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             string[] vehicleArray =
-                                vehicle.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                                vehicle.Split(new string[] { ":" }, StringSplitOptions.None);
                             VehicleClient vehicleClient = new VehicleClient(Guid.Parse(vehicleArray[0]),
                                 vehicleArray[1],
                                 vehicleArray[2]);
@@ -128,8 +131,8 @@ namespace Client.Services
             try
             {
                 string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" +
-                                       userId + ";" + carModel + ";" + path;
-                
+                                       userId;
+
                 NetworkHelper.SendMessage(socket, messageToSend);
 
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
@@ -142,9 +145,8 @@ namespace Client.Services
                     throw new Exception(messageArray[2]);
                 }
 
-                Console.WriteLine("You are now a driver");
-                
                 AddVehicle(socket, userId, carModel, path);
+                Console.WriteLine("You are now a driver");
             }
             catch (Exception e)
             {
@@ -156,9 +158,8 @@ namespace Client.Services
         {
             try
             {
+                
                 SetDriverVehicles(clientSocket, userRegisteredId, carModel, path);
-
-                // ICollection<VehicleClient> vehiclesOfUser = new List<VehicleClient>();
 
                 string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
 
@@ -168,21 +169,6 @@ namespace Client.Services
                 if (vehicleInfoArray[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(vehicleInfoArray[2]);
-                }
-
-                // Guid vehicleId = Guid.Parse(vehicleInfoArray[2]);
-                // string vehicleModel = vehicleInfoArray[3];
-                // string imageAllocatedAtAServer = vehicleInfoArray[4];
-                //
-                // VehicleClient vehicleClient = new VehicleClient(vehicleId, vehicleModel, imageAllocatedAtAServer);
-                //
-                // vehiclesOfUser.Add(vehicleClient);
-                // DriverInfoClient driverInfo = new DriverInfoClient(vehiclesOfUser);
-                // userFound.DriverAspects = driverInfo;
-
-                else
-                {
-                    Console.WriteLine("You are not a driver");
                 }
             }
             catch (Exception e)

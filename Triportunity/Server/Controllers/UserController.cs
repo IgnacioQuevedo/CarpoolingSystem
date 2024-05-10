@@ -68,6 +68,7 @@ namespace Server.Controllers
 
                 if (userLogged.DriverAspects != null)
                 {
+                    messageLogin += ";";
                     foreach (var review in userLogged.DriverAspects.Reviews)
                     {
                         messageLogin += review.Id + ":" + review.Punctuation + ":" +
@@ -97,21 +98,16 @@ namespace Server.Controllers
             try
             {
                 Guid userIdToCreate = Guid.Parse(messageArray[2]);
-                string vehicleModel = messageArray[3];
-                string vehiclePath = messageArray[4];
                 
                 DriverInfo driverInfo = new DriverInfo();
                 _userRepository.RegisterDriver(userIdToCreate, driverInfo);
-                _userRepository.AddVehicle(userIdToCreate, new Vehicle(vehicleModel, vehiclePath));
                 
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userIdToCreate;
                 NetworkHelper.SendMessage(_serverSocket, responseMsg);
+                
             }
             catch (Exception exceptionCaught)
             {
-                Guid userIdToDelete = Guid.Parse(messageArray[2]);
-                
-                _userRepository.DeleteDriver(userIdToDelete);
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
             }
@@ -136,6 +132,13 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
+                User userFound = _userRepository.GetUserById(Guid.Parse(messageArray[2]));
+
+                if (userFound.DriverAspects.Vehicles.Count == 0)
+                {
+                    _userRepository.DeleteDriver(Guid.Parse(messageArray[2]));
+                }
+                
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
             }

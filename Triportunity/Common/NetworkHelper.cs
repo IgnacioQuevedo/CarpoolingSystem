@@ -176,9 +176,6 @@ namespace Common
                         offset += readBytes;
                     }
                 }
-
-                Console.WriteLine(
-                    $"File sent {fileInfo.Name}, size: {fileLength} bytes, from path: {filePath}");
             }
             catch (Exception ex)
             {

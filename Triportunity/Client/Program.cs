@@ -105,7 +105,7 @@ namespace Client
             {
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
-                
+
                 _userService.CloseApp(clientSocket);
                 _closeApp = true;
             }
@@ -259,6 +259,7 @@ namespace Client
                     {
                         CloseAppOption();
                     }
+
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null)
@@ -280,23 +281,33 @@ namespace Client
         {
             try
             {
+                string carModel;
+                string path;
                 string addNewVehicle = "Y";
+                bool firstVehicle = true;
+                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
 
                 while (addNewVehicle.Equals("Y"))
                 {
                     Console.WriteLine("Please enter the model of the vehicle");
-                    string carModel = Console.ReadLine();
+                    carModel = Console.ReadLine();
                     Console.WriteLine("Please enter the path of the vehicle image");
-                    string path = Console.ReadLine();
+                    path = Console.ReadLine();
 
-                    _userService.CreateDriver(clientSocket, userRegisteredId,carModel, path);
-                    // _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    if (firstVehicle)
+                    {
+                        _userService.CreateDriver(clientSocket, userRegisteredId, carModel, path);
+                        firstVehicle = false;
+                       
+                    }
+                    else
+                    {
+                        _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    }
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter 'N'");
                     addNewVehicle = Console.ReadLine();
-
-                    _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 }
             }
             catch (Exception e)
@@ -587,7 +598,8 @@ namespace Client
                         string seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
-                            Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
+                            Console.WriteLine(
+                                "And at the moment are available " + rideSelected.AvailableSeats + "seats");
                             Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                             Console.WriteLine("Do you want to see the car image?");
@@ -614,8 +626,6 @@ namespace Client
                 Console.WriteLine(e.Message);
                 return SelectRideFromList(rides);
             }
-
-
         }
 
 
@@ -954,7 +964,6 @@ namespace Client
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
                 DisplayAllReviews(reviewsList);
-
             }
             catch (Exception e)
             {
@@ -973,11 +982,10 @@ namespace Client
             {
                 actualReview = reviews[i];
                 Console.WriteLine(
-                                   $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
-
+                    $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
             }
         }
 
-        #endregion 
+        #endregion
     }
 }
