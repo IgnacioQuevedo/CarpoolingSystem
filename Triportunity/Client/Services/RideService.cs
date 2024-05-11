@@ -34,10 +34,6 @@ namespace Client.Services
                         message += request.Passengers[i] + ",";
                     }
                 }
-                else
-                {
-                    message += "#";
-                }
 
                 message += ";";
 
@@ -50,7 +46,7 @@ namespace Client.Services
                 string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);
 
                 string[] messageArrayResponse =
-                    messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
@@ -78,7 +74,7 @@ namespace Client.Services
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
 
                 string[] messageArrayResponse =
-                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
@@ -209,37 +205,41 @@ namespace Client.Services
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
                                  id.ToString();
+
                 NetworkHelper.SendMessage(_clientSocket, message);
+
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (rideData[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(rideData[2]);
                 }
 
+                string[] rideArray = rideData[2].Split(new string[] { ":" }, StringSplitOptions.None);
+
+                ICollection<Guid> passengers = new List<Guid>();
+
+                foreach (var passenger in rideArray[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    passengers.Add(Guid.Parse(passenger));
+                }
+
+                DateTime departureTime = DateTime.Parse(rideArray[5] + " " + rideArray[6] + " " + rideArray[7]);
+
                 RideClient ride = new RideClient
                 {
-                    Id = Guid.Parse(rideData[2]),
-                    DriverId = Guid.Parse(rideData[3]),
-                    Passengers = new List<Guid>(),
-                    InitialLocation = (CitiesEnum)(int.Parse(rideData[4])),
-                    EndingLocation = (CitiesEnum)(int.Parse(rideData[5])),
-                    DepartureTime = DateTime.Parse(rideData[6]),
-                    AvailableSeats = int.Parse(rideData[7]),
-                    PricePerPerson = double.Parse(rideData[8]),
-                    PetsAllowed = bool.Parse(rideData[9])
+                    Id = Guid.Parse(rideArray[0]),
+                    DriverId = Guid.Parse(rideArray[1]),
+                    Passengers = passengers,
+                    InitialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideArray[3]),
+                    EndingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideArray[4]),
+                    DepartureTime = departureTime,
+                    AvailableSeats = int.Parse(rideArray[8]),
+                    PricePerPerson = double.Parse(rideArray[9]),
+                    PetsAllowed = bool.Parse(rideArray[10]),
+                    VehicleId = Guid.Parse(rideArray[11])
                 };
-
-                if (rideData[4] != "#")
-                {
-                    string[] passengers =
-                        rideData[4].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var passenger in passengers)
-                    {
-                        ride.Passengers.Add(Guid.Parse(passenger));
-                    }
-                }
                 return ride;
             }
             catch (Exception e)
@@ -257,26 +257,30 @@ namespace Client.Services
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
                 ICollection<RideClient> rides = new List<RideClient>();
 
-                string[] allRides = ridesData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                if (ridesData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(ridesData[2]);
+                }
+
+                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
 
 
                 for (int i = 0; i < allRides.Length; i++)
                 {
-                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.None);
                     ICollection<Guid> passengers = new List<Guid>();
 
-                    if (!rideInfo[2].Equals("#"))
+                    string[] passengersString =
+                        rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var passenger in passengersString)
                     {
-                        string[] passengersString =
-                            rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var passenger in passengersString)
-                        {
-                            passengers.Add(Guid.Parse(passenger));
-                        }
+                        passengers.Add(Guid.Parse(passenger));
                     }
+
 
                     DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
 
@@ -343,11 +347,57 @@ namespace Client.Services
 
         public ICollection<RideClient> GetRidesByUser(Guid userLoggedId)
         {
-            List<RideClient> allRides = GetAllRides().ToList();
-            List<RideClient> ridesByUser = allRides.Where(ride => ride.DriverId == userLoggedId).ToList();
+            try
+            {
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRidesByUser + ";" + userLoggedId;
+                NetworkHelper.SendMessage(_clientSocket, message);
 
-            return ridesByUser;
+                string response = NetworkHelper.ReceiveMessage(_clientSocket);
 
+                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (ridesData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(ridesData[2]);
+                }
+
+                ICollection<RideClient> rides = new List<RideClient>();
+
+                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
+
+                for (int i = 0; i < allRides.Length; i++)
+                {
+                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.None);
+                    ICollection<Guid> passengers = new List<Guid>();
+
+                    foreach (var passenger in rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        passengers.Add(Guid.Parse(passenger));
+                    }
+
+                    DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
+
+                    rides.Add(new RideClient
+                    {
+                        Id = Guid.Parse(rideInfo[0]),
+                        DriverId = Guid.Parse(rideInfo[1]),
+                        Passengers = passengers,
+                        InitialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideInfo[3]),
+                        EndingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), rideInfo[4]),
+                        DepartureTime = departureTime,
+                        AvailableSeats = int.Parse(rideInfo[8]),
+                        PricePerPerson = double.Parse(rideInfo[9]),
+                        PetsAllowed = bool.Parse(rideInfo[10]),
+                        VehicleId = Guid.Parse(rideInfo[11])
+                    });
+                }
+
+                return rides;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
 
@@ -401,30 +451,28 @@ namespace Client.Services
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
 
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (ridesData[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(ridesData[2]);
                 }
 
-                string[] allRides = ridesData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
 
 
                 for (int i = 0; i < allRides.Length; i++)
                 {
-                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.None);
                     ICollection<Guid> passengers = new List<Guid>();
 
-                    if (!rideInfo[2].Equals("#"))
+                    string[] passengersString =
+                                     rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var passenger in passengersString)
                     {
-                        string[] passengersString =
-                            rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var passenger in passengersString)
-                        {
-                            passengers.Add(Guid.Parse(passenger));
-                        }
+                        passengers.Add(Guid.Parse(passenger));
                     }
+
 
                     DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
 
@@ -484,6 +532,16 @@ namespace Client.Services
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
                 NetworkHelper.SendMessage(_clientSocket, message);
+
+                string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] messageArrayResponse =
+                    messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (messageArrayResponse[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(messageArrayResponse[2]);
+                }
             }
             catch (Exception e)
             {
@@ -504,14 +562,14 @@ namespace Client.Services
 
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (reviewsData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(reviewsData[2]);
+                }
+
                 ICollection<ReviewClient> reviews = new List<ReviewClient>();
 
                 string[] allReviews = reviewsData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (allReviews[0].Equals("#"))
-                {
-                    return reviews;
-                }
 
                 for (int i = 0; i < allReviews.Length; i++)
                 {

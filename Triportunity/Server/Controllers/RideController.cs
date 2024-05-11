@@ -31,15 +31,6 @@ namespace Server.Controllers
 
                 Guid id = Guid.Parse(messageArray[2]);
 
-                if (messageArray[3] != "#")
-                {
-                    foreach (var passenger in messageArray[10].Split(new string[] { "," },
-                                 StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        passengers.Add(Guid.Parse(passenger));
-                    }
-                }
-
                 CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[5]);
                 DateTime departureTime = DateTime.Parse(messageArray[6]);
@@ -67,6 +58,39 @@ namespace Server.Controllers
             }
         }
 
+        public void GetRidesByUser(string[] messageArray)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(messageArray[2]);
+                ICollection<Ride> rides = _rideRepository.GetRidesByUser(userId);
+
+                string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetRidesByUser + ";";
+
+                foreach (var ride in rides)
+                {
+                    response += ride.Id + ":" + ride.DriverId + ":";
+
+                    foreach (var passenger in ride.Passengers)
+                    {
+                        response += passenger + ",";
+                    }
+
+                    response += ":" + ride.InitialLocation +
+                                ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
+                                ride.PricePerPerson + ":" + ride.PetsAllowed + ":" + ride.VehicleId + "@";
+
+                }
+
+                NetworkHelper.SendMessage(_clientSocket, response);
+            }
+            catch (Exception exceptionCaught)
+            {
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+            }
+        }
+
         public void JoinRide(string[] messageArray)
         {
             try
@@ -74,7 +98,11 @@ namespace Server.Controllers
                 Guid rideId = Guid.Parse(messageArray[2]);
                 Guid userId = Guid.Parse(messageArray[3]);
 
-                _rideRepository.JoinRide(rideId, userId);
+                _rideRepository.JoinRide(userId, rideId);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.JoinRide;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception exceptionCaught)
             {
@@ -126,6 +154,11 @@ namespace Server.Controllers
             {
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DeleteRide(rideId);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.DeleteRide;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
+
             }
             catch (Exception exceptionCaught)
             {
@@ -142,6 +175,9 @@ namespace Server.Controllers
                 Guid userId = Guid.Parse(messageArray[3]);
 
                 _rideRepository.QuitRide(rideId, userId);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.QuitRide;
+                NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception exceptionCaught)
             {
@@ -161,10 +197,6 @@ namespace Server.Controllers
                 {
                     response += ride.Id + ":" + ride.DriverId + ":";
 
-                    if (ride.Passengers.Count == 0)
-                    {
-                        response += "#";
-                    }
                     foreach (var passenger in ride.Passengers)
                     {
                         response += passenger + ",";
@@ -173,7 +205,7 @@ namespace Server.Controllers
                     response += ":" + ride.InitialLocation +
                                 ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                                + ride.VehicleId + ",";
+                                + ride.VehicleId + "@";
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
@@ -234,10 +266,6 @@ namespace Server.Controllers
                 {
                     response += ride.Id + ":" + ride.DriverId + ":";
 
-                    if (ride.Passengers.Count == 0)
-                    {
-                        response += "#";
-                    }
                     foreach (var passenger in ride.Passengers)
                     {
                         response += passenger + ",";
@@ -246,14 +274,15 @@ namespace Server.Controllers
                     response += ":" + ride.InitialLocation +
                                 ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                                + ride.VehicleId + ",";
+                                + ride.VehicleId + "@";
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 
@@ -266,14 +295,7 @@ namespace Server.Controllers
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetDriverReviews + ";";
 
-                User user = _userRepository.GetUserById(ride.DriverId);
-
-                ICollection<Review> reviews = user.DriverAspects.Reviews;
-
-                if (reviews.Count == 0)
-                {
-                    response += "#";
-                }
+                ICollection<Review> reviews = _rideRepository.GetDriverReviews(rideId);
 
                 foreach (var review in reviews)
                 {
@@ -282,9 +304,10 @@ namespace Server.Controllers
 
                 NetworkHelper.SendMessage(_clientSocket, response);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 
@@ -299,7 +322,7 @@ namespace Server.Controllers
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetRideById + ";";
 
-                response += ride.Id + ":" + ride.DriverId + ":" + ":";
+                response += ride.Id + ":" + ride.DriverId + ":";
 
                 foreach (var passenger in ride.Passengers)
                 {
@@ -330,10 +353,15 @@ namespace Server.Controllers
                 Review review = new Review(punctuation, comment);
 
                 _rideRepository.AddReview(userId, review);
+
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.AddReview;
+
+                NetworkHelper.SendMessage(_clientSocket, message);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 
