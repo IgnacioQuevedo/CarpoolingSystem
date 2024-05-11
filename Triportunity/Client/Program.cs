@@ -23,7 +23,6 @@ namespace Client
         private static UserService _userService;
         private static RideService _rideService;
 
-        //private static byte[] _messageInBytes;
         private static bool _closeApp;
         private static int _amountOfCities = Enum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
@@ -559,7 +558,6 @@ namespace Client
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
-
         private static RideClient SelectRideFromList(List<RideClient> rides)
         {
             try
@@ -769,10 +767,8 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetAllRides();
+                ICollection<RideClient> ridesCollection = _rideService.GetRidesByUser(_userLogged.Id);
                 List<RideClient> ridesList = new List<RideClient>(ridesCollection);
-
-                DisplayAllRides(ridesList);
 
                 RideClient rideSelected = SelectRideFromList(ridesList);
 
@@ -830,12 +826,29 @@ namespace Client
             try
             {
                 _rideService.GetRideById(rideSelected.Id);
+
+                DisplayRide(rideSelected);
+               
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
+        }
+
+        private static void DisplayRide(RideClient ride)
+        {
+            Console.WriteLine($"\nRide ID: {ride.Id}");
+            Console.WriteLine($"Driver ID: {ride.DriverId}");
+            Console.WriteLine($"Initial Location: {ride.InitialLocation}");
+            Console.WriteLine($"Ending Location: {ride.EndingLocation}");
+            Console.WriteLine($"Departure Time: {ride.DepartureTime}");
+            Console.WriteLine($"Available Seats: {ride.AvailableSeats}");
+            Console.WriteLine($"Price Per Person: {ride.PricePerPerson}");
+            Console.WriteLine($"Pets Allowed: {ride.PetsAllowed}");
+            Console.WriteLine($"Vehicle ID: {ride.VehicleId}");
+            Console.WriteLine("");
         }
 
         #endregion
