@@ -28,7 +28,6 @@ namespace Server.Repositories
         public void JoinRide(Guid userId, Guid rideId)
         {
             Ride rideToJoin = GetRideById(rideId);
-            User user = _userRepository.GetUserById(userId);
 
             ValidateJoinRide(userId, rideToJoin);
 
@@ -44,10 +43,12 @@ namespace Server.Repositories
         {
             string exceptionMessage = "";
 
+            LockManager.StartReading();
             if (rideToJoin.AvailableSeats < 1) exceptionMessage = "No are no available seats";
-            if (rideToJoin.Passengers.Contains(user)) exceptionMessage = "User is already in the ride";
+            if (rideToJoin.Passengers.Contains(user) || rideToJoin.DriverId == user) exceptionMessage = "You are already in the ride";
             if (rideToJoin.DepartureTime <= DateTime.Now)
                 exceptionMessage = "Cannot join a ride that has already departed";
+            LockManager.StopReading();
 
             if (exceptionMessage != "") throw new RideException(exceptionMessage);
         }
@@ -71,12 +72,16 @@ namespace Server.Repositories
         public void QuitRide(Guid userId, Guid rideId)
         {
             Ride rideToQuit = GetRideById(rideId);
+
+            LockManager.StartReading();
+
+            if (rideToQuit.DriverId.Equals(userId)) {
+                throw new RideException("You are the driver, you must disable or delete the ride in order to quit");
+            }
+
             User user = _userRepository.GetUserById(userId);
 
-            if (!rideToQuit.Passengers.Contains(userId))
-            {
-                throw new RideException("User is not in the ride");
-            }
+            LockManager.StopReading();
 
             if (rideToQuit.DepartureTime <= DateTime.Now)
             {
@@ -207,6 +212,34 @@ namespace Server.Repositories
             User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
             LockManager.StopReading();
             return user.DriverAspects.Reviews;
+        }
+
+        public ICollection<Ride> GetRidesByUser(Guid userId)
+        {
+            LockManager.StartReading();
+            ICollection<Ride> rides = new List<Ride>();
+            rides = MemoryDatabase.GetInstance().Rides;
+                
+            LockManager.StopReading();
+
+            ICollection<Ride> userRides = new List<Ride>();
+
+            foreach (var ride in rides)
+            {
+                if (ride.DriverId == userId || ride.Passengers.Contains(userId))
+                {
+                    userRides.Add(ride);
+                }
+            }
+
+
+
+            if (userRides.Count == 0)
+            {
+                throw new RideException("No rides found");
+            }
+
+            return userRides;
         }
     }
 }
