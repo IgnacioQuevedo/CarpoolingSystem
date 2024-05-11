@@ -152,6 +152,11 @@ namespace Server.Repositories
 
             LockManager.StopReading();
 
+            if (filteredRides.Count == 0)
+            {
+                throw new RideException("No rides found in the selected range");
+            }
+
             return filteredRides;
         }
 
@@ -226,8 +231,6 @@ namespace Server.Repositories
                     userRides.Add(ride);
                 }
             }
-
-
 
             if (userRides.Count == 0)
             {

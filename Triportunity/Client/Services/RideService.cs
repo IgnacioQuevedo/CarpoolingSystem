@@ -257,26 +257,30 @@ namespace Client.Services
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
                 ICollection<RideClient> rides = new List<RideClient>();
 
-                string[] allRides = ridesData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                if (ridesData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(ridesData[2]);
+                }
+
+                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
 
 
                 for (int i = 0; i < allRides.Length; i++)
                 {
-                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] rideInfo = allRides[i].Split(new string[] { ":" }, StringSplitOptions.None);
                     ICollection<Guid> passengers = new List<Guid>();
 
-                    if (!rideInfo[2].Equals("#"))
+                    string[] passengersString =
+                        rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var passenger in passengersString)
                     {
-                        string[] passengersString =
-                            rideInfo[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var passenger in passengersString)
-                        {
-                            passengers.Add(Guid.Parse(passenger));
-                        }
+                        passengers.Add(Guid.Parse(passenger));
                     }
+
 
                     DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
 
@@ -558,14 +562,14 @@ namespace Client.Services
 
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (reviewsData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(reviewsData[2]);
+                }
+
                 ICollection<ReviewClient> reviews = new List<ReviewClient>();
 
                 string[] allReviews = reviewsData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (allReviews[0].Equals("#"))
-                {
-                    return reviews;
-                }
 
                 for (int i = 0; i < allReviews.Length; i++)
                 {
