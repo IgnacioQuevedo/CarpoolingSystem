@@ -307,7 +307,7 @@ namespace Client
                     }
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
-                    Console.WriteLine("If not - Enter 'N'");
+                    Console.WriteLine("If not - Enter any other key");
                     addNewVehicle = Console.ReadLine();
                 }
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
