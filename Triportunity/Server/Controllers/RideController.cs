@@ -234,10 +234,6 @@ namespace Server.Controllers
                 {
                     response += ride.Id + ":" + ride.DriverId + ":";
 
-                    if (ride.Passengers.Count == 0)
-                    {
-                        response += "#";
-                    }
                     foreach (var passenger in ride.Passengers)
                     {
                         response += passenger + ",";
@@ -246,14 +242,15 @@ namespace Server.Controllers
                     response += ":" + ride.InitialLocation +
                                 ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
-                                + ride.VehicleId + ",";
+                                + ride.VehicleId + "@";
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 
