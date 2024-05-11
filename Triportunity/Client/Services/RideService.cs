@@ -562,14 +562,14 @@ namespace Client.Services
 
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
+                if (reviewsData[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(reviewsData[2]);
+                }
+
                 ICollection<ReviewClient> reviews = new List<ReviewClient>();
 
                 string[] allReviews = reviewsData[2].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (allReviews[0].Equals("#"))
-                {
-                    return reviews;
-                }
 
                 for (int i = 0; i < allReviews.Length; i++)
                 {

@@ -226,7 +226,7 @@ namespace Client
                 _optionSelected = Console.ReadLine();
             }
 
-            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 6)
+            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 7)
             {
                 WrongDigitInserted();
                 return;
@@ -901,6 +901,8 @@ namespace Client
             Console.WriteLine($"Pets Allowed: {ride.PetsAllowed}");
             Console.WriteLine($"Vehicle ID: {ride.VehicleId}");
             Console.WriteLine("");
+            GetDriverReviews(ride.Id);
+            Console.WriteLine("");
         }
 
         #endregion
@@ -1041,13 +1043,11 @@ namespace Client
 
         #region GetDriverReview
 
-        public static void GetDriverReviews()
+        public static void GetDriverReviews(Guid rideId)
         {
             try
             {
-                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides().ToList());
-
-                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(rideClient.Id);
+                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(rideId);
 
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
@@ -1057,6 +1057,7 @@ namespace Client
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                Console.WriteLine("");
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }

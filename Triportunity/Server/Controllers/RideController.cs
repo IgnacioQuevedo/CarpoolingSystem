@@ -295,14 +295,7 @@ namespace Server.Controllers
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetDriverReviews + ";";
 
-                User user = _userRepository.GetUserById(ride.DriverId);
-
-                ICollection<Review> reviews = user.DriverAspects.Reviews;
-
-                if (reviews.Count == 0)
-                {
-                    response += "#";
-                }
+                ICollection<Review> reviews = _rideRepository.GetDriverReviews(rideId);
 
                 foreach (var review in reviews)
                 {
@@ -311,9 +304,10 @@ namespace Server.Controllers
 
                 NetworkHelper.SendMessage(_clientSocket, response);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 

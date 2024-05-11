@@ -232,8 +232,6 @@ namespace Server.Repositories
                 }
             }
 
-
-
             if (userRides.Count == 0)
             {
                 throw new RideException("No rides found");
