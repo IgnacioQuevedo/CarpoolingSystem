@@ -195,7 +195,7 @@ namespace Server.Controllers
                 Guid vehicleId = rideToFound.VehicleId;
                 Vehicle vehicle = _userRepository.GetVehicleById(userId, vehicleId);
 
-                NetworkHelper.SendImage(_clientSocket, vehicle.ImageAllocatedAtAServer);
+                NetworkHelper.SendImage(_clientSocket, vehicle.ImageAllocatedAtServer);
             }
             catch (Exception exceptionCaught)
             {

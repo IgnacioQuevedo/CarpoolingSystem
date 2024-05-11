@@ -79,7 +79,7 @@ namespace Server.Controllers
                     foreach (var vehicleLogin in userLogged.DriverAspects.Vehicles)
                     {
                         messageLogin += vehicleLogin.Id + ":" + vehicleLogin.VehicleModel + ":" +
-                                        vehicleLogin.ImageAllocatedAtAServer + ",";
+                                        vehicleLogin.ImageAllocatedAtServer + ",";
                     }
                 }
 
@@ -119,16 +119,19 @@ namespace Server.Controllers
             {
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
-
-                string imageAllocatedAtAServer = NetworkHelper.ReceiveImage(_serverSocket);
-                Vehicle vehicleToAdd = new Vehicle(vehicleModel, imageAllocatedAtAServer);
-
+                string path = messageArray[4];
+                
+                Vehicle vehicleToAdd = new Vehicle(vehicleModel);
+                NetworkHelper.FilePathValidator(path);
+                
+                string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
+                                     + vehicleToAdd.Id;
+                NetworkHelper.SendMessage(_serverSocket, responseVehicleModelMsg);
+                
+                string imageAllocatedAtServer = NetworkHelper.ReceiveImage(_serverSocket);
+                vehicleToAdd.ImageAllocatedAtServer = imageAllocatedAtServer;
+                
                 _userRepository.AddVehicle(userId, vehicleToAdd);
-
-                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
-                                     + vehicleToAdd.Id + ";" + vehicleToAdd.VehicleModel + ";" + vehicleToAdd.ImageAllocatedAtAServer;
-
-                NetworkHelper.SendMessage(_serverSocket, responseMsg);
             }
             catch (Exception exceptionCaught)
             {
@@ -171,7 +174,7 @@ namespace Server.Controllers
                     if (userFound.DriverAspects.Vehicles.Count == 0) message += "#";
                     foreach (var vehicle in userFound.DriverAspects.Vehicles)
                     {
-                        message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtAServer +
+                        message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtServer +
                                    ",";
                     }
 

@@ -8,20 +8,18 @@ namespace Server.Objects.Domain.VehicleModels
     {
         public Guid Id { get; set; }
         public string VehicleModel { get; set; }
-        public string ImageAllocatedAtAServer { get; set; }
+        public string ImageAllocatedAtServer { get; set; }
         
-        public Vehicle(string vehicleModel, string imageAllocatedAtAServer)
+        public Vehicle(string vehicleModel)
         {
             Id = Guid.NewGuid();
             VehicleModel = vehicleModel;
-            ImageAllocatedAtAServer = imageAllocatedAtAServer;
             VehicleValidations();
         }
-
+        
         private void VehicleValidations()
         {
             if (string.IsNullOrEmpty(VehicleModel)) throw new VehicleException("Vehicle model must not be empty");
-            if(string.IsNullOrEmpty(ImageAllocatedAtAServer)) throw new VehicleException("Vehicle image cannot be empty");
         }
         
     }

@@ -145,6 +145,7 @@ namespace Client.Services
                     throw new Exception(messageArray[2]);
                 }
 
+                //HASTA ACA, EL DRIVER SE CREÓ CON EXITO
                 AddVehicle(socket, userId, carModel, path);
                 Console.WriteLine("You are now a driver");
             }
@@ -154,15 +155,15 @@ namespace Client.Services
             }
         }
 
-        public void AddVehicle(Socket clientSocket, Guid userRegisteredId, string carModel, string path)
+        public void AddVehicle(Socket clientSocket, Guid userId, string carModel, string path)
         {
             try
             {
-                
-                SetDriverVehicles(clientSocket, userRegisteredId, carModel, path);
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
+                                 carModel + ";" + path;
+                NetworkHelper.SendMessage(clientSocket, message);
 
                 string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
-
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -170,26 +171,12 @@ namespace Client.Services
                 {
                     throw new Exception(vehicleInfoArray[2]);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
-        public void SetDriverVehicles(Socket socket, Guid userId, string carModel, string path)
-        {
-            try
-            {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
-                                 carModel;
-                NetworkHelper.SendMessage(socket, message);
                 
-                NetworkHelper.SendImage(socket, path);
+                NetworkHelper.SendImage(clientSocket, path);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message);
             }
         }
 

@@ -144,7 +144,7 @@ namespace Common
             return responseBuffer;
         }
 
-        public static void SendImage(Socket socket, string filePath)
+        public static void FilePathValidator(string filePath)
         {
             try
             {
@@ -155,8 +155,18 @@ namespace Common
                 }
 
                 if (string.IsNullOrEmpty(filePath)) throw new Exception("The path cannot be empty");
+            }
+            catch (Exception exceptionCaught)
+            {
+                throw new Exception(exceptionCaught.Message);
+            }
+        }
 
-                SendMessage(socket, "ImageProcessOkay");
+        public static void SendImage(Socket socket, string filePath)
+        {
+            try
+            {
+                FileInfo fileInfo = new FileInfo(filePath);
                 SendMessage(socket, fileInfo.Name);
 
                 long fileLength = fileInfo.Length;
@@ -180,11 +190,9 @@ namespace Common
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception exceptionCaught)
             {
-                SendMessage(socket, "Error");
-                throw new Exception($"Error during : the transmission of the file, {ex.Message}");
-                
+                throw new Exception(exceptionCaught.Message);
             }
         }
 
@@ -192,14 +200,6 @@ namespace Common
         {
             try
             {
-
-                string imageProcessOkay = ReceiveMessage(socket);
-                
-                if(imageProcessOkay.Equals("Error"))
-                {
-                    throw new Exception("The image was not processed correctly");
-                }
-                
                 string pathDirectoryImageAllocated = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
 
                 if (!Directory.Exists(pathDirectoryImageAllocated))
@@ -248,7 +248,6 @@ namespace Common
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error while receiving file:");
                 throw new Exception($"Error: {ex.Message}");
             }
         }
