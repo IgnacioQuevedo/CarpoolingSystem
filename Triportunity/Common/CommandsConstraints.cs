@@ -23,5 +23,6 @@ namespace Common
         public const int ManageException = 19;
         public const int AddReview = 20;
         public const int GetRidesByUser = 21;
+        public const int CloseApp = 22;
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 using Client.Objects.EnumsModels;
 using Client.Objects.ReviewModels;
 using Client.Objects.RideModels;
@@ -77,7 +76,6 @@ namespace Client
 
                 else
                 {
-                    //This is when the user is logged in
                     PossibleActionsToBeDoneByLoggedUser();
                 }
             }
@@ -96,8 +94,8 @@ namespace Client
 
         private static void WrongDigitInserted()
         {
-            Console.WriteLine("Insert a valid digit, please.");
             Console.WriteLine("");
+            Console.WriteLine("Insert a valid digit, please.");
         }
 
         private static void CloseAppOption()
@@ -106,7 +104,8 @@ namespace Client
             {
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
-                NetworkHelper.CloseSocketConnections(clientSocket);
+
+                _userService.CloseApp(clientSocket);
                 _closeApp = true;
             }
             catch (Exception e)
@@ -171,7 +170,6 @@ namespace Client
             catch (Exception exception)
             {
                 Console.WriteLine("Redo all again but without this error: " + exception.Message);
-                MainMenuOptions();
             }
         }
 
@@ -189,9 +187,8 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception.Message);
                 Console.WriteLine();
-                MainMenuOptions();
+                Console.WriteLine(exception.Message);
             }
         }
 
@@ -263,6 +260,7 @@ namespace Client
                     {
                         FilterRides();
                     }
+
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null) {
@@ -338,29 +336,42 @@ namespace Client
         {
             try
             {
+                string carModel;
+                string path;
                 string addNewVehicle = "Y";
+                
+                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
+                bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
                 while (addNewVehicle.Equals("Y"))
                 {
                     Console.WriteLine("Please enter the model of the vehicle");
-                    string carModel = Console.ReadLine();
+                    carModel = Console.ReadLine();
                     Console.WriteLine("Please enter the path of the vehicle image");
-                    string path = Console.ReadLine();
+                    path = Console.ReadLine();
 
-                    _userService.CreateDriver(clientSocket, userRegisteredId);
-                    _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    if (firstVehicle)
+                    {
+                        _userService.CreateDriver(clientSocket, userRegisteredId, carModel, path);
+                        firstVehicle = false;
+                       
+                    }
+                    else
+                    {
+                        _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                    }
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
-                    Console.WriteLine("If not - Enter 'N'");
+                    Console.WriteLine("If not - Enter any other key");
                     addNewVehicle = Console.ReadLine();
-
-                    _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 }
+                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
             }
             catch (Exception e)
             {
+                Console.WriteLine("");
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                CreateDriver(userRegisteredId);
             }
         }
 
@@ -643,7 +654,8 @@ namespace Client
                         string seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
-                            Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
+                            Console.WriteLine(
+                                "And at the moment are available " + rideSelected.AvailableSeats + "seats");
                             Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                             Console.WriteLine("Do you want to see the car image?");
@@ -670,8 +682,6 @@ namespace Client
                 Console.WriteLine(e.Message);
                 return SelectRideFromList(rides);
             }
-
-
         }
 
 
@@ -1052,7 +1062,6 @@ namespace Client
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
                 DisplayAllReviews(reviewsList);
-
             }
             catch (Exception e)
             {
@@ -1072,11 +1081,10 @@ namespace Client
             {
                 actualReview = reviews[i];
                 Console.WriteLine(
-                                   $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
-
+                    $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
             }
         }
 
-        #endregion 
+        #endregion
     }
 }

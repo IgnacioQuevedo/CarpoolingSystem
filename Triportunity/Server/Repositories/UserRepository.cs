@@ -90,6 +90,17 @@ namespace Server.Repositories
             userFound.DriverAspects = driveInfo;
             LockManager.StopWriting();
         }
+        
+        public void DeleteDriver(Guid userId)
+        {
+            
+            User userFound = new User();
+            userFound = GetUserById(userId);
+            
+            LockManager.StartWriting();
+            userFound.DriverAspects = null;
+            LockManager.StopWriting();
+        }
 
         public void RateDriver(Guid id, Review review)
         {
@@ -150,5 +161,7 @@ namespace Server.Repositories
 
             throw new UserException("User is not a driver");
         }
+
+     
     }
 }
