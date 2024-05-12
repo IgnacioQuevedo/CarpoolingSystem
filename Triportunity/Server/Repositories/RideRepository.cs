@@ -19,7 +19,7 @@ namespace Server.Repositories
         public void CreateRide(Ride rideToAdd)
         {
             LockManager.StartWriting();
-
+            rideToAdd.DepartureTime = rideToAdd.DepartureTime.ToUniversalTime();
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
 
             LockManager.StopWriting();
@@ -102,6 +102,7 @@ namespace Server.Repositories
             {
                 if (ride.Published && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
                 {
+                    ride.DepartureTime = ride.DepartureTime.ToLocalTime();
                     availableRides.Add(ride);
                 }
             }

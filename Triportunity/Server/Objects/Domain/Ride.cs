@@ -23,7 +23,6 @@ namespace Server.Objects.Domain
         public Ride() { }
         public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed, Guid vehicleId)
         {
-            Id = Guid.NewGuid();
             DriverId = driver;
             Passengers = passengers;
             InitialLocation = initialLocation;
@@ -34,7 +33,7 @@ namespace Server.Objects.Domain
             PetsAllowed = petsAllowed;
             VehicleId = vehicleId;
             Published = true;
-
+            AvailableSeats = availableSeats;
             RideValidations();
         }
         private void RideValidations()
