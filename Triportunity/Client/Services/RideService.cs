@@ -80,10 +80,6 @@ namespace Client.Services
                 {
                     throw new Exception(messageArrayResponse[2]);
                 }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Joined successfully");
-                }
             }
             catch (Exception e)
             {

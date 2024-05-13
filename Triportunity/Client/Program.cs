@@ -438,7 +438,7 @@ namespace Client
             else
             {
                 Console.WriteLine("You have not allowed pets on your vehicle");
-                petsAllowed = false;    
+                petsAllowed = false;
             }
 
             return petsAllowed;
@@ -527,12 +527,13 @@ namespace Client
             string departureHour = Console.ReadLine();
 
             DateTime rideDate = ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
-            
-            if(rideDate.Date < DateTime.Now.Date)
+
+            if (rideDate.Date < DateTime.Now.Date)
             {
                 Console.WriteLine("The date of the ride must be in the future");
                 return PickDepartureDate();
             }
+
             Console.WriteLine("Departure date selected: " + rideDate.ToString("yyyy-MM-dd"));
             return rideDate;
         }
@@ -616,10 +617,10 @@ namespace Client
                 ICollection<RideClient> rides = _rideService.GetAllRides();
                 RideClient selectedRide = SelectRideFromList(rides.ToList());
 
-
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
                 _rideService.JoinRide(joinReq);
+                Console.WriteLine("Join Successfully");
             }
             catch (Exception e)
             {
@@ -639,10 +640,9 @@ namespace Client
 
                 _optionSelected = Console.ReadLine();
 
-
                 if (int.TryParse(_optionSelected, out int optionValue))
                 {
-                    if (optionValue <= rides.Count)
+                    if (optionValue < rides.Count && optionValue >= 0)
                     {
                         RideClient rideSelected = rides[optionValue];
                         Console.WriteLine(
@@ -650,7 +650,9 @@ namespace Client
                         Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
                         Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
 
-                        Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
+                        Console.WriteLine("Do you want to see the details of the ride? - 'Y' for Yes " +
+                                          "or Any other key for No");
+
                         string seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
@@ -669,9 +671,6 @@ namespace Client
 
                         return rideSelected;
                     }
-
-                    Console.WriteLine("You must introduce a valid digit for the ride");
-                    return SelectRideFromList(rides);
                 }
 
                 Console.WriteLine("Introduce a valid number");
