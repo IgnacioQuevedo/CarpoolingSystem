@@ -231,7 +231,7 @@ namespace Client.Services
                     InitialLocation = (CitiesEnum)(int.Parse(rideDataSecondPart[1])),
                     EndingLocation = (CitiesEnum)(int.Parse(rideDataSecondPart[2])),
                     DepartureTime = DateTime.Parse(rideDataSecondPart[3] + ":" + rideDataSecondPart[4] + ":" + rideDataSecondPart[5]),
-                    AvailableSeats = int.Parse(rideDataSecondPart[6]),
+                    AvailableSeats = int.Parse(rideDataSecondPart[6]), 
                     PricePerPerson = double.Parse(rideDataSecondPart[7]),
                     PetsAllowed = bool.Parse(rideDataSecondPart[8]),
                     VehicleId = Guid.Parse(rideDataSecondPart[9])

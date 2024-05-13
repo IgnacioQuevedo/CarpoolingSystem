@@ -262,6 +262,7 @@ namespace Client
                     {
                         CloseAppOption();
                     }
+
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null)
@@ -589,7 +590,8 @@ namespace Client
                         string seeDetails = Console.ReadLine();
                         if (seeDetails == "Y")
                         {
-                            Console.WriteLine("And at the moment are available " + rideSelected.AvailableSeats + "seats");
+                            Console.WriteLine(
+                                "And at the moment are available " + rideSelected.AvailableSeats + "seats");
                             Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                             Console.WriteLine("Do you want to see the car image?");
@@ -616,8 +618,6 @@ namespace Client
                 Console.WriteLine(e.Message);
                 return SelectRideFromList(rides);
             }
-
-
         }
 
 
@@ -668,7 +668,8 @@ namespace Client
                         RideClient rideSelected = rideListOfUser[optionValue];
                         Console.WriteLine(
                             $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
-                        Console.WriteLine($"Departure date on: {rideSelected.DepartureTime.ToShortDateString() + " At: " + rideSelected.DepartureTime.ToLongTimeString()}");
+                        Console.WriteLine(
+                            $"Departure date on: {rideSelected.DepartureTime.ToShortDateString() + " At: " + rideSelected.DepartureTime.ToLongTimeString()}");
                         Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
                         Console.WriteLine("");
 
@@ -829,7 +830,26 @@ namespace Client
         {
             try
             {
-                _rideService.GetRideById(rideSelected.Id);
+                RideClient rideData = _rideService.GetRideById(rideSelected.Id);
+
+                Console.WriteLine("This is the information that related to the ride you have selected: ");
+                Console.WriteLine();
+                Console.WriteLine(
+                    $"From: {rideData.InitialLocation} To: {rideData.EndingLocation} With date of departure: " +
+                    $"{rideData.DepartureTime.ToShortDateString()} and with a Price per person of : ${rideData.PricePerPerson}");
+
+                Console.WriteLine("And at the moment are available " + rideData.AvailableSeats + "seats");
+
+                Console.WriteLine($"Pets allowed: {rideData.PetsAllowed}");
+
+                Console.WriteLine("Do you want to see the car image?");
+
+                string seeDetails = Console.ReadLine();
+
+                if (seeDetails == "Y")
+                {
+                    _rideService.GetCarImageById(_userLogged.Id, rideData.Id);
+                }
             }
             catch (Exception e)
             {
@@ -956,7 +976,6 @@ namespace Client
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
                 DisplayAllReviews(reviewsList);
-
             }
             catch (Exception e)
             {
@@ -975,11 +994,10 @@ namespace Client
             {
                 actualReview = reviews[i];
                 Console.WriteLine(
-                                   $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
-
+                    $" {i} -  Driver ID: {actualReview.DriverId}  - Rating : {actualReview.Punctuation} - Comment : {actualReview.Comment}");
             }
         }
 
-        #endregion 
+        #endregion
     }
 }
