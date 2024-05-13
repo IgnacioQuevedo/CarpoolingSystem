@@ -60,6 +60,14 @@ namespace Server.Repositories
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
             LockManager.StopReading();
+            
+            
+            if (rideToFind != null)
+            {
+                LockManager.StartWriting();
+                rideToFind.DepartureTime = rideToFind.DepartureTime.ToLocalTime();
+                LockManager.StopWriting();
+            }
 
             if (rideToFind == null)
             {
@@ -208,10 +216,8 @@ namespace Server.Repositories
 
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
-            LockManager.StartReading();
             Ride rideToGetReviews = GetRideById(ride);
             User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
-            LockManager.StopReading();
             return user.DriverAspects.Reviews;
         }
 
