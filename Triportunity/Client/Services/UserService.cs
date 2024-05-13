@@ -144,8 +144,7 @@ namespace Client.Services
                 {
                     throw new Exception(messageArray[2]);
                 }
-
-                //HASTA ACA, EL DRIVER SE CREÓ CON EXITO
+                
                 AddVehicle(socket, userId, carModel, path);
                 Console.WriteLine("You are now a driver");
             }
