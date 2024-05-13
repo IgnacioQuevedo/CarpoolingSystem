@@ -151,7 +151,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
-                                 request.Id + ";";
+                                 request.RideId + ";";
 
                 foreach (var passenger in request.Passengers)
                 {
@@ -160,14 +160,14 @@ namespace Client.Services
 
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" +
                            request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
-                           + ";" + request.PetsAllowed + ";" + request.VehicleId
+                           + ";" + request.PetsAllowed + ";" + request.VehicleId + ";" + request.DriverId
                     ;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
 
                 string[] messageArrayResponse =
-                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
@@ -204,11 +204,11 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
-                                 id.ToString();
-
+                                 id;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
+
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (rideData[0] == ProtocolConstants.Exception)
@@ -259,14 +259,12 @@ namespace Client.Services
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
                 ICollection<RideClient> rides = new List<RideClient>();
-
                 if (ridesData[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(ridesData[2]);
                 }
 
                 string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
-
 
                 for (int i = 0; i < allRides.Length; i++)
                 {
@@ -458,8 +456,8 @@ namespace Client.Services
                     throw new Exception(ridesData[2]);
                 }
 
-                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
 
+                string[] allRides = ridesData[2].Split(new string[] { "@" }, StringSplitOptions.RemoveEmptyEntries);
 
                 for (int i = 0; i < allRides.Length; i++)
                 {

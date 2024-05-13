@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Server.Objects.Domain;
 using Server.Objects.Domain.UserModels;
+using Server.Objects.Domain.VehicleModels;
 
 namespace Server.DataContext
 {

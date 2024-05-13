@@ -29,7 +29,17 @@ namespace Server.Controllers
             {
                 List<Guid> passengers = new List<Guid>();
 
-                Guid id = Guid.Parse(messageArray[2]);
+                Guid driverId = Guid.Parse(messageArray[2]);
+
+                if (messageArray[3] != "#")
+                {
+                    foreach (var passenger in messageArray[10].Split(new string[] { "," },
+                                 StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        passengers.Add(Guid.Parse(passenger));
+                    }
+                }
+            
 
                 CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[5]);
@@ -38,12 +48,11 @@ namespace Server.Controllers
                 double price = double.Parse(messageArray[8]);
                 bool pets = bool.Parse(messageArray[9]);
                 Guid vehicleId = Guid.Parse(messageArray[10]);
-
-
-
-
-                Ride ride = new Ride(id, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                
+                Ride ride = new Ride(driverId, passengers, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
+                
+                ride.Id = Guid.NewGuid();
 
                 _rideRepository.CreateRide(ride);
 
@@ -117,29 +126,37 @@ namespace Server.Controllers
             {
                 List<Guid> passengers = new List<Guid>();
 
-                Guid id = Guid.Parse(messageArray[2]);
+                Guid rideId = Guid.Parse(messageArray[2]);
 
                 if (messageArray[3] != "#")
                 {
-                    foreach (var passenger in messageArray[10].Split(new string[] { "," },
+                    foreach (var passenger in messageArray[9].Split(new string[] { "," },
                                  StringSplitOptions.RemoveEmptyEntries))
                     {
                         passengers.Add(Guid.Parse(passenger));
                     }
                 }
 
-                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
-                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[5]);
-                DateTime departureTime = DateTime.Parse(messageArray[6]);
-                int availableSeats = int.Parse(messageArray[7]);
-                double price = double.Parse(messageArray[8]);
-                bool pets = bool.Parse(messageArray[9]);
-                Guid vehicleId = Guid.Parse(messageArray[10]);
+                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
+                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
+                DateTime departureTime = DateTime.Parse(messageArray[5]);
+                int availableSeats = int.Parse(messageArray[6]);
+                double price = double.Parse(messageArray[7]);
+                bool pets = bool.Parse(messageArray[8]);
+                Guid vehicleId = Guid.Parse(messageArray[9]);
+                Guid driverId = Guid.Parse(messageArray[10]);
 
-                Ride ride = new Ride(id, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                Ride ride = new Ride(driverId, passengers, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
+                
+                ride.Id = rideId;
 
                 _rideRepository.UpdateRide(ride);
+                
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.EditRide + ";" + ride.Id;
+                
+                NetworkHelper.SendMessage(_clientSocket, message);
+                
             }
             catch (Exception exceptionCaught)
             {
@@ -322,12 +339,21 @@ namespace Server.Controllers
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetRideById + ";";
 
+
                 response += ride.Id + ":" + ride.DriverId + ":";
 
-                foreach (var passenger in ride.Passengers)
+                if (ride.Passengers.Count == 0)
                 {
-                    response += passenger + ",";
+                    response += "#";
                 }
+                else
+                {
+                    foreach (var passenger in ride.Passengers)
+                    {
+                        response += passenger + ",";
+                    }
+                }
+                
 
                 response += ":" + ride.InitialLocation +
                             ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +

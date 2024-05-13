@@ -732,7 +732,8 @@ namespace Client
                         RideClient rideSelected = rideListOfUser[optionValue];
                         Console.WriteLine(
                             $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
-                        Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
+                        Console.WriteLine(
+                            $"Departure date on: {rideSelected.DepartureTime.ToShortDateString() + " At: " + rideSelected.DepartureTime.ToLongTimeString()}");
                         Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
                         Console.WriteLine("");
 
@@ -809,7 +810,7 @@ namespace Client
                 ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id,
                     rideSelected.Passengers,
                     initialLocation, endingLocation, departureDate,
-                    pricePerPerson, petsAllowed, vehicleId);
+                    pricePerPerson, petsAllowed, vehicleId, availableSeats, rideSelected.DriverId);
 
                 _rideService.ModifyRide(modifyRideReq);
             }
@@ -887,10 +888,31 @@ namespace Client
         {
             try
             {
-                _rideService.GetRideById(rideSelected.Id);
 
-                DisplayRide(rideSelected);
-               
+                RideClient rideData = _rideService.GetRideById(rideSelected.Id);
+
+                Console.WriteLine("This is the information that related to the ride you have selected: ");
+                Console.WriteLine();
+                Console.WriteLine(
+                    $"From: {rideData.InitialLocation} To: {rideData.EndingLocation} With date of departure: " +
+                    $"{rideData.DepartureTime.ToShortDateString()} and with a Price per person of : ${rideData.PricePerPerson}");
+
+                Console.WriteLine("And at the moment are available " + rideData.AvailableSeats + "seats");
+
+                Console.WriteLine($"Pets allowed: {rideData.PetsAllowed}");
+
+                Console.WriteLine("Do you want to see the car image?");
+
+                string seeDetails = Console.ReadLine();
+
+                if (seeDetails == "Y")
+                {
+                    _rideService.GetCarImageById(_userLogged.Id, rideData.Id);
+                }
+
+                //_rideService.GetRideById(rideSelected.Id);
+
+                //DisplayRide(rideSelected);
             }
             catch (Exception e)
             {
