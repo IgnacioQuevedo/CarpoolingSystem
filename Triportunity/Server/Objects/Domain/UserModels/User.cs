@@ -40,13 +40,13 @@ namespace Server.Objects.Domain.UserModels
 
             if (Username.Length < validLengthForUsername)
             {
-                throw new UserException("Username length must be greater than: " + Password.Length + "digits!");
+                throw new UserException("Username length must be greater than: " + validLengthForUsername + " digits!");
             }
         }
 
         private void PasswordValidation()
         {
-            const int validLengthForPassword = 6;
+            const int validLengthForPassword = 4;
 
             if (Password != PasswordRepeated)
             {
@@ -54,7 +54,7 @@ namespace Server.Objects.Domain.UserModels
             }
             if (Password.Length < validLengthForPassword)
             {
-                throw new UserException("Password length must be greater than: " + validLengthForPassword + "digits!");
+                throw new UserException("Password length must be greater than: " + validLengthForPassword + " digits!");
             }
         }
 
@@ -69,8 +69,8 @@ namespace Server.Objects.Domain.UserModels
 
             if (Ci.Length < minimalLengthForCi || !NumericFormatIsCorrect())
             {
-                throw new DriverInfoException("Ci must be in a correct format. It must be at least of" +
-                                              minimalLengthForCi + "and without special characters");
+                throw new DriverInfoException("Ci must be in a correct format. It must be at least of " +
+                                              minimalLengthForCi + " and without special characters");
             }
         }
 

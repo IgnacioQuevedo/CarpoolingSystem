@@ -144,7 +144,7 @@ namespace Common
             return responseBuffer;
         }
 
-        public static void SendImage(Socket socket, string filePath)
+        public static void FilePathValidator(string filePath)
         {
             try
             {
@@ -154,6 +154,19 @@ namespace Common
                     throw new Exception("The specific file does not exit.");
                 }
 
+                if (string.IsNullOrEmpty(filePath)) throw new Exception("The path cannot be empty");
+            }
+            catch (Exception exceptionCaught)
+            {
+                throw new Exception(exceptionCaught.Message);
+            }
+        }
+
+        public static void SendImage(Socket socket, string filePath)
+        {
+            try
+            {
+                FileInfo fileInfo = new FileInfo(filePath);
                 SendMessage(socket, fileInfo.Name);
 
                 long fileLength = fileInfo.Length;
@@ -176,13 +189,10 @@ namespace Common
                         offset += readBytes;
                     }
                 }
-
-                Console.WriteLine(
-                    $"File sent {fileInfo.Name}, size: {fileLength} bytes, from path: {filePath}");
             }
-            catch (Exception ex)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception($"Error during : the transmision of the file, {ex.Message}");
+                throw new Exception(exceptionCaught.Message);
             }
         }
 
@@ -223,7 +233,7 @@ namespace Common
                             isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
 
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
-                        Console.WriteLine($"Recieving part #{currentPart}, of {byteAmountToReceive} bytes");
+                        Console.WriteLine($"Receiving part #{currentPart}, of {byteAmountToReceive} bytes");
                         byte[] buffer = Receive(socket, byteAmountToReceiveInBytes);
                         fileStream.Write(buffer, 0, buffer.Length);
 
@@ -238,7 +248,6 @@ namespace Common
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error while receiving file:");
                 throw new Exception($"Error: {ex.Message}");
             }
         }
