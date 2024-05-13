@@ -363,7 +363,7 @@ namespace Client
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter any other key");
-                    addNewVehicle = Console.ReadLine();
+                    addNewVehicle = Console.ReadLine().ToUpper();
                 }
 
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
@@ -428,7 +428,7 @@ namespace Client
             Console.WriteLine("Y - If yes");
             Console.WriteLine("Another key - If not");
 
-            _optionSelected = Console.ReadLine();
+            _optionSelected = Console.ReadLine().ToUpper();
 
             if (_optionSelected != null && _optionSelected.Equals("Y"))
             {
@@ -622,9 +622,9 @@ namespace Client
                 _rideService.JoinRide(joinReq);
                 Console.WriteLine("Join Successfully");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -653,16 +653,19 @@ namespace Client
                         Console.WriteLine("Do you want to see the details of the ride? - 'Y' for Yes " +
                                           "or Any other key for No");
 
-                        string seeDetails = Console.ReadLine();
-                        if (seeDetails == "Y")
+                        string seeDetails = Console.ReadLine().ToUpper();
+                        
+                        if (seeDetails.Equals("Y"))
                         {
                             Console.WriteLine(
                                 "And at the moment are available " + rideSelected.AvailableSeats + "seats");
                             Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                             Console.WriteLine("Do you want to see the car image?");
-                            seeDetails = Console.ReadLine();
-                            if (seeDetails == "Y")
+                            Console.WriteLine("Y - If yes or Any other key for No");
+                            
+                            seeDetails = Console.ReadLine().ToUpper();
+                            if (seeDetails.Equals("Y"))
                             {
                                 Console.WriteLine(@"Your Image is Allocated At: " +
                                                   _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
@@ -829,14 +832,14 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetRidesByUser(_userLogged.Id);
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+                ICollection<RideClient> rides = _rideService.GetRidesByUser(_userLogged.Id);
 
-                RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
                 _rideService.QuitRide(quitRideReq);
+                Console.WriteLine("Quit from ride successfully");
             }
             catch (Exception e)
             {
@@ -901,7 +904,7 @@ namespace Client
 
                 Console.WriteLine("Do you want to see the car image?");
 
-                string seeDetails = Console.ReadLine();
+                string seeDetails = Console.ReadLine().ToUpper();
 
                 if (seeDetails == "Y")
                 {

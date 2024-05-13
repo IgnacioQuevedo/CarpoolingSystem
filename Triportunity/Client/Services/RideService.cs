@@ -118,10 +118,10 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + request.UserToExit.Id.ToString() + ";" + request.RideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + 
+                                 request.UserToExit.Id+ ";" + request.RideId;
 
                 NetworkHelper.SendMessage(_clientSocket, message);
-
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
 
                 string[] messageArrayResponse =
@@ -131,14 +131,10 @@ namespace Client.Services
                 {
                     throw new Exception(messageArrayResponse[2]);
                 }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Quit from ride successfully");
-                }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message);
             }
         }
 

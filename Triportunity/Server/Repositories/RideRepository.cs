@@ -72,27 +72,19 @@ namespace Server.Repositories
         public void QuitRide(Guid userId, Guid rideId)
         {
             Ride rideToQuit = GetRideById(rideId);
-
-            LockManager.StartReading();
-
+            
             if (rideToQuit.DriverId.Equals(userId)) {
                 throw new RideException("You are the driver, you must disable or delete the ride in order to quit");
             }
-
-            User user = _userRepository.GetUserById(userId);
-
-            LockManager.StopReading();
-
+            
             if (rideToQuit.DepartureTime <= DateTime.Now)
             {
                 throw new RideException("Cannot quit the ride as the departure time has passed.");
             }
 
             LockManager.StartWriting();
-
             rideToQuit.Passengers.Remove(userId);
             rideToQuit.AvailableSeats++;
-
             LockManager.StopWriting();
         }
 
