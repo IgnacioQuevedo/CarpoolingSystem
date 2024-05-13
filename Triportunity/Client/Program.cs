@@ -263,17 +263,19 @@ namespace Client
 
                     break;
                 case 6:
-                    if (_userLogged.DriverAspects != null) {
+                    if (_userLogged.DriverAspects != null)
+                    {
                         FilterRides();
-                        }
+                    }
                     else
                     {
                         CloseAppOption();
                     }
+
                     break;
                 case 7:
-                    if(_userLogged.DriverAspects != null)
-                    CloseAppOption();
+                    if (_userLogged.DriverAspects != null)
+                        CloseAppOption();
                     break;
                 default:
                     WrongDigitInserted();
@@ -326,8 +328,6 @@ namespace Client
             }
         }
 
-
-
         #endregion
 
         #region Driver creation
@@ -339,7 +339,7 @@ namespace Client
                 string carModel;
                 string path;
                 string addNewVehicle = "Y";
-                
+
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
@@ -354,17 +354,18 @@ namespace Client
                     {
                         _userService.CreateDriver(clientSocket, userRegisteredId, carModel, path);
                         firstVehicle = false;
-                       
                     }
                     else
                     {
                         _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
                     }
+
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter any other key");
                     addNewVehicle = Console.ReadLine();
                 }
+
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
             }
             catch (Exception e)
@@ -434,12 +435,11 @@ namespace Client
                 Console.WriteLine("You have allowed pets on your vehicle");
                 result = true;
             }
-            else if (_optionSelected == "2")
+            if (_optionSelected == "2")
             {
                 Console.WriteLine("You have not allowed pets on your vehicle");
                 result = false;
             }
-
             return result;
         }
 
@@ -454,11 +454,9 @@ namespace Client
             {
                 return pricePerPerson;
             }
-            else
-            {
-                Console.WriteLine("Please introduce a numeric value for the price, try again...");
-                return pricePerPerson;
-            }
+
+            Console.WriteLine("Please introduce a numeric value for the price, try again...");
+            return pricePerPerson;
         }
 
         private static string PickVehicle()
@@ -467,15 +465,22 @@ namespace Client
 
             ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
 
-            foreach (var vehicle in vehicles)
+
+            for (int i = 0; i < vehicles.Count; i++)
             {
-                Console.WriteLine("Vehicle Id: " + vehicle.Id);
-                Console.WriteLine("Vehicle Model: " + vehicle.CarModel);
+                Console.WriteLine(i + " - " + "Vehicle Model: " + vehicles.ElementAt(i).CarModel);
             }
 
-            string vehicleIdSelected = Console.ReadLine();
+            _optionSelected = Console.ReadLine();
 
-            return vehicleIdSelected;
+            if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 0 && optionValue < vehicles.Count)
+            {
+                Console.WriteLine(vehicles.ElementAt(optionValue).CarModel + " has been selected");
+                return vehicles.ElementAt(optionValue).Id.ToString();
+            }
+
+            Console.WriteLine("Please introduce a valid digit for the vehicle");
+            return PickVehicle();
         }
 
         private static int PickAmountOfAvailableSeats()
@@ -625,6 +630,7 @@ namespace Client
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
+
         private static RideClient SelectRideFromList(List<RideClient> rides)
         {
             try
@@ -636,11 +642,8 @@ namespace Client
 
                 _optionSelected = Console.ReadLine();
 
-                string[] parts = _optionSelected.Split('-');
 
-                int optionValue;
-
-                if (int.TryParse(parts[0].Trim(), out optionValue))
+                if (int.TryParse(_optionSelected, out int optionValue))
                 {
                     if (optionValue <= rides.Count)
                     {
@@ -888,7 +891,6 @@ namespace Client
         {
             try
             {
-
                 RideClient rideData = _rideService.GetRideById(rideSelected.Id);
 
                 Console.WriteLine("This is the information that related to the ride you have selected: ");
@@ -945,7 +947,6 @@ namespace Client
         {
             try
             {
-
                 Console.WriteLine("\nIntroduce the minimum price :");
                 string minPriceInput = Console.ReadLine();
                 double minPrice;
@@ -975,7 +976,6 @@ namespace Client
                 Console.WriteLine("\nRides with price between " + minPrice + " and " + maxPrice + " are: ");
                 DisplayAllRides(rides.ToList());
                 Console.WriteLine("");
-
             }
             catch (Exception e)
             {
@@ -984,7 +984,6 @@ namespace Client
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
-
 
         #endregion
 
@@ -1055,6 +1054,7 @@ namespace Client
                     Console.WriteLine("Invalid rating. Please enter a number between 0.0 and 5.0.");
                     ratingInput = Console.ReadLine();
                 }
+
                 rating = Double.Parse(ratingInput);
 
                 Console.WriteLine("Introduce the comment you want to give to the driver");

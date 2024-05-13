@@ -141,7 +141,7 @@ namespace Server
                         
                         case CommandsConstraints.CloseApp:
                             _clientWantsToContinueSendingData = false;
-                 
+                            break;
                     }
                 }
 
