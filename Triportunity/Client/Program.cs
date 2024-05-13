@@ -422,41 +422,41 @@ namespace Client
 
         private static bool DecideIfPetsAreAllowed()
         {
-            bool result = false;
+            bool petsAllowed = true;
 
             Console.WriteLine("Do you want to allow pets in your vehicle?");
-            Console.WriteLine("1- If yes");
-            Console.WriteLine("2- If not");
+            Console.WriteLine("Y - If yes");
+            Console.WriteLine("Another key - If not");
 
             _optionSelected = Console.ReadLine();
 
-            if (_optionSelected == "1")
+            if (_optionSelected != null && _optionSelected.Equals("Y"))
             {
                 Console.WriteLine("You have allowed pets on your vehicle");
-                result = true;
             }
-            if (_optionSelected == "2")
+
+            else
             {
                 Console.WriteLine("You have not allowed pets on your vehicle");
-                result = false;
+                petsAllowed = false;    
             }
-            return result;
+
+            return petsAllowed;
         }
 
         private static double IntroducePricePerPerson()
         {
-            double pricePerPerson;
             Console.WriteLine("Introduce the price per person of your ride");
 
-            string priceSetted = Console.ReadLine();
+            string priceSet = Console.ReadLine();
 
-            if (double.TryParse(priceSetted, out pricePerPerson))
+            if (double.TryParse(priceSet, out var pricePerPerson) && pricePerPerson >= 0)
             {
                 return pricePerPerson;
             }
 
-            Console.WriteLine("Please introduce a numeric value for the price, try again...");
-            return pricePerPerson;
+            Console.WriteLine("Please introduce a correct numeric value for the price, try again.");
+            return IntroducePricePerPerson();
         }
 
         private static string PickVehicle()
@@ -464,7 +464,6 @@ namespace Client
             Console.WriteLine("Select the vehicle you will use for this ride");
 
             ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
-
 
             for (int i = 0; i < vehicles.Count; i++)
             {
@@ -498,21 +497,17 @@ namespace Client
 
             if (int.TryParse(_optionSelected, out int optionValue))
             {
-                if (optionValue <= _maxSeatsPerCar)
+                if (optionValue <= _maxSeatsPerCar && optionValue > 0)
                 {
                     return optionValue;
                 }
-                else
-                {
-                    Console.WriteLine("Please introduce valid numeric values, try again...");
-                    return PickAmountOfAvailableSeats();
-                }
-            }
-            else
-            {
-                Console.WriteLine("Please introduce valid numeric values, try again...");
+
+                Console.WriteLine("Please introduce valid numeric values, try again.");
                 return PickAmountOfAvailableSeats();
             }
+
+            Console.WriteLine("Please introduce valid numeric values, try again.");
+            return PickAmountOfAvailableSeats();
         }
 
         private static DateTime PickDepartureDate()
@@ -531,7 +526,15 @@ namespace Client
             Console.WriteLine("Introduce the hour of departure");
             string departureHour = Console.ReadLine();
 
-            return ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
+            DateTime rideDate = ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
+            
+            if(rideDate.Date < DateTime.Now.Date)
+            {
+                Console.WriteLine("The date of the ride must be in the future");
+                return PickDepartureDate();
+            }
+            Console.WriteLine("Departure date selected: " + rideDate.ToString("yyyy-MM-dd"));
+            return rideDate;
         }
 
         private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay,
@@ -545,7 +548,6 @@ namespace Client
                 try
                 {
                     DateTime departureDate = new DateTime(year, month, day, hour, 0, 0);
-                    Console.WriteLine("Departure date selected: " + departureDate.ToString("yyyy-MM-dd"));
                     return departureDate;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -567,9 +569,7 @@ namespace Client
             Console.WriteLine();
 
             ShowCities();
-
             _optionSelected = Console.ReadLine();
-
             return PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
         }
 
@@ -586,24 +586,21 @@ namespace Client
         {
             try
             {
-                int optionValue = int.Parse(_optionSelected);
-
-                if (optionValue <= _amountOfCities)
+                if (int.TryParse(optionSelected, out int optionValue) && optionValue <= _amountOfCities &&
+                    optionValue > 0)
                 {
                     string cityName = Enum.GetName(typeof(CitiesEnum), optionValue);
-                    Console.WriteLine($"You have selected {cityName} as your initial location");
+                    Console.WriteLine($"You have selected {cityName} as your {locationMode} location");
 
                     return (CitiesEnum)optionValue;
                 }
-                else
-                {
-                    Console.WriteLine("You have introduced incorrect values, try again...");
-                    return PickLocation(locationMode);
-                }
+
+                Console.WriteLine("You have introduced incorrect values, try again.");
+                return PickLocation(locationMode);
             }
             catch (FormatException)
             {
-                Console.WriteLine("You have introduced incorrect values, try again...");
+                Console.WriteLine("You have introduced incorrect values, try again.");
                 return PickLocation(locationMode);
             }
         }
