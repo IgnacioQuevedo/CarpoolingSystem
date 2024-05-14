@@ -66,10 +66,6 @@ namespace Client.Services
                 {
                     throw new Exception(messageArrayResponse[2]);
                 }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Joined successfully");
-                }
             }
             catch (Exception e)
             {
@@ -108,10 +104,10 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + request.UserToExit.Id.ToString() + ";" + request.RideId.ToString();
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + 
+                                 request.UserToExit.Id+ ";" + request.RideId;
 
                 NetworkHelper.SendMessage(_clientSocket, message);
-
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
 
                 string[] messageArrayResponse =
@@ -121,14 +117,10 @@ namespace Client.Services
                 {
                     throw new Exception(messageArrayResponse[2]);
                 }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Quit from ride successfully");
-                }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message);
             }
         }
 
@@ -138,16 +130,9 @@ namespace Client.Services
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.EditRide + ";" +
                                  request.RideId + ";";
-
-                foreach (var passenger in request.Passengers)
-                {
-                    message += passenger + ",";
-                }
-
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" +
                            request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
-                           + ";" + request.PetsAllowed + ";" + request.VehicleId + ";" + request.DriverId
-                    ;
+                           + ";" + request.PetsAllowed + ";" + request.VehicleId + ";" + request.DriverId;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
@@ -158,10 +143,6 @@ namespace Client.Services
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(messageArrayResponse[2]);
-                }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Ride modified successfully");
                 }
             }
             catch (Exception e)

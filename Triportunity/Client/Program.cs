@@ -284,6 +284,50 @@ namespace Client
         }
 
         #endregion
+        
+        #region Filter Rides
+
+        private static void FilterRides()
+        {
+            try
+            {
+                Console.WriteLine("Select the filter you want to apply to the rides");
+                Console.WriteLine("1- Filter by price");
+                Console.WriteLine("2- Filter by initial location");
+                Console.WriteLine("3- Filter by ending location");
+
+                _optionSelected = Console.ReadLine();
+
+                if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 1 && optionValue <= 3)
+                {
+                    switch (optionValue)
+                    {
+                        case 1:
+                            GetRidesByPrice();
+                            break;
+                        case 2:
+                            GetRidesByInitialLocation();
+                            break;
+                        case 3:
+                            GetRidesByEndingLocation();
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Please introduce a valid digit");
+                    FilterRides();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("");
+                PossibleActionsToBeDoneByLoggedUser();
+            }
+        }
+
+        #endregion
 
         #region Driver creation
 
@@ -318,7 +362,7 @@ namespace Client
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter any other key");
-                    addNewVehicle = Console.ReadLine();
+                    addNewVehicle = Console.ReadLine().ToUpper();
                 }
 
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
@@ -332,8 +376,7 @@ namespace Client
         }
 
         #endregion
-
-
+        
         #region Create Ride
 
         private static void CreateRide()
@@ -367,8 +410,8 @@ namespace Client
                     departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
                 _rideService.CreateRide(rideReq);
-                
-                Console.WriteLine("Ride created successfully!");
+                Console.WriteLine("Ride created successfully");
+
             }
             catch (Exception e)
             {
@@ -379,41 +422,41 @@ namespace Client
 
         private static bool DecideIfPetsAreAllowed()
         {
-            bool result = false;
+            bool petsAllowed = true;
 
             Console.WriteLine("Do you want to allow pets in your vehicle?");
-            Console.WriteLine("1- If yes");
-            Console.WriteLine("2- If not");
+            Console.WriteLine("Y - If yes");
+            Console.WriteLine("Another key - If not");
 
-            _optionSelected = Console.ReadLine();
+            _optionSelected = Console.ReadLine().ToUpper();
 
-            if (_optionSelected == "1")
+            if (_optionSelected != null && _optionSelected.Equals("Y"))
             {
                 Console.WriteLine("You have allowed pets on your vehicle");
-                result = true;
             }
-            if (_optionSelected == "2")
+
+            else
             {
                 Console.WriteLine("You have not allowed pets on your vehicle");
-                result = false;
+                petsAllowed = false;
             }
-            return result;
+
+            return petsAllowed;
         }
 
         private static double IntroducePricePerPerson()
         {
-            double pricePerPerson;
             Console.WriteLine("Introduce the price per person of your ride");
 
-            string priceSetted = Console.ReadLine();
+            string priceSet = Console.ReadLine();
 
-            if (double.TryParse(priceSetted, out pricePerPerson))
+            if (double.TryParse(priceSet, out var pricePerPerson) && pricePerPerson >= 0)
             {
                 return pricePerPerson;
             }
 
-            Console.WriteLine("Please introduce a numeric value for the price, try again...");
-            return pricePerPerson;
+            Console.WriteLine("Please introduce a correct numeric value for the price, try again.");
+            return IntroducePricePerPerson();
         }
 
         private static string PickVehicle()
@@ -421,7 +464,6 @@ namespace Client
             Console.WriteLine("Select the vehicle you will use for this ride");
 
             ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
-
 
             for (int i = 0; i < vehicles.Count; i++)
             {
@@ -455,21 +497,17 @@ namespace Client
 
             if (int.TryParse(_optionSelected, out int optionValue))
             {
-                if (optionValue <= _maxSeatsPerCar)
+                if (optionValue <= _maxSeatsPerCar && optionValue > 0)
                 {
                     return optionValue;
                 }
-                else
-                {
-                    Console.WriteLine("Please introduce valid numeric values, try again...");
-                    return PickAmountOfAvailableSeats();
-                }
-            }
-            else
-            {
-                Console.WriteLine("Please introduce valid numeric values, try again...");
+
+                Console.WriteLine("Please introduce valid numeric values, try again.");
                 return PickAmountOfAvailableSeats();
             }
+
+            Console.WriteLine("Please introduce valid numeric values, try again.");
+            return PickAmountOfAvailableSeats();
         }
 
         private static DateTime PickDepartureDate()
@@ -488,7 +526,16 @@ namespace Client
             Console.WriteLine("Introduce the hour of departure");
             string departureHour = Console.ReadLine();
 
-            return ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
+            DateTime rideDate = ParseInputsToDate(departureYear, departureMonth, departureDay, departureHour);
+
+            if (rideDate.Date < DateTime.Now.Date)
+            {
+                Console.WriteLine("The date of the ride must be in the future");
+                return PickDepartureDate();
+            }
+
+            Console.WriteLine("Departure date selected: " + rideDate.ToString("yyyy-MM-dd"));
+            return rideDate;
         }
 
         private static DateTime ParseInputsToDate(string departureYear, string departureMonth, string departureDay,
@@ -502,7 +549,6 @@ namespace Client
                 try
                 {
                     DateTime departureDate = new DateTime(year, month, day, hour, 0, 0);
-                    Console.WriteLine("Departure date selected: " + departureDate.ToString("yyyy-MM-dd"));
                     return departureDate;
                 }
                 catch (ArgumentOutOfRangeException)
@@ -524,9 +570,7 @@ namespace Client
             Console.WriteLine();
 
             ShowCities();
-
             _optionSelected = Console.ReadLine();
-
             return PossibleCasesWhenPickingLocation(_optionSelected, locationMode);
         }
 
@@ -543,24 +587,21 @@ namespace Client
         {
             try
             {
-                int optionValue = int.Parse(_optionSelected);
-
-                if (optionValue <= _amountOfCities)
+                if (int.TryParse(optionSelected, out int optionValue) && optionValue <= _amountOfCities &&
+                    optionValue > 0)
                 {
                     string cityName = Enum.GetName(typeof(CitiesEnum), optionValue);
-                    Console.WriteLine($"You have selected {cityName} as your initial location");
+                    Console.WriteLine($"You have selected {cityName} as your {locationMode} location");
 
                     return (CitiesEnum)optionValue;
                 }
-                else
-                {
-                    Console.WriteLine("You have introduced incorrect values, try again...");
-                    return PickLocation(locationMode);
-                }
+
+                Console.WriteLine("You have introduced incorrect values, try again.");
+                return PickLocation(locationMode);
             }
             catch (FormatException)
             {
-                Console.WriteLine("You have introduced incorrect values, try again...");
+                Console.WriteLine("You have introduced incorrect values, try again.");
                 return PickLocation(locationMode);
             }
         }
@@ -576,14 +617,14 @@ namespace Client
                 ICollection<RideClient> rides = _rideService.GetAllRides();
                 RideClient selectedRide = SelectRideFromList(rides.ToList());
 
-
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
                 _rideService.JoinRide(joinReq);
+                Console.WriteLine("Join Successfully");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -599,10 +640,9 @@ namespace Client
 
                 _optionSelected = Console.ReadLine();
 
-
                 if (int.TryParse(_optionSelected, out int optionValue))
                 {
-                    if (optionValue <= rides.Count)
+                    if (optionValue < rides.Count && optionValue >= 0)
                     {
                         RideClient rideSelected = rides[optionValue];
                         Console.WriteLine(
@@ -610,17 +650,22 @@ namespace Client
                         Console.WriteLine($"Departure time on: {rideSelected.DepartureTime.ToShortDateString()}");
                         Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
 
-                        Console.WriteLine("Do you want to see the details of the ride? -- 'Y' for Yes or 'N' for No");
-                        string seeDetails = Console.ReadLine();
-                        if (seeDetails == "Y")
+                        Console.WriteLine("Do you want to see the details of the ride? - 'Y' for Yes " +
+                                          "or Any other key for No");
+
+                        string seeDetails = Console.ReadLine().ToUpper();
+
+                        if (seeDetails.Equals("Y"))
                         {
                             Console.WriteLine(
                                 "And at the moment are available " + rideSelected.AvailableSeats + "seats");
                             Console.WriteLine($"Pets allowed: {rideSelected.PetsAllowed}");
 
                             Console.WriteLine("Do you want to see the car image?");
-                            seeDetails = Console.ReadLine();
-                            if (seeDetails == "Y")
+                            Console.WriteLine("Y - If yes or Any other key for No");
+
+                            seeDetails = Console.ReadLine().ToUpper();
+                            if (seeDetails.Equals("Y"))
                             {
                                 Console.WriteLine(@"Your Image is Allocated At: " +
                                                   _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
@@ -629,9 +674,6 @@ namespace Client
 
                         return rideSelected;
                     }
-
-                    Console.WriteLine("You must introduce a valid digit for the ride");
-                    return SelectRideFromList(rides);
                 }
 
                 Console.WriteLine("Introduce a valid number");
@@ -670,77 +712,83 @@ namespace Client
 
         #endregion
 
+        #region View Your Rides
+
         private static void ViewYourRides()
         {
             try
             {
-                int index = 0;
                 List<RideClient> rideListOfUser = _rideService.GetRidesByUser(_userLogged.Id).ToList();
-
                 DisplayAllRides(rideListOfUser.ToList());
 
                 Console.WriteLine("Select the ride you want to edit: ");
                 _optionSelected = Console.ReadLine();
-                string[] parts = _optionSelected.Split('-');
 
-                int optionValue;
-
-                if (int.TryParse(parts[0].Trim(), out optionValue))
+                if (int.TryParse(_optionSelected, out int optionValue)
+                    && optionValue >= 0 && optionValue < rideListOfUser.Count)
                 {
-                    if (optionValue <= rideListOfUser.Count)
-                    {
-                        RideClient rideSelected = rideListOfUser[optionValue];
-                        Console.WriteLine(
-                            $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
-                        Console.WriteLine(
-                            $"Departure date on: {rideSelected.DepartureTime.ToShortDateString() + " At: " + rideSelected.DepartureTime.ToLongTimeString()}");
-                        Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
-                        Console.WriteLine("");
+                    RideClient rideSelected = rideListOfUser[optionValue];
+                    Console.WriteLine(
+                        $"You have selected the ride From: {rideSelected.InitialLocation} To: {rideSelected.EndingLocation}");
+                    Console.WriteLine(
+                        $"Departure date on: {rideSelected.DepartureTime.ToShortDateString() + " At: " + rideSelected.DepartureTime.ToLongTimeString()}");
+                    Console.WriteLine($"Price: {rideSelected.PricePerPerson}");
+                    Console.WriteLine("");
 
-                        Console.WriteLine("Select the respective action do you want to do with this ride: ");
-                        Console.WriteLine("1- Modify Ride");
-                        Console.WriteLine("2- Delete Ride");
-                        Console.WriteLine("3- Disable Ride");
-                        Console.WriteLine("4- Get Ride Info");
-                        Console.WriteLine("5- Go back to the main menu");
+                    Console.WriteLine("Select the respective action do you want to do with this ride: ");
+                    Console.WriteLine("1- Modify Ride");
+                    Console.WriteLine("2- Delete Ride");
+                    Console.WriteLine("3- Disable Ride");
+                    Console.WriteLine("4- Get Ride Info");
+                    Console.WriteLine("5- Go back to the main menu");
 
-                        _optionSelected = Console.ReadLine();
-                        if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 5)
-                        {
-                            switch (optionToDo)
-                            {
-                                case 1:
-                                    ModifyRide(rideSelected);
-                                    break;
-                                case 2:
-                                    DeleteRide(rideSelected);
-                                    break;
-                                case 3:
-                                    DisableRide(rideSelected);
-                                    break;
-                                case 4:
-                                    GetRideInfo(rideSelected);
-                                    break;
-                                case 5:
-                                    PossibleActionsToBeDoneByLoggedUser();
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Please introduce a valid digit");
-                            ViewYourRides();
-                        }
-                    }
+                    ViewFunctions(rideSelected);
+                }
+                else
+                {
+                    Console.WriteLine("Please introduce a positive digit");
+                    ViewYourRides();
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
+        private static void ViewFunctions(RideClient rideSelected)
+        {
+            _optionSelected = Console.ReadLine();
+            if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 5)
+            {
+                switch (optionToDo)
+                {
+                    case 1:
+                        ModifyRide(rideSelected);
+                        break;
+                    case 2:
+                        DeleteRide(rideSelected);
+                        break;
+                    case 3:
+                        DisableRide(rideSelected);
+                        break;
+                    case 4:
+                        GetRideInfo(rideSelected);
+                        break;
+                    case 5:
+                        PossibleActionsToBeDoneByLoggedUser();
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Please introduce a valid digit");
+                ViewFunctions(rideSelected);
+            }
+        }
+
+        #endregion
 
         #region Modify Ride
 
@@ -768,11 +816,11 @@ namespace Client
 
 
                 ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id,
-                    rideSelected.Passengers,
                     initialLocation, endingLocation, departureDate,
                     pricePerPerson, petsAllowed, vehicleId, availableSeats, rideSelected.DriverId);
 
                 _rideService.ModifyRide(modifyRideReq);
+                Console.WriteLine("Ride modified successfully");
             }
 
             catch (Exception e)
@@ -790,14 +838,14 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> ridesCollection = _rideService.GetRidesByUser(_userLogged.Id);
-                List<RideClient> ridesList = new List<RideClient>(ridesCollection);
+                ICollection<RideClient> rides = _rideService.GetRidesByUser(_userLogged.Id);
 
-                RideClient rideSelected = SelectRideFromList(ridesList);
+                RideClient rideSelected = SelectRideFromList(rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
                 _rideService.QuitRide(quitRideReq);
+                Console.WriteLine("Quit from ride successfully");
             }
             catch (Exception e)
             {
@@ -816,9 +864,9 @@ namespace Client
             {
                 _rideService.DeleteRide(rideSelected.Id);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -851,6 +899,7 @@ namespace Client
             try
             {
                 RideClient rideData = _rideService.GetRideById(rideSelected.Id);
+              
                 Console.WriteLine("This is the information related to the ride you have selected: ");
                 Console.WriteLine();
 
@@ -859,8 +908,9 @@ namespace Client
                 DisplayRide(rideSelected);
                 
                 Console.WriteLine("Do you want to see the car image?");
+                Console.WriteLine("Y - If yes or Any other key for No");
 
-                string seeDetails = Console.ReadLine();
+                string seeDetails = Console.ReadLine().ToUpper();
 
                 if (seeDetails == "Y")
                 {

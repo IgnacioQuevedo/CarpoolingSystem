@@ -10,7 +10,6 @@ namespace Client.Objects.RideModels
     public class ModifyRideRequest
     {
         public  Guid RideId { get; set; }
-        public ICollection<Guid> Passengers { get; set; }
         public CitiesEnum InitialLocation { get; set; }
         public CitiesEnum EndingLocation { get; set; }
         public DateTime DepartureTime { get; set; }
@@ -20,10 +19,9 @@ namespace Client.Objects.RideModels
         public Guid VehicleId { get; set; }
         public Guid DriverId { get; set; }
 
-        public ModifyRideRequest(Guid rideId, ICollection<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, double pricePerPerson, bool petsAllowed, Guid vehicleId, int availableSeats, Guid driverId)
+        public ModifyRideRequest(Guid rideId, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, double pricePerPerson, bool petsAllowed, Guid vehicleId, int availableSeats, Guid driverId)
         {
             RideId = rideId;
-            Passengers = passengers;
             InitialLocation = initialLocation;
             EndingLocation = endingLocation;
             DepartureTime = departureTime;
