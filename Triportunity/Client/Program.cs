@@ -702,7 +702,7 @@ namespace Client
                 }
                 else
                 {
-                    Console.WriteLine("Please introduce a positive digit");
+                    Console.WriteLine("Please introduce a valid digit");
                     ViewYourRides();
                 }
             }
