@@ -20,11 +20,11 @@ namespace Server.Controllers
     {
         private static UserRepository _userRepository = new UserRepository();
         private static RideRepository _rideRepository = new RideRepository();
-        private static Socket _serverSocket;
+        private static TcpClient _clientServerSide;
 
-        public UserController(Socket socket)
+        public UserController(TcpClient clientServer)
         {
-            _serverSocket = socket;
+            _clientServerSide = client;
         }
 
         #region COMPLETADOS
@@ -43,12 +43,12 @@ namespace Server.Controllers
                 _userRepository.RegisterUser(userToRegister);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; //Ok response
-                NetworkHelper.SendMessage(_serverSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exception)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exception.Message;
-                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -83,13 +83,13 @@ namespace Server.Controllers
                     }
                 }
 
-                NetworkHelper.SendMessage(_serverSocket, messageLogin);
+                NetworkHelper.SendMessage(_clientServerSide, messageLogin);
             }
 
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
         
@@ -103,13 +103,13 @@ namespace Server.Controllers
                 _userRepository.RegisterDriver(userIdToCreate, driverInfo);
                 
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userIdToCreate;
-                NetworkHelper.SendMessage(_serverSocket, responseMsg);
+                NetworkHelper.SendMessage(_clientServerSide, responseMsg);
                 
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, excepetionMessageToClient);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Server.Controllers
                 
                 string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
                                      + vehicleToAdd.Id;
-                NetworkHelper.SendMessage(_serverSocket, responseVehicleModelMsg);
+                NetworkHelper.SendMessage(_clientServerSide, responseVehicleModelMsg);
                 
                 string imageAllocatedAtServer = NetworkHelper.ReceiveImage(_serverSocket);
                 vehicleToAdd.ImageAllocatedAtServer = imageAllocatedAtServer;
@@ -143,7 +143,7 @@ namespace Server.Controllers
                 }
                 
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_serverSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -180,12 +180,12 @@ namespace Server.Controllers
 
                 }
 
-                NetworkHelper.SendMessage(_serverSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_serverSocket, excepetionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, excepetionMessageToClient);
             }
         }
 
@@ -196,16 +196,6 @@ namespace Server.Controllers
 
         #endregion
 
-        // public static void AddReview(Guid driverId, ReviewClient reviewToAdd)
-        // {
-        //     try
-        //     {
-        //         _userRepository.AddReview(driverId, new Review(reviewToAdd.Punctuation, reviewToAdd.Comment));
-        //     }
-        //     catch (UserException exceptionCaught)
-        //     {
-        //         throw new Exception(exceptionCaught.Message);
-        //     }
-        // }
+      
     }
 }

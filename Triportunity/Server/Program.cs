@@ -11,7 +11,7 @@ namespace Server
     internal class Program
     {
         private static bool _listenToNewClients = true;
-        public static Socket _serverSocket;
+        public static TcpListener _serverListener;
         
         private static UserController _userController;
         private static RideController _rideController;
@@ -19,26 +19,25 @@ namespace Server
 
         public static void Main(string[] args)
         {
-            _serverSocket = NetworkHelper.DeployServerSocket();
-
+            _serverListener = NetworkHelper.DeployServerListener();
 
             int users = 1;
             while (_listenToNewClients)
             {
-                Socket clientSocketServerSide = _serverSocket.Accept();
-                _userController = new UserController(clientSocketServerSide);
-                _rideController = new RideController(clientSocketServerSide);
+                TcpClient clientServerSide = _serverListener.AcceptTcpClient();
+                _userController = new UserController(clientServerSide);
+                _rideController = new RideController(clientServerSide);
                 string connectedMsg = "Welcome to Triportunity!! Your user is " + users + "!";
                 Console.WriteLine(connectedMsg);
 
-                NetworkHelper.SendMessage(clientSocketServerSide, connectedMsg);
+                NetworkHelper.SendMessage(clientServerSide, connectedMsg);
                 int actualUser = users;
-                new Thread(() => ManageUser(clientSocketServerSide, actualUser)).Start();
+                // new Thread(() => ManageUser(clientSocketServerSide, actualUser)).Start(); VA TASK
                 users++;
             }
         }
 
-        private static void ManageUser(Socket clientSocketServerSide, int actualUser)
+        private static void ManageUser(TcpClient clientServerSide, int actualUser)
         {
             bool _clientWantsToContinueSendingData = true;
             string direction = "";
@@ -50,7 +49,7 @@ namespace Server
             {
                 try
                 {
-                    string message = NetworkHelper.ReceiveMessage(clientSocketServerSide);
+                    string message = NetworkHelper.ReceiveMessage(clientServerSide);
                     Console.WriteLine($@"The user {actualUser} : {message}");
 
                     string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -156,7 +155,7 @@ namespace Server
                 }
             }
 
-            NetworkHelper.CloseSocketConnections(clientSocketServerSide);
+            NetworkHelper.CloseTcpConnections(clientServerSide);
         }
     }
 }

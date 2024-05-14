@@ -13,16 +13,16 @@ namespace Common
         private static readonly SettingsManager settingsManager = new SettingsManager();
         public static Socket ConnectWithServer()
         {
-            
+
             IPEndPoint local = new IPEndPoint(
                 IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.LocalIp)), int.Parse(settingsManager.ReadSettings(ClientConfig.LocalPort))
             );
-            
+
             IPEndPoint server = new IPEndPoint(
-                IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.RemoteIp)), 
+                IPAddress.Parse(settingsManager.ReadSettings(ClientConfig.RemoteIp)),
                 int.Parse(settingsManager.ReadSettings(ClientConfig.RemotePort))
             );
-            
+
             Socket newClientSocket = new Socket(
                 AddressFamily.InterNetwork,
                 SocketType.Stream,
@@ -53,29 +53,22 @@ namespace Common
             }
         }
 
-        public static void CloseSocketConnections(Socket clientSocket)
+        public static void CloseTcpConnections(TcpClient client)
         {
-            clientSocket.Shutdown(SocketShutdown.Both);
-            clientSocket.Close();
+            client.Close();
         }
 
-        public static Socket DeployServerSocket()
+        public static TcpListener DeployServerListener()
         {
             var localEndPoint = new IPEndPoint(
                 IPAddress.Parse(settingsManager.ReadSettings(ServerConfig.LocalIp)),
                 int.Parse(settingsManager.ReadSettings(ServerConfig.LocalPort))
             );
 
-            var serverSocket = new Socket(
-                AddressFamily.InterNetwork,
-                SocketType.Stream,
-                ProtocolType.Tcp
-            );
+            TcpListener serverListener = new TcpListener(localEndPoint);
 
-            serverSocket.Bind(localEndPoint);
-            serverSocket.Listen(ProtocolConstants.MaxUsersInBackLog);
             Console.WriteLine("Waiting for clients...");
-            return serverSocket;
+            return serverListener;
         }
 
         public static byte[] EncodeMsgIntoBytes(string message)
@@ -88,41 +81,31 @@ namespace Common
             return Encoding.UTF8.GetString(buffer);
         }
 
-        public static void SendMessage(Socket socket, string message)
+        public static void SendMessage(TcpClient client, string message)
         {
-            Send(socket, BitConverter.GetBytes(message.Length));
-            Send(socket, EncodeMsgIntoBytes(message));
+            Stream stream = client.GetStream();
+
+            byte[] buffer = EncodeMsgIntoBytes(message);
+
+            int size = buffer.Length;
+            int offSet = 0;
+
+            stream.Write(buffer, offSet, size);
         }
 
-        public static string ReceiveMessage(Socket socket)
+        public static string ReceiveMessage(TcpClient clientReciever)
         {
-            //This buffer has the constant length represented in bytes.
+            Stream stream = clientReciever.GetStream();
 
             byte[] bufferConstantLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
 
-            byte[] msgLengthBuffer = Receive(socket, bufferConstantLength);
-            byte[] dataBuffer = Receive(socket, msgLengthBuffer);
+            byte[] msgLengthBuffer = Receive(stream, bufferConstantLength);
+            byte[] dataBuffer = Receive(stream, msgLengthBuffer);
             return DecodeMsgFromBytes(dataBuffer);
         }
 
-        public static void Send(Socket clientSocketServerSide, byte[] buffer)
-        {
-            int size = buffer.Length;
-            int offSet = 0;
-            int amountByteSent = 0;
 
-            while (size > 0)
-            {
-                amountByteSent = clientSocketServerSide.Send(buffer, offSet, size, SocketFlags.None);
-
-                if (amountByteSent == 0) throw new SocketException();
-
-                size = size - amountByteSent;
-                offSet = offSet + amountByteSent;
-            }
-        }
-
-        public static byte[] Receive(Socket clientSocketServerSide, byte[] bufferWithTheLengthNumber)
+        public static byte[] Receive(Stream clientStream, byte[] bufferWithTheLengthNumber)
         {
             int length = BitConverter.ToInt32(bufferWithTheLengthNumber, 0);
             byte[] responseBuffer = new byte[length];
@@ -134,7 +117,7 @@ namespace Common
             while (offSet < size)
             {
                 amountByteSent =
-                    clientSocketServerSide.Receive(responseBuffer, offSet, size - offSet, SocketFlags.None);
+                    clientStream.Read(responseBuffer, offSet, size - offSet);
 
                 if (amountByteSent == 0) throw new SocketException();
 

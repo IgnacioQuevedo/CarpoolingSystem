@@ -15,13 +15,13 @@ namespace Server.Controllers
 {
     public class RideController
     {
-        private static Socket _clientSocket;
+        private static TcpClient _clientServerSide;
         private static RideRepository _rideRepository = new RideRepository();
         private static UserRepository _userRepository = new UserRepository();
 
-        public RideController(Socket clientSocket)
+        public RideController(TcpClient clientServerSide)
         {
-            _clientSocket = clientSocket;
+            _clientServerSide = clientServerSide;
         }
 
         public void CreateRide(string[] messageArray)
