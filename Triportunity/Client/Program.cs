@@ -207,7 +207,7 @@ namespace Client
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To view, edit and delete your created rides");
                 Console.WriteLine("Select 5 - To add a review");
-                Console.WriteLine("Select 6 - To filter rides per price, starting location or ending location");
+                Console.WriteLine("Select 6 - To filter rides per price");
                 Console.WriteLine("Select 7 - To close the app");
 
                 _optionSelected = Console.ReadLine();
@@ -218,7 +218,7 @@ namespace Client
                 Console.WriteLine("Select 2 - To join a Ride");
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To add a review");
-                Console.WriteLine("Select 5 - To filter rides per price, starting location or ending location");
+                Console.WriteLine("Select 5 - To filter rides per price");
                 Console.WriteLine("Select 6 - To close the app");
                 _optionSelected = Console.ReadLine();
             }
@@ -258,75 +258,30 @@ namespace Client
                         AddReview();
                     else
                     {
-                        FilterRides();
+                        GetRidesByPrice();
                     }
 
                     break;
                 case 6:
-                    if (_userLogged.DriverAspects != null) {
-                        FilterRides();
-                        }
+                    if (_userLogged.DriverAspects != null)
+                    {
+                        GetRidesByPrice();
+                    }
                     else
                     {
                         CloseAppOption();
                     }
+
                     break;
                 case 7:
-                    if(_userLogged.DriverAspects != null)
-                    CloseAppOption();
+                    if (_userLogged.DriverAspects != null)
+                        CloseAppOption();
                     break;
                 default:
                     WrongDigitInserted();
                     break;
             }
         }
-
-        #endregion
-
-
-        #region Filter Rides
-
-        private static void FilterRides()
-        {
-            try
-            {
-                Console.WriteLine("Select the filter you want to apply to the rides");
-                Console.WriteLine("1- Filter by price");
-                Console.WriteLine("2- Filter by initial location");
-                Console.WriteLine("3- Filter by ending location");
-
-                _optionSelected = Console.ReadLine();
-
-                if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 1 && optionValue <= 3)
-                {
-                    switch (optionValue)
-                    {
-                        case 1:
-                            GetRidesByPrice();
-                            break;
-                        case 2:
-                            GetRidesByInitialLocation();
-                            break;
-                        case 3:
-                            GetRidesByEndingLocation();
-                            break;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Please introduce a valid digit");
-                    FilterRides();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-
 
         #endregion
 
@@ -339,7 +294,7 @@ namespace Client
                 string carModel;
                 string path;
                 string addNewVehicle = "Y";
-                
+
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
                 bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
@@ -354,17 +309,18 @@ namespace Client
                     {
                         _userService.CreateDriver(clientSocket, userRegisteredId, carModel, path);
                         firstVehicle = false;
-                       
                     }
                     else
                     {
                         _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
                     }
+
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
                     Console.WriteLine("If yes - Enter 'Y'");
                     Console.WriteLine("If not - Enter any other key");
                     addNewVehicle = Console.ReadLine();
                 }
+
                 _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
             }
             catch (Exception e)
@@ -436,12 +392,11 @@ namespace Client
                 Console.WriteLine("You have allowed pets on your vehicle");
                 result = true;
             }
-            else if (_optionSelected == "2")
+            if (_optionSelected == "2")
             {
                 Console.WriteLine("You have not allowed pets on your vehicle");
                 result = false;
             }
-
             return result;
         }
 
@@ -456,11 +411,9 @@ namespace Client
             {
                 return pricePerPerson;
             }
-            else
-            {
-                Console.WriteLine("Please introduce a numeric value for the price, try again...");
-                return pricePerPerson;
-            }
+
+            Console.WriteLine("Please introduce a numeric value for the price, try again...");
+            return pricePerPerson;
         }
 
         private static string PickVehicle()
@@ -469,15 +422,22 @@ namespace Client
 
             ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
 
-            foreach (var vehicle in vehicles)
+
+            for (int i = 0; i < vehicles.Count; i++)
             {
-                Console.WriteLine("Vehicle Id: " + vehicle.Id);
-                Console.WriteLine("Vehicle Model: " + vehicle.CarModel);
+                Console.WriteLine(i + " - " + "Vehicle Model: " + vehicles.ElementAt(i).CarModel);
             }
 
-            string vehicleIdSelected = Console.ReadLine();
+            _optionSelected = Console.ReadLine();
 
-            return vehicleIdSelected;
+            if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 0 && optionValue < vehicles.Count)
+            {
+                Console.WriteLine(vehicles.ElementAt(optionValue).CarModel + " has been selected");
+                return vehicles.ElementAt(optionValue).Id.ToString();
+            }
+
+            Console.WriteLine("Please introduce a valid digit for the vehicle");
+            return PickVehicle();
         }
 
         private static int PickAmountOfAvailableSeats()
@@ -627,6 +587,7 @@ namespace Client
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
+
         private static RideClient SelectRideFromList(List<RideClient> rides)
         {
             try
@@ -638,11 +599,8 @@ namespace Client
 
                 _optionSelected = Console.ReadLine();
 
-                string[] parts = _optionSelected.Split('-');
 
-                int optionValue;
-
-                if (int.TryParse(parts[0].Trim(), out optionValue))
+                if (int.TryParse(_optionSelected, out int optionValue))
                 {
                     if (optionValue <= rides.Count)
                     {
@@ -874,6 +832,8 @@ namespace Client
             try
             {
                 _rideService.DisableRide(rideSelected.Id);
+
+                Console.WriteLine("Ride has been disabled");
             }
             catch (Exception e)
             {
@@ -938,7 +898,6 @@ namespace Client
         {
             try
             {
-
                 Console.WriteLine("\nIntroduce the minimum price :");
                 string minPriceInput = Console.ReadLine();
                 double minPrice;
@@ -968,63 +927,11 @@ namespace Client
                 Console.WriteLine("\nRides with price between " + minPrice + " and " + maxPrice + " are: ");
                 DisplayAllRides(rides.ToList());
                 Console.WriteLine("");
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-
-        #endregion
-
-        #region Get Rides By Initial Location
-
-        private static void GetRidesByInitialLocation()
-        {
-            try
-            {
-                Console.WriteLine("Introduce the initial location you want to filter the rides by");
-
-                ShowCities();
-
-                _optionSelected = Console.ReadLine();
-
-                CitiesEnum initialLocation = PossibleCasesWhenPickingLocation(_optionSelected, "initial");
-
-                _rideService.GetRidesFilteredByInitialLocation(initialLocation);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-        #endregion
-
-        #region Get Rides By Ending Location
-
-        private static void GetRidesByEndingLocation()
-        {
-            try
-            {
-                Console.WriteLine("Introduce the ending location you want to filter the rides by");
-
-                ShowCities();
-
-                _optionSelected = Console.ReadLine();
-
-                CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
-
-                _rideService.GetRidesFilteredByEndingLocation(endingLocation);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
                 PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -1048,19 +955,20 @@ namespace Client
                     Console.WriteLine("Invalid rating. Please enter a number between 0.0 and 5.0.");
                     ratingInput = Console.ReadLine();
                 }
+
                 rating = Double.Parse(ratingInput);
 
                 Console.WriteLine("Introduce the comment you want to give to the driver");
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-                _rideService.AddReview(reviewRequest);
+                _rideService.AddReview(_userLogged.Id, reviewRequest);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                AddReview();
+                PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
