@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Client.Objects.RideModels;
 using Common;
+using Server.Exceptions;
 using Server.Objects.Domain;
 using Server.Objects.Domain.Enums;
 using Server.Objects.Domain.UserModels;
@@ -31,27 +32,17 @@ namespace Server.Controllers
 
                 Guid driverId = Guid.Parse(messageArray[2]);
 
-                if (messageArray[3] != "#")
-                {
-                    foreach (var passenger in messageArray[10].Split(new string[] { "," },
-                                 StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        passengers.Add(Guid.Parse(passenger));
-                    }
-                }
-            
+                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
+                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
+                DateTime departureTime = DateTime.Parse(messageArray[5]);
+                int availableSeats = int.Parse(messageArray[6]);
+                double price = double.Parse(messageArray[7]);
+                bool pets = bool.Parse(messageArray[8]);
+                Guid vehicleId = Guid.Parse(messageArray[9]);
 
-                CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
-                CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[5]);
-                DateTime departureTime = DateTime.Parse(messageArray[6]);
-                int availableSeats = int.Parse(messageArray[7]);
-                double price = double.Parse(messageArray[8]);
-                bool pets = bool.Parse(messageArray[9]);
-                Guid vehicleId = Guid.Parse(messageArray[10]);
-                
-                Ride ride = new Ride(driverId, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                Ride ride = new Ride(driverId, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
-                
+
                 ride.Id = Guid.NewGuid();
 
                 _rideRepository.CreateRide(ride);
@@ -62,7 +53,8 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -88,14 +80,14 @@ namespace Server.Controllers
                     response += ":" + ride.InitialLocation +
                                 ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":" + ride.VehicleId + "@";
-
                 }
 
                 NetworkHelper.SendMessage(_clientSocket, response);
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -115,7 +107,8 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -126,7 +119,7 @@ namespace Server.Controllers
             {
 
                 Guid rideId = Guid.Parse(messageArray[2]);
-                
+      
                 CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
                 CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 DateTime departureTime = DateTime.Parse(messageArray[5]);
@@ -138,19 +131,19 @@ namespace Server.Controllers
 
                 Ride ride = new Ride(driverId, null, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
-                
+
                 ride.Id = rideId;
 
                 _rideRepository.UpdateRide(ride);
-                
+
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.EditRide + ";" + ride.Id;
-                
+
                 NetworkHelper.SendMessage(_clientSocket, message);
-                
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -165,11 +158,11 @@ namespace Server.Controllers
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.DeleteRide;
 
                 NetworkHelper.SendMessage(_clientSocket, message);
-
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -188,10 +181,12 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
+
         public void GetAllRides()
         {
             try
@@ -219,7 +214,8 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -238,7 +234,8 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -267,6 +264,11 @@ namespace Server.Controllers
                 double minPrice = double.Parse(messageArray[2]);
                 double maxPrice = double.Parse(messageArray[3]);
 
+                if (maxPrice < 0 || minPrice < 0 || maxPrice <= minPrice)
+                {
+                    throw new RideException("Max price cannot be equal or lower than min price");
+                }
+
                 ICollection<Ride> rides = _rideRepository.FilterByPrice(minPrice, maxPrice);
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.FilterRidesByPrice + ";";
@@ -291,7 +293,8 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
@@ -316,11 +319,11 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
-
 
 
         public void GetRideById(string[] messageArray)
@@ -332,21 +335,12 @@ namespace Server.Controllers
 
                 string response = ProtocolConstants.Response + ";" + CommandsConstraints.GetRideById + ";";
 
-
                 response += ride.Id + ":" + ride.DriverId + ":";
 
-                if (ride.Passengers.Count == 0)
+                foreach (var passenger in ride.Passengers)
                 {
-                    response += "#";
+                    response += passenger + ",";
                 }
-                else
-                {
-                    foreach (var passenger in ride.Passengers)
-                    {
-                        response += passenger + ",";
-                    }
-                }
-                
 
                 response += ":" + ride.InitialLocation +
                             ":" + ride.EndingLocation + ":" + ride.DepartureTime + ":" + ride.AvailableSeats + ":" +
@@ -357,10 +351,12 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
+
         public void AddReview(string[] messageArray)
         {
             try
@@ -380,12 +376,10 @@ namespace Server.Controllers
             }
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
-
-
-
     }
 }

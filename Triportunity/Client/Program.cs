@@ -411,6 +411,7 @@ namespace Client
 
                 _rideService.CreateRide(rideReq);
                 Console.WriteLine("Ride created successfully");
+
             }
             catch (Exception e)
             {
@@ -898,17 +899,14 @@ namespace Client
             try
             {
                 RideClient rideData = _rideService.GetRideById(rideSelected.Id);
-
-                Console.WriteLine("This is the information that is related to the ride you have selected: ");
+              
+                Console.WriteLine("This is the information related to the ride you have selected: ");
                 Console.WriteLine();
-                Console.WriteLine(
-                    $"From: {rideData.InitialLocation} To: {rideData.EndingLocation} With date of departure: " +
-                    $"{rideData.DepartureTime.ToShortDateString()} and with a Price per person of : ${rideData.PricePerPerson}");
 
-                Console.WriteLine("And at the moment are available " + rideData.AvailableSeats + "seats");
+                _rideService.GetRideById(rideSelected.Id);
 
-                Console.WriteLine($"Pets allowed: {rideData.PetsAllowed}");
-
+                DisplayRide(rideSelected);
+                
                 Console.WriteLine("Do you want to see the car image?");
                 Console.WriteLine("Y - If yes or Any other key for No");
 
@@ -918,10 +916,6 @@ namespace Client
                 {
                     _rideService.GetCarImageById(_userLogged.Id, rideData.Id);
                 }
-
-                //_rideService.GetRideById(rideSelected.Id);
-
-                //DisplayRide(rideSelected);
             }
             catch (Exception e)
             {
