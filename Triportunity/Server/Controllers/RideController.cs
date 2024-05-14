@@ -129,7 +129,7 @@ namespace Server.Controllers
                 Guid vehicleId = Guid.Parse(messageArray[9]);
                 Guid driverId = Guid.Parse(messageArray[10]);
 
-                Ride ride = new Ride(driverId, null, initialLocation, endingLocation, departureTime, availableSeats,
+                Ride ride = new Ride(driverId, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
 
                 ride.Id = rideId;

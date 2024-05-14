@@ -285,50 +285,6 @@ namespace Client
 
         #endregion
         
-        #region Filter Rides
-
-        private static void FilterRides()
-        {
-            try
-            {
-                Console.WriteLine("Select the filter you want to apply to the rides");
-                Console.WriteLine("1- Filter by price");
-                Console.WriteLine("2- Filter by initial location");
-                Console.WriteLine("3- Filter by ending location");
-
-                _optionSelected = Console.ReadLine();
-
-                if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 1 && optionValue <= 3)
-                {
-                    switch (optionValue)
-                    {
-                        case 1:
-                            GetRidesByPrice();
-                            break;
-                        case 2:
-                            GetRidesByInitialLocation();
-                            break;
-                        case 3:
-                            GetRidesByEndingLocation();
-                            break;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Please introduce a valid digit");
-                    FilterRides();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-        #endregion
-
         #region Driver creation
 
         private static void CreateDriver(Guid userRegisteredId)
@@ -746,7 +702,7 @@ namespace Client
                 }
                 else
                 {
-                    Console.WriteLine("Please introduce a positive digit");
+                    Console.WriteLine("Please introduce a valid digit");
                     ViewYourRides();
                 }
             }
