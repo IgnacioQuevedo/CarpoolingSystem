@@ -45,7 +45,8 @@ namespace Server.Repositories
 
             LockManager.StartReading();
             if (rideToJoin.AvailableSeats < 1) exceptionMessage = "No are no available seats";
-            if (rideToJoin.Passengers.Contains(user) || rideToJoin.DriverId == user) exceptionMessage = "You are already in the ride";
+            if (rideToJoin.Passengers.Contains(user) || rideToJoin.DriverId == user)
+                exceptionMessage = "You are already in the ride";
             if (rideToJoin.DepartureTime <= DateTime.Now)
                 exceptionMessage = "Cannot join a ride that has already departed";
             LockManager.StopReading();
@@ -60,8 +61,8 @@ namespace Server.Repositories
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
             LockManager.StopReading();
-            
-            
+
+
             if (rideToFind != null)
             {
                 LockManager.StartWriting();
@@ -81,12 +82,12 @@ namespace Server.Repositories
         {
             Ride rideToQuit = GetRideById(rideId);
 
-            
-            if (rideToQuit.DriverId.Equals(userId)) {
 
+            if (rideToQuit.DriverId.Equals(userId))
+            {
                 throw new RideException("You are the driver, you must disable or delete the ride in order to quit");
             }
-            
+
             if (rideToQuit.DepartureTime <= DateTime.Now)
             {
                 throw new RideException("Cannot quit the ride as the departure time has passed.");
@@ -145,19 +146,14 @@ namespace Server.Repositories
         public ICollection<Ride> FilterByPrice(double minPrice, double maxPrice)
         {
             ICollection<Ride> filteredRides = new List<Ride>();
-            var rides = GetRides();
+            var rides = MemoryDatabase.GetInstance().Rides;
 
-            LockManager.StartReading();
-
-            filteredRides = rides
-                .Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
+            filteredRides = rides.Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
                 .ToList();
-
-            LockManager.StopReading();
 
             if (filteredRides.Count == 0)
             {
-                throw new RideException("No rides found in the selected range");
+                throw new RideException("No rides were found in the specified range");
             }
 
             return filteredRides;
@@ -186,10 +182,12 @@ namespace Server.Repositories
             {
                 throw new RideException("You can't review your own ride");
             }
+
             if (ride.DepartureTime > DateTime.Now)
             {
                 throw new RideException("You can't review a ride that hasn't happened yet");
             }
+
             driver.DriverAspects.Reviews.Add(review);
             LockManager.StopWriting();
         }
