@@ -882,9 +882,7 @@ namespace Client
 
         private static void DisplayRide(RideClient ride)
         {
-            Console.WriteLine($"\nRide ID: {ride.Id}");
-            Console.WriteLine($"Driver ID: {ride.DriverId}");
-            Console.WriteLine($"Initial Location: {ride.InitialLocation}");
+            Console.WriteLine($"\nInitial Location: {ride.InitialLocation}");
             Console.WriteLine($"Ending Location: {ride.EndingLocation}");
             Console.WriteLine($"Departure Time: {ride.DepartureTime}");
             Console.WriteLine($"Available Seats: {ride.AvailableSeats}");
