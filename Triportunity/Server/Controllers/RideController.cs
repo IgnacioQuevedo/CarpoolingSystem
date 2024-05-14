@@ -124,19 +124,9 @@ namespace Server.Controllers
         {
             try
             {
-                List<Guid> passengers = new List<Guid>();
 
                 Guid rideId = Guid.Parse(messageArray[2]);
-
-                if (messageArray[3] != "#")
-                {
-                    foreach (var passenger in messageArray[9].Split(new string[] { "," },
-                                 StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        passengers.Add(Guid.Parse(passenger));
-                    }
-                }
-
+                
                 CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
                 CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 DateTime departureTime = DateTime.Parse(messageArray[5]);
@@ -146,7 +136,7 @@ namespace Server.Controllers
                 Guid vehicleId = Guid.Parse(messageArray[9]);
                 Guid driverId = Guid.Parse(messageArray[10]);
 
-                Ride ride = new Ride(driverId, passengers, initialLocation, endingLocation, departureTime, availableSeats,
+                Ride ride = new Ride(driverId, null, initialLocation, endingLocation, departureTime, availableSeats,
                     price, pets, vehicleId);
                 
                 ride.Id = rideId;
