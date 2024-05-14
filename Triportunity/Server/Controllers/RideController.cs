@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Client.Objects.RideModels;
 using Common;
+using Server.Exceptions;
 using Server.Objects.Domain;
 using Server.Objects.Domain.Enums;
 using Server.Objects.Domain.UserModels;
@@ -265,6 +266,11 @@ namespace Server.Controllers
             {
                 double minPrice = double.Parse(messageArray[2]);
                 double maxPrice = double.Parse(messageArray[3]);
+
+                if (maxPrice < 0 || minPrice < 0 || maxPrice <= minPrice)
+                {
+                    throw new RideException("Max price cannot be equal or lower than min price");
+                }
 
                 ICollection<Ride> rides = _rideRepository.FilterByPrice(minPrice, maxPrice);
 
