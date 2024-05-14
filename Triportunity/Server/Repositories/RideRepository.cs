@@ -72,8 +72,10 @@ namespace Server.Repositories
         public void QuitRide(Guid userId, Guid rideId)
         {
             Ride rideToQuit = GetRideById(rideId);
+
             
             if (rideToQuit.DriverId.Equals(userId)) {
+
                 throw new RideException("You are the driver, you must disable or delete the ride in order to quit");
             }
             
@@ -125,8 +127,8 @@ namespace Server.Repositories
 
         public void DisablePublishedRide(Guid rideId)
         {
-            LockManager.StartWriting();
             Ride rideToCancel = GetRideById(rideId);
+            LockManager.StartWriting();
             rideToCancel.Published = false;
             LockManager.StopWriting();
         }
@@ -153,28 +155,6 @@ namespace Server.Repositories
             return filteredRides;
         }
 
-        public ICollection<Ride> FilterByInitialLocation(CitiesEnum initialLocation)
-        {
-            LockManager.StartReading();
-            ICollection<Ride> filteredRides = new List<Ride>();
-            filteredRides = MemoryDatabase.GetInstance().Rides
-                .Where(ride => ride.InitialLocation.Equals(initialLocation))
-                .ToList();
-            LockManager.StopReading();
-            return filteredRides;
-        }
-
-        public ICollection<Ride> FilterByDestination(string destination)
-        {
-            LockManager.StartReading();
-            ICollection<Ride> filteredRides = new List<Ride>();
-            filteredRides = MemoryDatabase.GetInstance().Rides
-                .Where(ride => ride.EndingLocation.Equals(destination))
-                .ToList();
-            LockManager.StopReading();
-            return filteredRides;
-        }
-
         public void UpdateRide(Ride rideWithUpdates)
         {
             Ride rideToUpdate = GetRideById(rideWithUpdates.Id);
@@ -189,41 +169,49 @@ namespace Server.Repositories
             LockManager.StopWriting();
         }
 
-        public void AddReview(Guid rideId, Review review)
+        public void AddReview(Guid actualUserId, Guid rideId, Review review)
         {
             Ride ride = GetRideById(rideId);
             User driver = _userRepository.GetUserById(ride.DriverId);
             LockManager.StartWriting();
+            if (actualUserId.Equals(driver.Id))
+            {
+                throw new RideException("You can't review your own ride");
+            }
+            if (ride.DepartureTime > DateTime.Now)
+            {
+                throw new RideException("You can't review a ride that hasn't happened yet");
+            }
             driver.DriverAspects.Reviews.Add(review);
             LockManager.StopWriting();
         }
 
         public ICollection<Review> GetDriverReviews(Guid ride)
         {
-            LockManager.StartReading();
             Ride rideToGetReviews = GetRideById(ride);
             User user = _userRepository.GetUserById(rideToGetReviews.DriverId);
-            LockManager.StopReading();
             return user.DriverAspects.Reviews;
         }
 
         public ICollection<Ride> GetRidesByUser(Guid userId)
         {
-            LockManager.StartReading();
             ICollection<Ride> rides = new List<Ride>();
             rides = MemoryDatabase.GetInstance().Rides;
-                
-            LockManager.StopReading();
 
             ICollection<Ride> userRides = new List<Ride>();
+
+            LockManager.StartReading();
 
             foreach (var ride in rides)
             {
                 if (ride.DriverId == userId || ride.Passengers.Contains(userId))
                 {
+                    ride.DepartureTime = ride.DepartureTime.ToLocalTime();
                     userRides.Add(ride);
                 }
             }
+
+            LockManager.StopReading();
 
             if (userRides.Count == 0)
             {
