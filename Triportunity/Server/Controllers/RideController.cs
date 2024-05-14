@@ -260,10 +260,13 @@ namespace Server.Controllers
                 Guid rideId = Guid.Parse(messageArray[2]);
                 _rideRepository.DisablePublishedRide(rideId);
 
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.DisableRide;
+                NetworkHelper.SendMessage(_clientSocket, message);
             }
             catch (Exception e)
             {
-                throw new Exception("Error: " + e.Message);
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + e.Message;
+                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
             }
         }
 
@@ -372,13 +375,14 @@ namespace Server.Controllers
         {
             try
             {
-                Guid userId = Guid.Parse(messageArray[2]);
-                double punctuation = double.Parse(messageArray[3]);
-                string comment = messageArray[4];
+                Guid actualUser = Guid.Parse(messageArray[2]);
+                Guid rideId = Guid.Parse(messageArray[3]);
+                double punctuation = double.Parse(messageArray[4]);
+                string comment = messageArray[5];
 
                 Review review = new Review(punctuation, comment);
 
-                _rideRepository.AddReview(userId, review);
+                _rideRepository.AddReview(actualUser, rideId, review);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.AddReview;
 

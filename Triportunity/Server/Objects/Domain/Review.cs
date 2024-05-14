@@ -9,6 +9,8 @@ namespace Server.Objects.Domain
 
         public Guid Id { get; private set; }
 
+        public string Comment { get; set; }
+
         public double Punctuation
         {
             get => _punctuation;
@@ -19,21 +21,6 @@ namespace Server.Objects.Domain
                     throw new ReviewException("The punctuation must be between 0.0 and 5.0.");
                 }
                 _punctuation = value;
-            }
-        }
-
-        private string _comment;
-
-        public string Comment
-        {
-            get => _comment;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ReviewException("The comment cannot be empty.");
-                }
-                _comment = value;
             }
         }
 

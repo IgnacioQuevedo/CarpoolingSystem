@@ -192,6 +192,15 @@ namespace Client.Services
                                  id;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
+                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+
+                string[] messageArrayResponse =
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
+
+                if (messageArrayResponse[0] == ProtocolConstants.Exception)
+                {
+                    throw new Exception(messageArrayResponse[2]);
+                }
             }
             catch (Exception e)
             {
@@ -305,43 +314,6 @@ namespace Client.Services
             }
         }
 
-        public ICollection<RideClient> GetRidesFilteredByInitialLocation(CitiesEnum initialLocation)
-        {
-            try
-            {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByInitialLocation +
-                                 ";" + ((int)initialLocation).ToString();
-                NetworkHelper.SendMessage(_clientSocket, message);
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (ridesData[0] == ProtocolConstants.Exception)
-                {
-                    throw new Exception(ridesData[2]);
-                }
-
-                ICollection<RideClient> rides = new List<RideClient>();
-                for (int i = 0; i < ridesData.Length; i += 7)
-                {
-                    rides.Add(new RideClient
-                    {
-                        Id = Guid.Parse(ridesData[i + 2]),
-                        DriverId = Guid.Parse(ridesData[i + 3]),
-                        InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
-                        EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
-                        DepartureTime = DateTime.Parse(ridesData[i + 6]),
-                        PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8])
-                    });
-                }
-
-                return rides;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
 
         public ICollection<RideClient> GetRidesByUser(Guid userLoggedId)
         {
@@ -387,45 +359,6 @@ namespace Client.Services
                         PricePerPerson = double.Parse(rideInfo[9]),
                         PetsAllowed = bool.Parse(rideInfo[10]),
                         VehicleId = Guid.Parse(rideInfo[11])
-                    });
-                }
-
-                return rides;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
-
-        public ICollection<RideClient> GetRidesFilteredByEndingLocation(CitiesEnum endingLocation)
-        {
-            try
-            {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByEndingLocation +
-                                 ";" + ((int)endingLocation).ToString();
-                NetworkHelper.SendMessage(_clientSocket, message);
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
-                string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (ridesData[0] == ProtocolConstants.Exception)
-                {
-                    throw new Exception(ridesData[2]);
-                }
-
-                ICollection<RideClient> rides = new List<RideClient>();
-                for (int i = 0; i < ridesData.Length; i += 7)
-                {
-                    rides.Add(new RideClient
-                    {
-                        Id = Guid.Parse(ridesData[i + 2]),
-                        DriverId = Guid.Parse(ridesData[i + 3]),
-                        InitialLocation = (CitiesEnum)(int.Parse(ridesData[i + 4])),
-                        EndingLocation = (CitiesEnum)(int.Parse(ridesData[i + 5])),
-                        DepartureTime = DateTime.Parse(ridesData[i + 6]),
-                        PricePerPerson = double.Parse(ridesData[i + 7]),
-                        PetsAllowed = bool.Parse(ridesData[i + 8])
                     });
                 }
 
@@ -524,11 +457,11 @@ namespace Client.Services
             }
         }
 
-        public void AddReview(ReviewClient request)
+        public void AddReview(Guid actualUserId, ReviewClient request)
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + actualUserId + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);

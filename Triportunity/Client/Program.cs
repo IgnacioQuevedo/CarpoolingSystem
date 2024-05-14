@@ -207,7 +207,7 @@ namespace Client
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To view, edit and delete your created rides");
                 Console.WriteLine("Select 5 - To add a review");
-                Console.WriteLine("Select 6 - To filter rides per price, starting location or ending location");
+                Console.WriteLine("Select 6 - To filter rides per price");
                 Console.WriteLine("Select 7 - To close the app");
 
                 _optionSelected = Console.ReadLine();
@@ -218,7 +218,7 @@ namespace Client
                 Console.WriteLine("Select 2 - To join a Ride");
                 Console.WriteLine("Select 3 - To Quit a Ride");
                 Console.WriteLine("Select 4 - To add a review");
-                Console.WriteLine("Select 5 - To filter rides per price, starting location or ending location");
+                Console.WriteLine("Select 5 - To filter rides per price");
                 Console.WriteLine("Select 6 - To close the app");
                 _optionSelected = Console.ReadLine();
             }
@@ -258,14 +258,14 @@ namespace Client
                         AddReview();
                     else
                     {
-                        FilterRides();
+                        GetRidesByPrice();
                     }
 
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null)
                     {
-                        FilterRides();
+                        GetRidesByPrice();
                     }
                     else
                     {
@@ -280,51 +280,6 @@ namespace Client
                 default:
                     WrongDigitInserted();
                     break;
-            }
-        }
-
-        #endregion
-
-
-        #region Filter Rides
-
-        private static void FilterRides()
-        {
-            try
-            {
-                Console.WriteLine("Select the filter you want to apply to the rides");
-                Console.WriteLine("1- Filter by price");
-                Console.WriteLine("2- Filter by initial location");
-                Console.WriteLine("3- Filter by ending location");
-
-                _optionSelected = Console.ReadLine();
-
-                if (int.TryParse(_optionSelected, out int optionValue) && optionValue >= 1 && optionValue <= 3)
-                {
-                    switch (optionValue)
-                    {
-                        case 1:
-                            GetRidesByPrice();
-                            break;
-                        case 2:
-                            GetRidesByInitialLocation();
-                            break;
-                        case 3:
-                            GetRidesByEndingLocation();
-                            break;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Please introduce a valid digit");
-                    FilterRides();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -875,6 +830,8 @@ namespace Client
             try
             {
                 _rideService.DisableRide(rideSelected.Id);
+
+                Console.WriteLine("Ride has been disabled");
             }
             catch (Exception e)
             {
@@ -987,56 +944,6 @@ namespace Client
 
         #endregion
 
-        #region Get Rides By Initial Location
-
-        private static void GetRidesByInitialLocation()
-        {
-            try
-            {
-                Console.WriteLine("Introduce the initial location you want to filter the rides by");
-
-                ShowCities();
-
-                _optionSelected = Console.ReadLine();
-
-                CitiesEnum initialLocation = PossibleCasesWhenPickingLocation(_optionSelected, "initial");
-
-                _rideService.GetRidesFilteredByInitialLocation(initialLocation);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-        #endregion
-
-        #region Get Rides By Ending Location
-
-        private static void GetRidesByEndingLocation()
-        {
-            try
-            {
-                Console.WriteLine("Introduce the ending location you want to filter the rides by");
-
-                ShowCities();
-
-                _optionSelected = Console.ReadLine();
-
-                CitiesEnum endingLocation = PossibleCasesWhenPickingLocation(_optionSelected, "ending");
-
-                _rideService.GetRidesFilteredByEndingLocation(endingLocation);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
-            }
-        }
-
-        #endregion
-
         #region Add Review
 
         public static void AddReview()
@@ -1061,13 +968,13 @@ namespace Client
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-                _rideService.AddReview(reviewRequest);
+                _rideService.AddReview(_userLogged.Id, reviewRequest);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                AddReview();
+                PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
