@@ -27,16 +27,6 @@ namespace Client.Services
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.CreateRide + ";" +
                                  request.DriverId + ";";
 
-                if (request.Passengers.Count > 0)
-                {
-                    for (int i = 0; i < request.Passengers.Count; i++)
-                    {
-                        message += request.Passengers[i] + ",";
-                    }
-                }
-
-                message += ";";
-
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" + request.DepartureTime +
                            ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
                            + ";" + request.VehicleId;
@@ -51,10 +41,6 @@ namespace Client.Services
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
                     throw new Exception(messageArrayResponse[2]);
-                }
-                else if (messageArrayResponse[0] == ProtocolConstants.Response)
-                {
-                    Console.WriteLine("Ride created successfully");
                 }
             }
             catch (Exception e)
@@ -213,7 +199,7 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
-                                 id;
+                                   id;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
@@ -234,7 +220,7 @@ namespace Client.Services
                     passengers.Add(Guid.Parse(passenger));
                 }
 
-                DateTime departureTime = DateTime.Parse(rideArray[5] + " " + rideArray[6] + " " + rideArray[7]);
+                DateTime departureTime = DateTime.Parse(rideArray[5] + ":" + rideArray[6] + ":" + rideArray[7]);
 
                 RideClient ride = new RideClient
                 {
@@ -345,7 +331,7 @@ namespace Client.Services
                         passengers.Add(Guid.Parse(passenger));
                     }
 
-                    DateTime departureTime = DateTime.Parse(rideInfo[5] + " " + rideInfo[6] + " " + rideInfo[7]);
+                    DateTime departureTime = DateTime.Parse(rideInfo[5] + ":" + rideInfo[6] + ":" + rideInfo[7]);
 
                     rides.Add(new RideClient
                     {
@@ -486,12 +472,12 @@ namespace Client.Services
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
-                                 rideId.ToString();
+                                 rideId;
                 NetworkHelper.SendMessage(_clientSocket, message);
 
                 string response = NetworkHelper.ReceiveMessage(_clientSocket);
 
-                string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (reviewsData[0] == ProtocolConstants.Exception)
                 {

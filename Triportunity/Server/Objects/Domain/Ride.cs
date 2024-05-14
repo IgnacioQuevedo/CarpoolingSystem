@@ -21,10 +21,10 @@ namespace Server.Objects.Domain
         public Guid VehicleId { get; set; }
 
         public Ride() { }
-        public Ride(Guid driver, List<Guid> passengers, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed, Guid vehicleId)
+        public Ride(Guid driver, CitiesEnum initialLocation, CitiesEnum endingLocation, DateTime departureTime, int availableSeats, double pricePerPerson, bool petsAllowed, Guid vehicleId)
         {
             DriverId = driver;
-            Passengers = passengers;
+            Passengers = new List<Guid>();
             InitialLocation = initialLocation;
             EndingLocation = endingLocation;
             DepartureTime = departureTime;
