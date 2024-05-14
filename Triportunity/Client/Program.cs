@@ -882,9 +882,7 @@ namespace Client
 
         private static void DisplayRide(RideClient ride)
         {
-            Console.WriteLine($"\nRide ID: {ride.Id}");
-            Console.WriteLine($"Driver ID: {ride.DriverId}");
-            Console.WriteLine($"Initial Location: {ride.InitialLocation}");
+            Console.WriteLine($"\nInitial Location: {ride.InitialLocation}");
             Console.WriteLine($"Ending Location: {ride.EndingLocation}");
             Console.WriteLine($"Departure Time: {ride.DepartureTime}");
             Console.WriteLine($"Available Seats: {ride.AvailableSeats}");
@@ -950,7 +948,7 @@ namespace Client
         {
             try
             {
-                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides().ToList());
+                RideClient rideClient = SelectRideFromList(_rideService.GetRidesByUser(_userLogged.Id).ToList());
 
                 Console.WriteLine("\nIntroduce the rating you want to give to the driver");
                 string ratingInput = Console.ReadLine();
