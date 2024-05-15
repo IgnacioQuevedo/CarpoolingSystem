@@ -24,6 +24,7 @@ namespace Server
             int users = 1;
             while (_listenToNewClients)
             {
+                _serverListener.Start(ProtocolConstants.MaxUsersInBackLog);
                 TcpClient clientServerSide = _serverListener.AcceptTcpClient();
                 _userController = new UserController(clientServerSide);
                 _rideController = new RideController(clientServerSide);
@@ -32,7 +33,7 @@ namespace Server
 
                 NetworkHelper.SendMessage(clientServerSide, connectedMsg);
                 int actualUser = users;
-                // new Thread(() => ManageUser(clientSocketServerSide, actualUser)).Start(); VA TASK
+                new Thread(() => ManageUser(clientServerSide, actualUser)).Start();
                 users++;
             }
         }
@@ -144,18 +145,15 @@ namespace Server
                     }
                 }
 
-                catch (SocketException exceptionNotExpected)
+                catch (Exception exceptionNotExpected)  
                 {
                     Console.WriteLine("Error" + exceptionNotExpected.Message);
                     break;
                 }
-                catch (Exception exception)
-                {
-                    throw new Exception(exception.Message);
-                }
             }
 
             NetworkHelper.CloseTcpConnections(clientServerSide);
+            _serverListener.Stop();
         }
     }
 }

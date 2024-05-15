@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public class FileStreamHelper
+    public class FileNetworkStreamHelper
     {
         public static byte[] ReadFile(string path, long offset, int size)
         {
             byte[] buffer = new byte[size];
 
-            using (var fileStream = new FileStream(path, FileMode.Open))
+            using (var fileNetworkStream = new FileStream(path, FileMode.Open))
             {
-                fileStream.Position = offset;
+                fileNetworkStream.Position = offset;
                 int readBytes = 0;
                 while (readBytes < size)
                 {
-                    int bytesRecieved = fileStream.Read(buffer, readBytes, size - readBytes);
+                    int bytesRecieved = fileNetworkStream.Read(buffer, readBytes, size - readBytes);
                     if (bytesRecieved == 0)
                     {
                         throw new FileNotFoundException();
@@ -34,16 +34,16 @@ namespace Common
         {
             if (File.Exists(fileName))
             {
-                using (var fileStream = new FileStream(fileName, FileMode.Append))
+                using (var fileNetworkStream = new FileStream(fileName, FileMode.Append))
                 {
-                    fileStream.Write(data, 0, data.Length);
+                    fileNetworkStream.Write(data, 0, data.Length);
                 }
             }
             else
             {
-                using (var fileStream = new FileStream(fileName, FileMode.Create))
+                using (var fileNetworkStream = new FileStream(fileName, FileMode.Create))
                 {
-                    fileStream.Write(data, 0, data.Length);
+                    fileNetworkStream.Write(data, 0, data.Length);
                 }
             }
         }

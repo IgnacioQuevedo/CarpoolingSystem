@@ -13,14 +13,11 @@ namespace Client.Services
 {
     public class RideService
     {
-        private static Socket _clientSocket;
-
-        public RideService(Socket socket)
+        public RideService()
         {
-            _clientSocket = socket;
         }
 
-        public void CreateRide(CreateRideRequest request)
+        public void CreateRide(TcpClient client, CreateRideRequest request)
         {
             try
             {
@@ -31,9 +28,9 @@ namespace Client.Services
                            ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
                            + ";" + request.VehicleId;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceiveed = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -49,15 +46,15 @@ namespace Client.Services
             }
         }
 
-        public void JoinRide(JoinRideRequest request)
+        public void JoinRide(TcpClient client, JoinRideRequest request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.JoinRide + ";" +
                                  request.RideId + ";" + request.PassengerToJoin;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceived = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -73,14 +70,14 @@ namespace Client.Services
             }
         }
 
-        public void DeleteRide(Guid id)
+        public void DeleteRide(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.DeleteRide + ";" + id;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageRecevied = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageRecevied = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageRecevied.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -100,15 +97,15 @@ namespace Client.Services
             }
         }
 
-        public void QuitRide(QuitRideRequest request)
+        public void QuitRide(TcpClient client, QuitRideRequest request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + 
                                  request.UserToExit.Id+ ";" + request.RideId;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                NetworkHelper.SendMessage(client, message);
+                string messageReceived = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -124,7 +121,7 @@ namespace Client.Services
             }
         }
 
-        public void ModifyRide(ModifyRideRequest request)
+        public void ModifyRide(TcpClient client, ModifyRideRequest request)
         {
             try
             {
@@ -133,9 +130,9 @@ namespace Client.Services
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" +
                            request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
                            + ";" + request.PetsAllowed + ";" + request.VehicleId + ";" + request.DriverId;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceived = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -151,15 +148,15 @@ namespace Client.Services
             }
         }
 
-        public void DisableRide(Guid id)
+        public void DisableRide(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.DisableRide + ";" +
                                  id;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceived = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -175,15 +172,15 @@ namespace Client.Services
             }
         }
 
-        public RideClient GetRideById(Guid id)
+        public RideClient GetRideById(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
                                    id;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client , message);
 
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                string response = NetworkHelper.ReceiveMessage(client);
 
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -224,15 +221,15 @@ namespace Client.Services
             }
         }
 
-        public ICollection<RideClient> GetRidesFilteredByPrice(double minPrize, double maxPrice)
+        public ICollection<RideClient> GetRidesFilteredByPrice(TcpClient client, double minPrize, double maxPrice)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" +
                                  minPrize.ToString() + ";" + maxPrice.ToString();
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                string response = NetworkHelper.ReceiveMessage(client);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
                 ICollection<RideClient> rides = new List<RideClient>();
                 if (ridesData[0] == ProtocolConstants.Exception)
@@ -282,14 +279,14 @@ namespace Client.Services
         }
 
 
-        public ICollection<RideClient> GetRidesByUser(Guid userLoggedId)
+        public ICollection<RideClient> GetRidesByUser(TcpClient client, Guid userLoggedId)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRidesByUser + ";" + userLoggedId;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                string response = NetworkHelper.ReceiveMessage(client);
 
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -338,16 +335,16 @@ namespace Client.Services
         }
 
 
-        public ICollection<RideClient> GetAllRides()
+        public ICollection<RideClient> GetAllRides(TcpClient client)
         {
             try
             {
                 ICollection<RideClient> rides = new List<RideClient>();
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetAllRides;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                string response = NetworkHelper.ReceiveMessage(client);
 
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -397,17 +394,17 @@ namespace Client.Services
             }
         }
 
-        public string GetCarImageById(Guid userId, Guid rideSelectedId)
+        public string GetCarImageById(TcpClient client, Guid userId, Guid rideSelectedId)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + userId +
                                  ";" +
                                  rideSelectedId;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
 
-                string imagePath = NetworkHelper.ReceiveImage(_clientSocket);
+                string imagePath = NetworkHelper.ReceiveImage(client);
 
                 string[] messageArray = imagePath.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -424,14 +421,14 @@ namespace Client.Services
             }
         }
 
-        public void AddReview(Guid actualUserId, ReviewClient request)
+        public void AddReview(TcpClient client, Guid actualUserId, ReviewClient request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + actualUserId + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageReceiveed = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceiveed = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArrayResponse =
                     messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -448,15 +445,15 @@ namespace Client.Services
         }
 
 
-        public ICollection<ReviewClient> GetDriverReviews(Guid rideId)
+        public ICollection<ReviewClient> GetDriverReviews(TcpClient client ,Guid rideId)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
                                  rideId;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(_clientSocket);
+                string response = NetworkHelper.ReceiveMessage(client);
 
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 

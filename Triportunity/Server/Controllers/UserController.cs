@@ -24,11 +24,11 @@ namespace Server.Controllers
 
         public UserController(TcpClient clientServer)
         {
-            _clientServerSide = client;
+            _clientServerSide = clientServer;
         }
 
         #region COMPLETADOS
-        
+
         public void RegisterUser(string[] requestArray)
         {
             try
@@ -92,19 +92,19 @@ namespace Server.Controllers
                 NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
-        
+
         public void CreateDriver(string[] messageArray)
         {
             try
             {
                 Guid userIdToCreate = Guid.Parse(messageArray[2]);
-                
+
                 DriverInfo driverInfo = new DriverInfo();
                 _userRepository.RegisterDriver(userIdToCreate, driverInfo);
-                
+
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userIdToCreate;
                 NetworkHelper.SendMessage(_clientServerSide, responseMsg);
-                
+
             }
             catch (Exception exceptionCaught)
             {
@@ -120,17 +120,17 @@ namespace Server.Controllers
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
                 string path = messageArray[4];
-                
+
                 Vehicle vehicleToAdd = new Vehicle(vehicleModel);
                 NetworkHelper.FilePathValidator(path);
-                
+
                 string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
                                      + vehicleToAdd.Id;
                 NetworkHelper.SendMessage(_clientServerSide, responseVehicleModelMsg);
-                
-                string imageAllocatedAtServer = NetworkHelper.ReceiveImage(_serverSocket);
+
+                string imageAllocatedAtServer = NetworkHelper.ReceiveImage(_clientServerSide);
                 vehicleToAdd.ImageAllocatedAtServer = imageAllocatedAtServer;
-                
+
                 _userRepository.AddVehicle(userId, vehicleToAdd);
             }
             catch (Exception exceptionCaught)
@@ -141,7 +141,7 @@ namespace Server.Controllers
                 {
                     _userRepository.DeleteDriver(Guid.Parse(messageArray[2]));
                 }
-                
+
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
@@ -196,6 +196,6 @@ namespace Server.Controllers
 
         #endregion
 
-      
+
     }
 }

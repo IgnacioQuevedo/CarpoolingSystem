@@ -49,13 +49,13 @@ namespace Server.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.CreateRide + ";" + ride.Id;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -82,13 +82,13 @@ namespace Server.Controllers
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":" + ride.VehicleId + "@";
                 }
 
-                NetworkHelper.SendMessage(_clientSocket, response);
+                NetworkHelper.SendMessage(_clientServerSide, response);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -103,13 +103,13 @@ namespace Server.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.JoinRide;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -138,13 +138,13 @@ namespace Server.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.EditRide + ";" + ride.Id;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -157,13 +157,13 @@ namespace Server.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.DeleteRide;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -177,13 +177,13 @@ namespace Server.Controllers
                 _rideRepository.QuitRide(rideId, userId);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.QuitRide;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -210,13 +210,13 @@ namespace Server.Controllers
                                 + ride.VehicleId + "@";
                 }
 
-                NetworkHelper.SendMessage(_clientSocket, response);
+                NetworkHelper.SendMessage(_clientServerSide, response);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -230,13 +230,13 @@ namespace Server.Controllers
                 Guid vehicleId = rideToFound.VehicleId;
                 Vehicle vehicle = _userRepository.GetVehicleById(userId, vehicleId);
 
-                NetworkHelper.SendImage(_clientSocket, vehicle.ImageAllocatedAtServer);
+                NetworkHelper.SendImage(_clientServerSide, vehicle.ImageAllocatedAtServer);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -248,12 +248,12 @@ namespace Server.Controllers
                 _rideRepository.DisablePublishedRide(rideId);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.DisableRide;
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception e)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + e.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -289,13 +289,13 @@ namespace Server.Controllers
                                 + ride.VehicleId + "@";
                 }
 
-                NetworkHelper.SendMessage(_clientSocket, response);
+                NetworkHelper.SendMessage(_clientServerSide, response);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -315,13 +315,13 @@ namespace Server.Controllers
                     response += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
                 }
 
-                NetworkHelper.SendMessage(_clientSocket, response);
+                NetworkHelper.SendMessage(_clientServerSide, response);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -347,13 +347,13 @@ namespace Server.Controllers
                             ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
                             + ride.VehicleId;
 
-                NetworkHelper.SendMessage(_clientSocket, response);
+                NetworkHelper.SendMessage(_clientServerSide, response);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
 
@@ -372,13 +372,13 @@ namespace Server.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.AddReview;
 
-                NetworkHelper.SendMessage(_clientSocket, message);
+                NetworkHelper.SendMessage(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientSocket, exceptionMessageToClient);
+                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
             }
         }
     }

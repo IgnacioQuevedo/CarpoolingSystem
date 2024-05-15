@@ -13,14 +13,11 @@ namespace Client.Services
 {
     public class UserService
     {
-        private static Socket _clientSocket;
-
-        public UserService(Socket socketClient)
+        public UserService()
         {
-            _clientSocket = socketClient;
         }
 
-        public void RegisterClient(Socket socket, RegisterUserRequest registerUserRequest)
+        public void RegisterClient(TcpClient client, RegisterUserRequest registerUserRequest)
         {
             try
             {
@@ -29,9 +26,9 @@ namespace Client.Services
                                       registerUserRequest.Username + ";" +
                                       registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
-                NetworkHelper.SendMessage(socket, registerInfo);
+                NetworkHelper.SendMessage(client, registerInfo);
 
-                string serverResponse = NetworkHelper.ReceiveMessage(socket);
+                string serverResponse = NetworkHelper.ReceiveMessage(client);
 
                 string[] responseArray =
                     serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -56,17 +53,17 @@ namespace Client.Services
             }
         }
 
-        public UserClient LoginClient(Socket socket, LoginUserRequest loginUserRequest)
+        public UserClient LoginClient(TcpClient client, LoginUserRequest loginUserRequest)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
                                  loginUserRequest.Username + ";" + loginUserRequest.Password;
-                NetworkHelper.SendMessage(socket, message);
+                NetworkHelper.SendMessage(client, message);
 
                 UserClient resultUser = null;
 
-                string loginResult = NetworkHelper.ReceiveMessage(socket);
+                string loginResult = NetworkHelper.ReceiveMessage(client);
 
                 string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -126,16 +123,16 @@ namespace Client.Services
             }
         }
 
-        public void CreateDriver(Socket socket, Guid userId, string carModel, string path)
+        public void CreateDriver(TcpClient client, Guid userId, string carModel, string path)
         {
             try
             {
                 string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" +
                                        userId;
 
-                NetworkHelper.SendMessage(socket, messageToSend);
+                NetworkHelper.SendMessage(client, messageToSend);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(_clientSocket);
+                string messageReceived = NetworkHelper.ReceiveMessage(client);
 
                 string[] messageArray =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -145,7 +142,7 @@ namespace Client.Services
                     throw new Exception(messageArray[2]);
                 }
                 
-                AddVehicle(socket, userId, carModel, path);
+                AddVehicle(client, userId, carModel, path);
                 Console.WriteLine("You are now a driver");
             }
             catch (Exception e)
@@ -154,15 +151,15 @@ namespace Client.Services
             }
         }
 
-        public void AddVehicle(Socket clientSocket, Guid userId, string carModel, string path)
+        public void AddVehicle(TcpClient client, Guid userId, string carModel, string path)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
                                  carModel + ";" + path;
-                NetworkHelper.SendMessage(clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
+                string messageArray = NetworkHelper.ReceiveMessage(client);
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -171,7 +168,7 @@ namespace Client.Services
                     throw new Exception(vehicleInfoArray[2]);
                 }
                 
-                NetworkHelper.SendImage(clientSocket, path);
+                NetworkHelper.SendImage(client, path);
             }
             catch (Exception exceptionCaught)
             {
@@ -179,16 +176,16 @@ namespace Client.Services
             }
         }
 
-        public UserClient GetUserById(Socket clientSocket, Guid userId)
+        public UserClient GetUserById(TcpClient client, Guid userId)
         {
             try
             {
                 double generalPunctuation = -1;
 
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetUserById + ";" + userId;
-                NetworkHelper.SendMessage(clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
 
-                string messageArray = NetworkHelper.ReceiveMessage(clientSocket);
+                string messageArray = NetworkHelper.ReceiveMessage(client);
 
                 string[] userArray = messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -264,11 +261,11 @@ namespace Client.Services
             }
         }
 
-        public ICollection<VehicleClient> GetVehiclesByUserId(Guid userLoggedId)
+        public ICollection<VehicleClient> GetVehiclesByUserId(TcpClient client, Guid userLoggedId)
         {
             try
             {
-                UserClient user = GetUserById(_clientSocket, userLoggedId);
+                UserClient user = GetUserById(client, userLoggedId);
                 if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
                 return null;
             }
@@ -278,12 +275,12 @@ namespace Client.Services
             }
         }
 
-        public void CloseApp(Socket clientSocket)
+        public void CloseApp(TcpClient client)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.CloseApp;
-                NetworkHelper.SendMessage(clientSocket, message);
+                NetworkHelper.SendMessage(client, message);
             }
             catch (Exception e)
             {

@@ -11,7 +11,7 @@ namespace Common
     public static class NetworkHelper
     {
         private static readonly SettingsManager settingsManager = new SettingsManager();
-        public static Socket ConnectWithServer()
+        public static TcpClient ConnectWithServer()
         {
 
             IPEndPoint local = new IPEndPoint(
@@ -23,21 +23,17 @@ namespace Common
                 int.Parse(settingsManager.ReadSettings(ClientConfig.RemotePort))
             );
 
-            Socket newClientSocket = new Socket(
-                AddressFamily.InterNetwork,
-                SocketType.Stream,
-                ProtocolType.Tcp
-            );
-            newClientSocket.Bind(local);
-            newClientSocket.Connect(server);
-            return newClientSocket;
+            TcpClient client = new TcpClient(local);
+            client.Connect(server);
+
+            return client;
         }
 
-        public static bool IsSocketConnected(Socket clientSocket)
+        public static bool IsClientConnected(TcpClient client)
         {
             try
             {
-                string messageReceived = ReceiveMessage(clientSocket);
+                string messageReceived = ReceiveMessage(client);
                 Console.WriteLine(messageReceived);
 
                 if (messageReceived.Length > 0)
@@ -83,29 +79,32 @@ namespace Common
 
         public static void SendMessage(TcpClient client, string message)
         {
-            Stream stream = client.GetStream();
+            NetworkStream NetworkStream = client.GetStream();
+
+            byte[] bufferLength = BitConverter.GetBytes(message.Length);
+            NetworkStream.Write(bufferLength, 0, ProtocolConstants.DataLengthSize);
 
             byte[] buffer = EncodeMsgIntoBytes(message);
 
             int size = buffer.Length;
             int offSet = 0;
 
-            stream.Write(buffer, offSet, size);
+            NetworkStream.Write(buffer, offSet, size);
         }
 
         public static string ReceiveMessage(TcpClient clientReciever)
         {
-            Stream stream = clientReciever.GetStream();
+            NetworkStream NetworkStream = clientReciever.GetStream();
 
             byte[] bufferConstantLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
 
-            byte[] msgLengthBuffer = Receive(stream, bufferConstantLength);
-            byte[] dataBuffer = Receive(stream, msgLengthBuffer);
+            byte[] msgLengthBuffer = Receive(NetworkStream, bufferConstantLength);
+            byte[] dataBuffer = Receive(NetworkStream, msgLengthBuffer);
             return DecodeMsgFromBytes(dataBuffer);
         }
 
 
-        public static byte[] Receive(Stream clientStream, byte[] bufferWithTheLengthNumber)
+        public static byte[] Receive(NetworkStream clientNetworkStream, byte[] bufferWithTheLengthNumber)
         {
             int length = BitConverter.ToInt32(bufferWithTheLengthNumber, 0);
             byte[] responseBuffer = new byte[length];
@@ -117,9 +116,9 @@ namespace Common
             while (offSet < size)
             {
                 amountByteSent =
-                    clientStream.Read(responseBuffer, offSet, size - offSet);
+                    clientNetworkStream.Read(responseBuffer, offSet, size - offSet);
 
-                if (amountByteSent == 0) throw new SocketException();
+                if (amountByteSent == 0) throw new Exception();
 
                 offSet = offSet + amountByteSent;
             }
@@ -145,20 +144,22 @@ namespace Common
             }
         }
 
-        public static void SendImage(Socket socket, string filePath)
+        public static void SendImage(TcpClient client, string filePath)
         {
             try
             {
                 FileInfo fileInfo = new FileInfo(filePath);
-                SendMessage(socket, fileInfo.Name);
+                SendMessage(client, fileInfo.Name);
+
+                NetworkStream NetworkStream = client.GetStream();
 
                 long fileLength = fileInfo.Length;
                 byte[] fileLengthInBytes = BitConverter.GetBytes(fileLength);
-                Send(socket, fileLengthInBytes);
+                NetworkStream.Write(fileLengthInBytes, 0, fileLengthInBytes.Length);
 
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
 
-                using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                using (FileStream fileNetworkStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     int offset = 0;
                     for (int currentPart = 1; currentPart <= amountOfParts; currentPart++)
@@ -166,8 +167,9 @@ namespace Common
                         bool isLastPart = (currentPart == amountOfParts);
                         int byteAmountToSend = isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
                         byte[] buffer = new byte[byteAmountToSend];
-                        int readBytes = fileStream.Read(buffer, 0, byteAmountToSend);
-                        Send(socket, buffer);
+                        int readBytes = fileNetworkStream.Read(buffer, 0, byteAmountToSend);
+                        
+                        NetworkStream.Write(buffer, 0, readBytes);
 
                         offset += readBytes;
                     }
@@ -179,7 +181,7 @@ namespace Common
             }
         }
 
-        public static string ReceiveImage(Socket socket)
+        public static string ReceiveImage(TcpClient client)
         {
             try
             {
@@ -190,23 +192,25 @@ namespace Common
                     Directory.CreateDirectory(pathDirectoryImageAllocated);
                 }
 
+                NetworkStream stream = client.GetStream();
+
                 byte[] bufferConstantNumberLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
                 byte[] bufferFileNameLength =
-                    Receive(socket, bufferConstantNumberLength);
+                    Receive(stream, bufferConstantNumberLength);
 
-                byte[] fileNameInBytes = Receive(socket, bufferFileNameLength);
+                byte[] fileNameInBytes = Receive(stream, bufferFileNameLength);
                 string fileName =
                     Encoding.UTF8.GetString(fileNameInBytes, 0, BitConverter.ToInt32(bufferFileNameLength, 0));
                 string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
 
                 byte[] bufferFileConstantLength = BitConverter.GetBytes(8);
-                byte[] bufferFileLength = Receive(socket, bufferFileConstantLength);
+                byte[] bufferFileLength = Receive(stream, bufferFileConstantLength);
 
                 long fileLength = BitConverter.ToInt64(bufferFileLength, 0);
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
 
-                using (FileStream fileStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
+                using (FileStream fileNetworkStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
                 {
                     int offset = 0;
                     for (int currentPart = 1; currentPart <= amountOfParts; currentPart++)
@@ -217,8 +221,8 @@ namespace Common
 
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
                         Console.WriteLine($"Receiving part #{currentPart}, of {byteAmountToReceive} bytes");
-                        byte[] buffer = Receive(socket, byteAmountToReceiveInBytes);
-                        fileStream.Write(buffer, 0, buffer.Length);
+                        byte[] buffer = Receive(stream, byteAmountToReceiveInBytes);
+                        fileNetworkStream.Write(buffer, 0, buffer.Length);
 
                         offset += buffer.Length;
                     }
