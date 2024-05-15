@@ -30,20 +30,20 @@ namespace Client
 
         #region Socket
 
-        public static Socket clientSocket;
+        public static TcpClient client;
 
         #endregion
 
         public static void Main(string[] args)
         {
-            clientSocket = NetworkHelper.ConnectWithServer();
-            _userService = new UserService(clientSocket);
-            _rideService = new RideService(clientSocket);
+            client = NetworkHelper.ConnectWithServer();
+            _userService = new UserService();
+            _rideService = new RideService();
 
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
 
-            _closeApp = !NetworkHelper.IsSocketConnected(clientSocket);
+            _closeApp = !NetworkHelper.IsClientConnected(client);
 
             while (!_closeApp)
             {
@@ -105,7 +105,7 @@ namespace Client
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
 
-                _userService.CloseApp(clientSocket);
+                _userService.CloseApp(client);
                 _closeApp = true;
             }
             catch (Exception e)
@@ -165,7 +165,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                _userService.RegisterClient(clientSocket, clientToRegister);
+                _userService.RegisterClient(client, clientToRegister);
             }
             catch (Exception exception)
             {
@@ -183,7 +183,7 @@ namespace Client
                 string password = Console.ReadLine();
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
-                _userLogged = _userService.LoginClient(clientSocket, loginUserRequest);
+                _userLogged = _userService.LoginClient(client, loginUserRequest);
             }
             catch (Exception exception)
             {
@@ -295,7 +295,7 @@ namespace Client
                 string path;
                 string addNewVehicle = "Y";
 
-                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
+                _userLogged = _userService.GetUserById(client, userRegisteredId);
                 bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
                 while (addNewVehicle.Equals("Y"))
@@ -307,12 +307,12 @@ namespace Client
 
                     if (firstVehicle)
                     {
-                        _userService.CreateDriver(clientSocket, userRegisteredId, carModel, path);
+                        _userService.CreateDriver(client, userRegisteredId, carModel, path);
                         firstVehicle = false;
                     }
                     else
                     {
-                        _userService.AddVehicle(clientSocket, userRegisteredId, carModel, path);
+                        _userService.AddVehicle(client, userRegisteredId, carModel, path);
                     }
 
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
@@ -321,7 +321,7 @@ namespace Client
                     addNewVehicle = Console.ReadLine().ToUpper();
                 }
 
-                _userLogged = _userService.GetUserById(clientSocket, userRegisteredId);
+                _userLogged = _userService.GetUserById(client, userRegisteredId);
             }
             catch (Exception e)
             {
@@ -365,7 +365,7 @@ namespace Client
                     initialLocation, endingLocation,
                     departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
-                _rideService.CreateRide(rideReq);
+                _rideService.CreateRide(client, rideReq);
                 Console.WriteLine("Ride created successfully");
 
             }
@@ -419,7 +419,7 @@ namespace Client
         {
             Console.WriteLine("Select the vehicle you will use for this ride");
 
-            ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(_userLogged.Id);
+            ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(client, _userLogged.Id);
 
             for (int i = 0; i < vehicles.Count; i++)
             {
@@ -570,12 +570,12 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> rides = _rideService.GetAllRides();
+                ICollection<RideClient> rides = _rideService.GetAllRides(client);
                 RideClient selectedRide = SelectRideFromList(rides.ToList());
 
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
-                _rideService.JoinRide(joinReq);
+                _rideService.JoinRide(client, joinReq);
                 Console.WriteLine("Join Successfully");
             }
             catch (Exception exceptionCaught)
@@ -624,7 +624,7 @@ namespace Client
                             if (seeDetails.Equals("Y"))
                             {
                                 Console.WriteLine(@"Your Image is Allocated At: " +
-                                                  _rideService.GetCarImageById(_userLogged.Id, rideSelected.Id));
+                                                  _rideService.GetCarImageById(client, _userLogged.Id, rideSelected.Id));
                             }
                         }
 
@@ -674,7 +674,7 @@ namespace Client
         {
             try
             {
-                List<RideClient> rideListOfUser = _rideService.GetRidesByUser(_userLogged.Id).ToList();
+                List<RideClient> rideListOfUser = _rideService.GetRidesByUser(client, _userLogged.Id).ToList();
                 DisplayAllRides(rideListOfUser.ToList());
 
                 Console.WriteLine("Select the ride you want to edit: ");
@@ -775,7 +775,7 @@ namespace Client
                     initialLocation, endingLocation, departureDate,
                     pricePerPerson, petsAllowed, vehicleId, availableSeats, rideSelected.DriverId);
 
-                _rideService.ModifyRide(modifyRideReq);
+                _rideService.ModifyRide(client, modifyRideReq);
                 Console.WriteLine("Ride modified successfully");
             }
 
@@ -794,13 +794,13 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> rides = _rideService.GetRidesByUser(_userLogged.Id);
+                ICollection<RideClient> rides = _rideService.GetRidesByUser(client, _userLogged.Id);
 
                 RideClient rideSelected = SelectRideFromList(rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
-                _rideService.QuitRide(quitRideReq);
+                _rideService.QuitRide(client, quitRideReq);
                 Console.WriteLine("Quit from ride successfully");
             }
             catch (Exception e)
@@ -818,7 +818,7 @@ namespace Client
         {
             try
             {
-                _rideService.DeleteRide(rideSelected.Id);
+                _rideService.DeleteRide(client, rideSelected.Id);
             }
             catch (Exception exceptionCaught)
             {
@@ -835,7 +835,7 @@ namespace Client
         {
             try
             {
-                _rideService.DisableRide(rideSelected.Id);
+                _rideService.DisableRide(client, rideSelected.Id);
 
                 Console.WriteLine("Ride has been disabled");
             }
@@ -854,12 +854,12 @@ namespace Client
         {
             try
             {
-                RideClient rideData = _rideService.GetRideById(rideSelected.Id);
+                RideClient rideData = _rideService.GetRideById(client, rideSelected.Id);
               
                 Console.WriteLine("This is the information related to the ride you have selected: ");
                 Console.WriteLine();
 
-                _rideService.GetRideById(rideSelected.Id);
+                _rideService.GetRideById(client, rideSelected.Id);
 
                 DisplayRide(rideSelected);
                 
@@ -870,7 +870,7 @@ namespace Client
 
                 if (seeDetails == "Y")
                 {
-                    _rideService.GetCarImageById(_userLogged.Id, rideData.Id);
+                    _rideService.GetCarImageById(client, _userLogged.Id, rideData.Id);
                 }
             }
             catch (Exception e)
@@ -926,7 +926,7 @@ namespace Client
 
                 maxPrice = Double.Parse(maxPriceInput);
 
-                ICollection<RideClient> rides = _rideService.GetRidesFilteredByPrice(minPrice, maxPrice);
+                ICollection<RideClient> rides = _rideService.GetRidesFilteredByPrice(client, minPrice, maxPrice);
 
                 Console.WriteLine("\nRides with price between " + minPrice + " and " + maxPrice + " are: ");
                 DisplayAllRides(rides.ToList());
@@ -948,7 +948,8 @@ namespace Client
         {
             try
             {
-                RideClient rideClient = SelectRideFromList(_rideService.GetRidesByUser(_userLogged.Id).ToList());
+                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides(client).ToList());
+
 
                 Console.WriteLine("\nIntroduce the rating you want to give to the driver");
                 string ratingInput = Console.ReadLine();
@@ -966,7 +967,7 @@ namespace Client
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-                _rideService.AddReview(_userLogged.Id, reviewRequest);
+                _rideService.AddReview(client, _userLogged.Id, reviewRequest);
             }
             catch (Exception e)
             {
@@ -984,7 +985,7 @@ namespace Client
         {
             try
             {
-                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(rideId);
+                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(client, rideId);
 
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
