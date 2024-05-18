@@ -889,6 +889,11 @@ namespace Client
             Console.WriteLine($"Price Per Person: {ride.PricePerPerson}");
             Console.WriteLine($"Pets Allowed: {ride.PetsAllowed}");
             Console.WriteLine($"Vehicle ID: {ride.VehicleId}");
+
+            UserClient driver = _userService.GetUserById(client, ride.DriverId);
+
+            Console.WriteLine($"Driver Punctuation: {driver.DriverAspects.Punctuation}");
+
             Console.WriteLine("");
             GetDriverReviews(ride.Id);
             Console.WriteLine("");
