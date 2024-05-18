@@ -23,9 +23,20 @@ namespace Server.Repositories
 
         private void UserAlreadyExists(string usernameToValidate)
         {
+            string exceptionMessage = "";
+
+            LockManager.StartReading();
+
             if (MemoryDatabase.GetInstance().Users.Any(x => x.Username.Equals(usernameToValidate)))
             {
-                throw new UserException("User already exists");
+                exceptionMessage = "User already exists";
+            }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
             }
         }
 
@@ -44,33 +55,48 @@ namespace Server.Repositories
 
         public User GetUserByUsername(string usernameOfClient)
         {
+            string exceptionMessage = "";
+
             LockManager.StartReading();
 
             User clientFound = MemoryDatabase.GetInstance().Users
                 .FirstOrDefault(x => x.Username.Equals(usernameOfClient));
 
-            LockManager.StopReading();
-
             if (clientFound == null)
             {
-                throw new UserException("User not found");
+                exceptionMessage = "User not found";
             }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
+            }
+
             return clientFound;
         }
 
         public User GetUserById(Guid id)
         {
+            string exceptionMessage = "";
+
             LockManager.StartReading();
 
             User clientFound = new User();
             clientFound = MemoryDatabase.GetInstance().Users
              .FirstOrDefault(x => x.Id.Equals(id));
 
-            LockManager.StopReading();
-
             if (clientFound == null)
             {
-                throw new UserException("User not found");
+                exceptionMessage = "User not found";
+            }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
             }
 
             return clientFound;
@@ -79,24 +105,35 @@ namespace Server.Repositories
         public void RegisterDriver(Guid userId, DriverInfo driveInfo)
         {
             User userFound = new User();
+            string exceptionMessage = "";
+
             userFound = GetUserById(userId);
+
+            LockManager.StartReading();
 
             if (userFound.DriverAspects != null)
             {
-                throw new UserException("User is already a driver");
+                exceptionMessage = "User is already a driver";
+            }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
             }
 
             LockManager.StartWriting();
             userFound.DriverAspects = driveInfo;
             LockManager.StopWriting();
         }
-        
+
         public void DeleteDriver(Guid userId)
         {
-            
+
             User userFound = new User();
             userFound = GetUserById(userId);
-            
+
             LockManager.StartWriting();
             userFound.DriverAspects = null;
             LockManager.StopWriting();
@@ -105,11 +142,22 @@ namespace Server.Repositories
         public void RateDriver(Guid id, Review review)
         {
             User user = new User();
+            string exceptionMessage = "";
+
             user = GetUserById(id);
+
+            LockManager.StartReading();
 
             if (user.DriverAspects == null)
             {
-                throw new UserException("User is not a driver");
+                exceptionMessage = "User is not a driver";
+            }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
             }
 
             LockManager.StartWriting();
@@ -123,11 +171,22 @@ namespace Server.Repositories
         public void AddVehicle(Guid id, Vehicle vehicle)
         {
             User user = new User();
+            string exceptionMessage = "";
+
             user = GetUserById(id);
+
+            LockManager.StartReading();
 
             if (user.DriverAspects == null)
             {
-                throw new UserException("User is not a driver");
+                exceptionMessage = "User is not a driver";
+            }
+
+            LockManager.StopReading();
+
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
             }
 
             LockManager.StartWriting();
@@ -140,28 +199,39 @@ namespace Server.Repositories
         public Vehicle GetVehicleById(Guid userId, Guid vehicleId)
         {
             User user = new User();
+            Vehicle vehicle = null;
+            string exceptionMessage = "";
+
             user = GetUserById(userId);
+
+            LockManager.StartReading();
 
             if (user.DriverAspects != null)
             {
-                LockManager.StartReading();
 
-                Vehicle vehicle = user.DriverAspects.Vehicles.FirstOrDefault(x => x.Id.Equals(vehicleId));
+                vehicle = user.DriverAspects.Vehicles.FirstOrDefault(x => x.Id.Equals(vehicleId));
 
-                LockManager.StopReading();
 
                 if (vehicle == null)
                 {
-                    throw new UserException("Vehicle not found");
+                    exceptionMessage = "Vehicle not found";
                 }
-
-                return vehicle;
+            }
+            else
+            {
+                exceptionMessage = "User is not a driver";
             }
 
+            LockManager.StopReading();
 
-            throw new UserException("User is not a driver");
+            if (!exceptionMessage.Equals(""))
+            {
+                throw new UserException(exceptionMessage);
+            }
+
+            return vehicle;
         }
 
-     
+
     }
 }
