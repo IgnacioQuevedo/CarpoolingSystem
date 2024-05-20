@@ -148,7 +148,9 @@ namespace Server.Repositories
             ICollection<Ride> filteredRides = new List<Ride>();
             var rides = MemoryDatabase.GetInstance().Rides;
 
-            filteredRides = rides.Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
+            filteredRides = rides.Where(ride =>
+                    ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice && ride.Published &&
+                    ride.DepartureTime > DateTime.Now)
                 .ToList();
 
             if (filteredRides.Count == 0)

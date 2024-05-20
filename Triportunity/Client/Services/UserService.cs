@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Client.Objects.ReviewModels;
 using Client.Objects.UserModels;
 using Client.Objects.VehicleModels;
@@ -17,7 +20,7 @@ namespace Client.Services
         {
         }
 
-        public void RegisterClient(TcpClient client, RegisterUserRequest registerUserRequest)
+        public async Task RegisterClientAsync(TcpClient client, RegisterUserRequest registerUserRequest)
         {
             try
             {
@@ -26,9 +29,9 @@ namespace Client.Services
                                       registerUserRequest.Username + ";" +
                                       registerUserRequest.Password + ";" + registerUserRequest.RepeatedPassword;
 
-                NetworkHelper.SendMessage(client, registerInfo);
+                await NetworkHelper.SendMessageAsync(client, registerInfo);
 
-                string serverResponse = NetworkHelper.ReceiveMessage(client);
+                string serverResponse = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] responseArray =
                     serverResponse.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -53,17 +56,17 @@ namespace Client.Services
             }
         }
 
-        public UserClient LoginClient(TcpClient client, LoginUserRequest loginUserRequest)
+        public async Task<UserClient> LoginClientAsync(TcpClient client, LoginUserRequest loginUserRequest)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.Login + ";" +
                                  loginUserRequest.Username + ";" + loginUserRequest.Password;
-                NetworkHelper.SendMessage(client, message);
 
                 UserClient resultUser = null;
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string loginResult = NetworkHelper.ReceiveMessage(client);
+                string loginResult = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] loginArray = loginResult.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -123,16 +126,16 @@ namespace Client.Services
             }
         }
 
-        public void CreateDriver(TcpClient client, Guid userId, string carModel, string path)
+        public async Task CreateDriverAsync(TcpClient client, Guid userId, string carModel, string path,CancellationToken token)
         {
             try
             {
                 string messageToSend = ProtocolConstants.Request + ";" + CommandsConstraints.CreateDriver + ";" +
                                        userId;
 
-                NetworkHelper.SendMessage(client, messageToSend);
+                await NetworkHelper.SendMessageAsync(client, messageToSend);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArray =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -141,8 +144,8 @@ namespace Client.Services
                 {
                     throw new Exception(messageArray[2]);
                 }
-                
-                AddVehicle(client, userId, carModel, path);
+
+                await AddVehicleAsync(client, userId, carModel, path,token);
                 Console.WriteLine("You are now a driver");
             }
             catch (Exception e)
@@ -151,15 +154,15 @@ namespace Client.Services
             }
         }
 
-        public void AddVehicle(TcpClient client, Guid userId, string carModel, string path)
+        public async Task AddVehicleAsync(TcpClient client, Guid userId, string carModel, string path, CancellationToken token)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddVehicle + ";" + userId + ";" +
                                  carModel + ";" + path;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageArray = NetworkHelper.ReceiveMessage(client);
+                string messageArray = await NetworkHelper.ReceiveMessageAsync(client);
                 string[] vehicleInfoArray =
                     messageArray.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -168,7 +171,7 @@ namespace Client.Services
                     throw new Exception(vehicleInfoArray[2]);
                 }
                 
-                NetworkHelper.SendImage(client, path);
+                await NetworkHelper.SendImageAsync(client, path, token);
             }
             catch (Exception exceptionCaught)
             {
@@ -176,16 +179,16 @@ namespace Client.Services
             }
         }
 
-        public UserClient GetUserById(TcpClient client, Guid userId)
+        public async Task<UserClient> GetUserByIdAsync(TcpClient client, Guid userId)
         {
             try
             {
                 double generalPunctuation = -1;
 
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetUserById + ";" + userId;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageArray = NetworkHelper.ReceiveMessage(client);
+                string messageArray = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] userArray = messageArray.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -261,11 +264,11 @@ namespace Client.Services
             }
         }
 
-        public ICollection<VehicleClient> GetVehiclesByUserId(TcpClient client, Guid userLoggedId)
+        public async Task<ICollection<VehicleClient>> GetVehiclesByUserIdAsync(TcpClient client, Guid userLoggedId)
         {
             try
             {
-                UserClient user = GetUserById(client, userLoggedId);
+                UserClient user = await GetUserByIdAsync(client, userLoggedId);
                 if (user.DriverAspects != null) return user.DriverAspects.Vehicles;
                 return null;
             }
@@ -275,12 +278,12 @@ namespace Client.Services
             }
         }
 
-        public void CloseApp(TcpClient client)
+        public async Task CloseAppAsync(TcpClient client)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.CloseApp;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
             }
             catch (Exception e)
             {

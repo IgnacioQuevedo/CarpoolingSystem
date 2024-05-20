@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Client.Services
 {
@@ -17,7 +19,7 @@ namespace Client.Services
         {
         }
 
-        public void CreateRide(TcpClient client, CreateRideRequest request)
+        public async Task CreateRideAsync(TcpClient client, CreateRideRequest request)
         {
             try
             {
@@ -28,9 +30,9 @@ namespace Client.Services
                            ";" + request.AvailableSeats + ";" + request.PricePerPerson + ";" + request.PetsAllowed
                            + ";" + request.VehicleId;
 
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageReceiveed = NetworkHelper.ReceiveMessage(client);
+                string messageReceiveed = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
                     messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -46,15 +48,15 @@ namespace Client.Services
             }
         }
 
-        public void JoinRide(TcpClient client, JoinRideRequest request)
+        public async Task JoinRideAsync(TcpClient client, JoinRideRequest request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.JoinRide + ";" +
                                  request.RideId + ";" + request.PassengerToJoin;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -70,17 +72,17 @@ namespace Client.Services
             }
         }
 
-        public void DeleteRide(TcpClient client, Guid id)
+        public async Task DeleteRideAsync(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.DeleteRide + ";" + id;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageRecevied = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
-                    messageRecevied.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
@@ -97,15 +99,15 @@ namespace Client.Services
             }
         }
 
-        public void QuitRide(TcpClient client, QuitRideRequest request)
+        public async Task QuitRideAsync(TcpClient client, QuitRideRequest request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + 
                                  request.UserToExit.Id+ ";" + request.RideId;
 
-                NetworkHelper.SendMessage(client, message);
-                string messageReceived = NetworkHelper.ReceiveMessage(client);
+                await NetworkHelper.SendMessageAsync(client, message);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
@@ -121,7 +123,7 @@ namespace Client.Services
             }
         }
 
-        public void ModifyRide(TcpClient client, ModifyRideRequest request)
+        public async Task ModifyRideAsync(TcpClient client, ModifyRideRequest request)
         {
             try
             {
@@ -130,9 +132,9 @@ namespace Client.Services
                 message += request.InitialLocation + ";" + request.EndingLocation + ";" +
                            request.DepartureTime + ";" + request.AvailableSeats + ";" + request.PricePerPerson
                            + ";" + request.PetsAllowed + ";" + request.VehicleId + ";" + request.DriverId;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -148,15 +150,15 @@ namespace Client.Services
             }
         }
 
-        public void DisableRide(TcpClient client, Guid id)
+        public async Task DisableRideAsync(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.DisableRide + ";" +
                                  id;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageReceived = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
                     messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -172,15 +174,15 @@ namespace Client.Services
             }
         }
 
-        public RideClient GetRideById(TcpClient client, Guid id)
+        public async Task<RideClient> GetRideByIdAsync(TcpClient client, Guid id)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
                                    id;
-                NetworkHelper.SendMessage(client , message);
+                await NetworkHelper.SendMessageAsync(client , message);
 
-                string response = NetworkHelper.ReceiveMessage(client);
+                string response = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] rideData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -221,15 +223,15 @@ namespace Client.Services
             }
         }
 
-        public ICollection<RideClient> GetRidesFilteredByPrice(TcpClient client, double minPrize, double maxPrice)
+        public async Task<ICollection<RideClient>> GetRidesFilteredByPriceAsync(TcpClient client, double minPrize, double maxPrice)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.FilterRidesByPrice + ";" +
-                                 minPrize.ToString() + ";" + maxPrice.ToString();
-                NetworkHelper.SendMessage(client, message);
+                                 minPrize + ";" + maxPrice;
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(client);
+                string response = await NetworkHelper.ReceiveMessageAsync(client);
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
                 ICollection<RideClient> rides = new List<RideClient>();
                 if (ridesData[0] == ProtocolConstants.Exception)
@@ -279,14 +281,14 @@ namespace Client.Services
         }
 
 
-        public ICollection<RideClient> GetRidesByUser(TcpClient client, Guid userLoggedId)
+        public async Task<ICollection<RideClient>> GetRidesByUserAsync(TcpClient client, Guid userLoggedId)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRidesByUser + ";" + userLoggedId;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(client);
+                string response = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -335,16 +337,16 @@ namespace Client.Services
         }
 
 
-        public ICollection<RideClient> GetAllRides(TcpClient client)
+        public async Task<ICollection<RideClient>> GetAllRidesAsync(TcpClient client)
         {
             try
             {
                 ICollection<RideClient> rides = new List<RideClient>();
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetAllRides;
 
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(client);
+                string response = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] ridesData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
@@ -394,17 +396,17 @@ namespace Client.Services
             }
         }
 
-        public string GetCarImageById(TcpClient client, Guid userId, Guid rideSelectedId)
+        public async Task<string> GetCarImageByIdAsync(TcpClient client, Guid userId, Guid rideSelectedId, CancellationToken token)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetCarImage + ";" + userId +
                                  ";" +
                                  rideSelectedId;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
 
-                string imagePath = NetworkHelper.ReceiveImage(client);
+                string imagePath = await NetworkHelper.ReceiveImageAsync(client, token);
 
                 string[] messageArray = imagePath.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -421,17 +423,17 @@ namespace Client.Services
             }
         }
 
-        public void AddReview(TcpClient client, Guid actualUserId, ReviewClient request)
+        public async Task AddReviewAsync(TcpClient client, Guid actualUserId, ReviewClient request)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.AddReview + ";" + actualUserId + ";" + request.DriverId + ";" + request.Punctuation + ";" + request.Comment;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string messageReceiveed = NetworkHelper.ReceiveMessage(client);
+                string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] messageArrayResponse =
-                    messageReceiveed.Split(new string[] { ";" }, StringSplitOptions.None);
+                    messageReceived.Split(new string[] { ";" }, StringSplitOptions.None);
 
                 if (messageArrayResponse[0] == ProtocolConstants.Exception)
                 {
@@ -445,15 +447,15 @@ namespace Client.Services
         }
 
 
-        public ICollection<ReviewClient> GetDriverReviews(TcpClient client ,Guid rideId)
+        public async Task<ICollection<ReviewClient>> GetDriverReviews(TcpClient client ,Guid rideId)
         {
             try
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetDriverReviews + ";" +
                                  rideId;
-                NetworkHelper.SendMessage(client, message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
-                string response = NetworkHelper.ReceiveMessage(client);
+                string response = await NetworkHelper.ReceiveMessageAsync(client);
 
                 string[] reviewsData = response.Split(new string[] { ";" }, StringSplitOptions.None);
 
