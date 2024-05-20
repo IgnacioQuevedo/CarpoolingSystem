@@ -4,6 +4,7 @@ using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain;
 using Server.Exceptions;
 using System;
+using System.Threading.Tasks;
 using Server.Objects.Domain.VehicleModels;
 
 namespace Server.Repositories
@@ -12,7 +13,7 @@ namespace Server.Repositories
     {
         public void RegisterUser(User userToRegister)
         {
-            UserAlreadyExists(userToRegister.Username);
+            UserAlreadyExists(userToRegister.Username); 
 
             LockManager.StartWriting();
 
@@ -80,16 +81,18 @@ namespace Server.Repositories
         {
             User userFound = new User();
             userFound = GetUserById(userId);
-
+            
             if (userFound.DriverAspects != null)
             {
                 throw new UserException("User is already a driver");
             }
 
+            Task.Delay(10000);
+
             LockManager.StartWriting();
             userFound.DriverAspects = driveInfo;
             LockManager.StopWriting();
-        }
+        } 
         
         public void DeleteDriver(Guid userId)
         {

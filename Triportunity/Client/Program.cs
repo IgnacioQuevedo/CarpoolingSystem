@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using Client.Objects.EnumsModels;
 using Client.Objects.ReviewModels;
 using Client.Objects.RideModels;
@@ -26,6 +28,9 @@ namespace Client
         private static int _amountOfCities = Enum.GetValues(typeof(CitiesEnum)).Length;
         private static int _maxSeatsPerCar = 6;
 
+        private static CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        private static CancellationToken _token = _cancellationToken.Token;
+
         #endregion
 
         #region Socket
@@ -34,7 +39,7 @@ namespace Client
 
         #endregion
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             client = NetworkHelper.ConnectWithServer();
             _userService = new UserService();
@@ -43,7 +48,9 @@ namespace Client
             Console.WriteLine("Waiting for the server to be ready");
             Console.WriteLine("");
 
-            _closeApp = !NetworkHelper.IsClientConnected(client);
+            _closeApp = !await NetworkHelper.IsClientConnectedAsync(client);
+
+            _ = CheckIfClientShutdown();
 
             while (!_closeApp)
             {
@@ -55,18 +62,18 @@ namespace Client
                     switch (_optionSelected)
                     {
                         case "1":
-                            LoginOption();
+                            await LoginOptionAsync();
                             break;
 
                         case "2":
-                            RegisterOption();
+                            await RegisterOptionAsync();
                             break;
 
                         case "3":
                             AboutUsOption();
                             break;
                         case "4":
-                            CloseAppOption();
+                            await CloseAppOptionAsync();
                             break;
                         default:
                             WrongDigitInserted();
@@ -76,9 +83,20 @@ namespace Client
 
                 else
                 {
-                    PossibleActionsToBeDoneByLoggedUser();
+                    await PossibleActionsToBeDoneByLoggedUser();
                 }
             }
+        }
+
+        private static async Task CheckIfClientShutdown()
+        {
+            await Task.Run(() =>
+            {
+                while (_token.IsCancellationRequested == false && client.Connected)
+                {
+                }
+                _closeApp = true;
+            });
         }
 
         #region Main Menu Options
@@ -98,14 +116,14 @@ namespace Client
             Console.WriteLine("Insert a valid digit, please.");
         }
 
-        private static void CloseAppOption()
+        private static async Task CloseAppOptionAsync()
         {
             try
             {
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
 
-                _userService.CloseApp(client);
+                await _userService.CloseAppAsync(client);
                 _closeApp = true;
             }
             catch (Exception e)
@@ -145,7 +163,7 @@ namespace Client
             }
         }
 
-        private static void RegisterOption()
+        private static async Task RegisterOptionAsync()
         {
             try
             {
@@ -165,7 +183,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                _userService.RegisterClient(client, clientToRegister);
+                await _userService.RegisterClientAsync(client, clientToRegister);
             }
             catch (Exception exception)
             {
@@ -173,7 +191,7 @@ namespace Client
             }
         }
 
-        private static void LoginOption()
+        private static async Task LoginOptionAsync()
         {
             try
             {
@@ -183,7 +201,7 @@ namespace Client
                 string password = Console.ReadLine();
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
-                _userLogged = _userService.LoginClient(client, loginUserRequest);
+                _userLogged = await _userService.LoginClientAsync(client, loginUserRequest);
             }
             catch (Exception exception)
             {
@@ -196,7 +214,7 @@ namespace Client
 
         #region Logged Options
 
-        public static void PossibleActionsToBeDoneByLoggedUser()
+        public static async Task PossibleActionsToBeDoneByLoggedUser()
         {
             string _optionSelected = "";
             if (_userLogged.DriverAspects != null)
@@ -233,49 +251,49 @@ namespace Client
             {
                 case 1:
                     if (_userLogged.DriverAspects != null)
-                        CreateRide();
+                        await CreateRideAsync();
                     else
-                        CreateDriver(_userLogged.Id);
+                        await CreateDriverAsync(_userLogged.Id);
                     break;
 
                 case 2:
-                    JoinRide();
+                    await JoinRideAsync();
                     break;
 
                 case 3:
-                    QuitRide();
+                    await QuitRideAsync();
                     break;
 
                 case 4:
                     if (_userLogged.DriverAspects != null)
-                        ViewYourRides();
+                        await ViewYourRidesAsync();
                     else
-                        AddReview();
+                        await AddReviewAsync();
                     break;
 
                 case 5:
                     if (_userLogged.DriverAspects != null)
-                        AddReview();
+                        await AddReviewAsync();
                     else
                     {
-                        GetRidesByPrice();
+                        await GetRidesByPriceAsync();
                     }
 
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null)
                     {
-                        GetRidesByPrice();
+                        await GetRidesByPriceAsync();
                     }
                     else
                     {
-                        CloseAppOption();
+                        await CloseAppOptionAsync();
                     }
 
                     break;
                 case 7:
                     if (_userLogged.DriverAspects != null)
-                        CloseAppOption();
+                        await CloseAppOptionAsync();
                     break;
                 default:
                     WrongDigitInserted();
@@ -284,10 +302,10 @@ namespace Client
         }
 
         #endregion
-        
+
         #region Driver creation
 
-        private static void CreateDriver(Guid userRegisteredId)
+        private static async Task CreateDriverAsync(Guid userRegisteredId)
         {
             try
             {
@@ -295,7 +313,7 @@ namespace Client
                 string path;
                 string addNewVehicle = "Y";
 
-                _userLogged = _userService.GetUserById(client, userRegisteredId);
+                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId);
                 bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
                 while (addNewVehicle.Equals("Y"))
@@ -307,12 +325,12 @@ namespace Client
 
                     if (firstVehicle)
                     {
-                        _userService.CreateDriver(client, userRegisteredId, carModel, path);
+                        await _userService.CreateDriverAsync(client, userRegisteredId, carModel, path, _token);
                         firstVehicle = false;
                     }
                     else
                     {
-                        _userService.AddVehicle(client, userRegisteredId, carModel, path);
+                        await _userService.AddVehicleAsync(client, userRegisteredId, carModel, path, _token);
                     }
 
                     Console.WriteLine("Vehicle added, do you want to add a new vehicle?");
@@ -321,21 +339,21 @@ namespace Client
                     addNewVehicle = Console.ReadLine().ToUpper();
                 }
 
-                _userLogged = _userService.GetUserById(client, userRegisteredId);
+                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId);
             }
             catch (Exception e)
             {
                 Console.WriteLine("");
                 Console.WriteLine(e.Message);
-                CreateDriver(userRegisteredId);
+                await CreateDriverAsync(userRegisteredId);
             }
         }
 
         #endregion
-        
+
         #region Create Ride
 
-        private static void CreateRide()
+        private static async Task CreateRideAsync()
         {
             try
             {
@@ -344,7 +362,7 @@ namespace Client
 
                 List<Guid> passengers = new List<Guid>();
 
-                Guid vehicleIdSelected = Guid.Parse(PickVehicle());
+                Guid vehicleIdSelected = Guid.Parse(await PickVehicleAsync());
 
                 string locationMode = "initial";
                 CitiesEnum initialLocation = PickLocation(locationMode);
@@ -365,14 +383,13 @@ namespace Client
                     initialLocation, endingLocation,
                     departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
-                _rideService.CreateRide(client, rideReq);
+                await _rideService.CreateRideAsync(client, rideReq);
                 Console.WriteLine("Ride created successfully");
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -415,11 +432,11 @@ namespace Client
             return IntroducePricePerPerson();
         }
 
-        private static string PickVehicle()
+        private static async Task<string> PickVehicleAsync()
         {
             Console.WriteLine("Select the vehicle you will use for this ride");
 
-            ICollection<VehicleClient> vehicles = _userService.GetVehiclesByUserId(client, _userLogged.Id);
+            ICollection<VehicleClient> vehicles = await _userService.GetVehiclesByUserIdAsync(client, _userLogged.Id);
 
             for (int i = 0; i < vehicles.Count; i++)
             {
@@ -435,7 +452,7 @@ namespace Client
             }
 
             Console.WriteLine("Please introduce a valid digit for the vehicle");
-            return PickVehicle();
+            return await PickVehicleAsync();
         }
 
         private static int PickAmountOfAvailableSeats()
@@ -566,26 +583,26 @@ namespace Client
 
         #region Join Ride
 
-        private static void JoinRide()
+        private static async Task JoinRideAsync()
         {
             try
             {
-                ICollection<RideClient> rides = _rideService.GetAllRides(client);
-                RideClient selectedRide = SelectRideFromList(rides.ToList());
+                ICollection<RideClient> rides = await _rideService.GetAllRidesAsync(client);
+                RideClient selectedRide = await SelectRideFromListAsync(rides.ToList());
 
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
-                _rideService.JoinRide(client, joinReq);
+                await _rideService.JoinRideAsync(client, joinReq);
                 Console.WriteLine("Join Successfully");
             }
             catch (Exception exceptionCaught)
             {
                 Console.WriteLine(exceptionCaught.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
-        private static RideClient SelectRideFromList(List<RideClient> rides)
+        private static async Task<RideClient> SelectRideFromListAsync(List<RideClient> rides)
         {
             try
             {
@@ -624,7 +641,8 @@ namespace Client
                             if (seeDetails.Equals("Y"))
                             {
                                 Console.WriteLine(@"Your Image is Allocated At: " +
-                                                  _rideService.GetCarImageById(client, _userLogged.Id, rideSelected.Id));
+                                                  await _rideService.GetCarImageByIdAsync(client, _userLogged.Id,
+                                                      rideSelected.Id, _token));
                             }
                         }
 
@@ -633,12 +651,12 @@ namespace Client
                 }
 
                 Console.WriteLine("Introduce a valid number");
-                return SelectRideFromList(rides);
+                return await SelectRideFromListAsync(rides);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return SelectRideFromList(rides);
+                return await SelectRideFromListAsync(rides);
             }
         }
 
@@ -670,11 +688,14 @@ namespace Client
 
         #region View Your Rides
 
-        private static void ViewYourRides()
+        private static async Task ViewYourRidesAsync()
         {
             try
             {
-                List<RideClient> rideListOfUser = _rideService.GetRidesByUser(client, _userLogged.Id).ToList();
+                ICollection<RideClient> rideCollectionOfUser =
+                    await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
+                List<RideClient> rideListOfUser = rideCollectionOfUser.ToList();
+
                 DisplayAllRides(rideListOfUser.ToList());
 
                 Console.WriteLine("Select the ride you want to edit: ");
@@ -698,22 +719,22 @@ namespace Client
                     Console.WriteLine("4- Get Ride Info");
                     Console.WriteLine("5- Go back to the main menu");
 
-                    ViewFunctions(rideSelected);
+                    await ViewFunctionsAsync(rideSelected);
                 }
                 else
                 {
                     Console.WriteLine("Please introduce a valid digit");
-                    ViewYourRides();
+                    await ViewYourRidesAsync();
                 }
             }
             catch (Exception exceptionCaught)
             {
                 Console.WriteLine(exceptionCaught.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
-        private static void ViewFunctions(RideClient rideSelected)
+        private static async Task ViewFunctionsAsync(RideClient rideSelected)
         {
             _optionSelected = Console.ReadLine();
             if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 5)
@@ -721,26 +742,26 @@ namespace Client
                 switch (optionToDo)
                 {
                     case 1:
-                        ModifyRide(rideSelected);
+                        await ModifyRideAsync(rideSelected);
                         break;
                     case 2:
-                        DeleteRide(rideSelected);
+                        await DeleteRideAsync(rideSelected);
                         break;
                     case 3:
-                        DisableRide(rideSelected);
+                        await DisableRideAsync(rideSelected);
                         break;
                     case 4:
-                        GetRideInfo(rideSelected);
+                        await GetRideInfoAsync(rideSelected);
                         break;
                     case 5:
-                        PossibleActionsToBeDoneByLoggedUser();
+                        await PossibleActionsToBeDoneByLoggedUser();
                         break;
                 }
             }
             else
             {
                 Console.WriteLine("Please introduce a valid digit");
-                ViewFunctions(rideSelected);
+                await ViewFunctionsAsync(rideSelected);
             }
         }
 
@@ -748,7 +769,7 @@ namespace Client
 
         #region Modify Ride
 
-        public static void ModifyRide(RideClient rideSelected)
+        public static async Task ModifyRideAsync(RideClient rideSelected)
         {
             try
             {
@@ -768,21 +789,21 @@ namespace Client
 
                 bool petsAllowed = DecideIfPetsAreAllowed();
 
-                Guid vehicleId = Guid.Parse(PickVehicle());
+                Guid vehicleId = Guid.Parse(await PickVehicleAsync());
 
 
                 ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id,
                     initialLocation, endingLocation, departureDate,
                     pricePerPerson, petsAllowed, vehicleId, availableSeats, rideSelected.DriverId);
 
-                _rideService.ModifyRide(client, modifyRideReq);
+                await _rideService.ModifyRideAsync(client, modifyRideReq);
                 Console.WriteLine("Ride modified successfully");
             }
 
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -790,23 +811,23 @@ namespace Client
 
         #region Quit Ride
 
-        private static void QuitRide()
+        private static async Task QuitRideAsync()
         {
             try
             {
-                ICollection<RideClient> rides = _rideService.GetRidesByUser(client, _userLogged.Id);
+                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
 
-                RideClient rideSelected = SelectRideFromList(rides.ToList());
+                RideClient rideSelected = await SelectRideFromListAsync(rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
-                _rideService.QuitRide(client, quitRideReq);
+                await _rideService.QuitRideAsync(client, quitRideReq);
                 Console.WriteLine("Quit from ride successfully");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -814,16 +835,16 @@ namespace Client
 
         #region Delete Ride
 
-        private static void DeleteRide(RideClient rideSelected)
+        private static async Task DeleteRideAsync(RideClient rideSelected)
         {
             try
             {
-                _rideService.DeleteRide(client, rideSelected.Id);
+                await _rideService.DeleteRideAsync(client, rideSelected.Id);
             }
             catch (Exception exceptionCaught)
             {
                 Console.WriteLine(exceptionCaught.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -831,18 +852,18 @@ namespace Client
 
         #region Disable Ride
 
-        private static void DisableRide(RideClient rideSelected)
+        private static async Task DisableRideAsync(RideClient rideSelected)
         {
             try
             {
-                _rideService.DisableRide(client, rideSelected.Id);
+                await _rideService.DisableRideAsync(client, rideSelected.Id);
 
                 Console.WriteLine("Ride has been disabled");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -850,19 +871,19 @@ namespace Client
 
         #region Get Ride Info
 
-        private static void GetRideInfo(RideClient rideSelected)
+        private static async Task GetRideInfoAsync(RideClient rideSelected)
         {
             try
             {
-                RideClient rideData = _rideService.GetRideById(client, rideSelected.Id);
-              
+                RideClient rideData = await _rideService.GetRideByIdAsync(client, rideSelected.Id);
+
                 Console.WriteLine("This is the information related to the ride you have selected: ");
                 Console.WriteLine();
 
-                _rideService.GetRideById(client, rideSelected.Id);
+                await _rideService.GetRideByIdAsync(client, rideSelected.Id);
 
-                DisplayRide(rideSelected);
-                
+                await DisplayRideAsync(rideSelected);
+
                 Console.WriteLine("Do you want to see the car image?");
                 Console.WriteLine("Y - If yes or Any other key for No");
 
@@ -870,17 +891,17 @@ namespace Client
 
                 if (seeDetails == "Y")
                 {
-                    _rideService.GetCarImageById(client, _userLogged.Id, rideData.Id);
+                    await _rideService.GetCarImageByIdAsync(client, _userLogged.Id, rideData.Id, _token);
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
-        private static void DisplayRide(RideClient ride)
+        private static async Task DisplayRideAsync(RideClient ride)
         {
             Console.WriteLine($"\nInitial Location: {ride.InitialLocation}");
             Console.WriteLine($"Ending Location: {ride.EndingLocation}");
@@ -890,7 +911,7 @@ namespace Client
             Console.WriteLine($"Pets Allowed: {ride.PetsAllowed}");
             Console.WriteLine($"Vehicle ID: {ride.VehicleId}");
             Console.WriteLine("");
-            GetDriverReviews(ride.Id);
+            await GetDriverReviewsAsync(ride.Id);
             Console.WriteLine("");
         }
 
@@ -898,7 +919,7 @@ namespace Client
 
         #region Get Rides By Price
 
-        private static void GetRidesByPrice()
+        private static async Task GetRidesByPriceAsync()
         {
             try
             {
@@ -926,7 +947,8 @@ namespace Client
 
                 maxPrice = Double.Parse(maxPriceInput);
 
-                ICollection<RideClient> rides = _rideService.GetRidesFilteredByPrice(client, minPrice, maxPrice);
+                ICollection<RideClient> rides =
+                    await _rideService.GetRidesFilteredByPriceAsync(client, minPrice, maxPrice);
 
                 Console.WriteLine("\nRides with price between " + minPrice + " and " + maxPrice + " are: ");
                 DisplayAllRides(rides.ToList());
@@ -936,7 +958,7 @@ namespace Client
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -944,11 +966,12 @@ namespace Client
 
         #region Add Review
 
-        public static void AddReview()
+        public static async Task AddReviewAsync()
         {
             try
             {
-                RideClient rideClient = SelectRideFromList(_rideService.GetAllRides(client).ToList());
+                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
+                RideClient rideClient = await SelectRideFromListAsync(rides.ToList());
 
 
                 Console.WriteLine("\nIntroduce the rating you want to give to the driver");
@@ -967,13 +990,13 @@ namespace Client
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-                _rideService.AddReview(client, _userLogged.Id, reviewRequest);
+                await _rideService.AddReviewAsync(client, _userLogged.Id, reviewRequest);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 
@@ -981,11 +1004,11 @@ namespace Client
 
         #region GetDriverReview
 
-        public static void GetDriverReviews(Guid rideId)
+        public static async Task GetDriverReviewsAsync(Guid rideId)
         {
             try
             {
-                ICollection<ReviewClient> reviews = _rideService.GetDriverReviews(client, rideId);
+                ICollection<ReviewClient> reviews = await _rideService.GetDriverReviews(client, rideId);
 
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
@@ -995,7 +1018,7 @@ namespace Client
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser();
             }
         }
 

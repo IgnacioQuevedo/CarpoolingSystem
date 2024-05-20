@@ -1,16 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
-using Client.Objects.ReviewModels;
-using Client.Objects.UserModels;
-using Client.Objects.VehicleModels;
+using System.Threading;
+using System.Threading.Tasks;
 using Common;
-using Server.Exceptions;
-using Server.Objects.Domain;
 using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.VehicleModels;
-using Server.Objects.DTOs.UserModelDtos;
 using Server.Repositories;
 
 
@@ -19,17 +13,18 @@ namespace Server.Controllers
     public class UserController
     {
         private static UserRepository _userRepository = new UserRepository();
-        private static RideRepository _rideRepository = new RideRepository();
         private static TcpClient _clientServerSide;
+        private static CancellationToken _token;
 
-        public UserController(TcpClient clientServer)
+        public UserController(TcpClient clientServer, CancellationToken token)
         {
             _clientServerSide = clientServer;
+            _token = token;
         }
 
         #region COMPLETADOS
 
-        public void RegisterUser(string[] requestArray)
+        public async Task RegisterUserAsync(string[] requestArray)
         {
             try
             {
@@ -42,26 +37,25 @@ namespace Server.Controllers
 
                 _userRepository.RegisterUser(userToRegister);
 
-                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; //Ok response
-                NetworkHelper.SendMessage(_clientServerSide, message);
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; 
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exception)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exception.Message;
-                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
-
-        //ok checked
-        public void LoginUser(string[] requestArray)
+        
+        public async Task LoginUserAsync(string[] requestArray) 
         {
             try
             {
                 string username = requestArray[2];
                 string password = requestArray[3];
 
-                User userLogged = _userRepository.Login(username, password);
-
+                User userLogged = _userRepository.Login(username, password); 
+      
                 string messageLogin = ProtocolConstants.Response + ";" + CommandsConstraints.Login + ";" +
                                       userLogged.Id + ";" +
                                       userLogged.Ci + ";" + userLogged.Username + ";" + userLogged.Password;
@@ -83,17 +77,17 @@ namespace Server.Controllers
                     }
                 }
 
-                NetworkHelper.SendMessage(_clientServerSide, messageLogin);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, messageLogin);
             }
 
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
 
-        public void CreateDriver(string[] messageArray)
+        public async Task CreateDriverAsync(string[] messageArray)
         {
             try
             {
@@ -103,20 +97,21 @@ namespace Server.Controllers
                 _userRepository.RegisterDriver(userIdToCreate, driverInfo);
 
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userIdToCreate;
-                NetworkHelper.SendMessage(_clientServerSide, responseMsg);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, responseMsg);
 
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientServerSide, excepetionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
 
-        public void AddVehicle(string[] messageArray)
+        public async Task AddVehicleAsync(string[] messageArray)
         {
             try
             {
+                _token.ThrowIfCancellationRequested();
                 Guid userId = Guid.Parse(messageArray[2]);
                 string vehicleModel = messageArray[3];
                 string path = messageArray[4];
@@ -125,13 +120,19 @@ namespace Server.Controllers
                 NetworkHelper.FilePathValidator(path);
 
                 string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
-                                     + vehicleToAdd.Id;
-                NetworkHelper.SendMessage(_clientServerSide, responseVehicleModelMsg);
+                                                 + vehicleToAdd.Id;
+                Task responseSent = NetworkHelper.SendMessageAsync(_clientServerSide, responseVehicleModelMsg);
 
-                string imageAllocatedAtServer = NetworkHelper.ReceiveImage(_clientServerSide);
+                _token.ThrowIfCancellationRequested();
+                string imageAllocatedAtServer = await NetworkHelper.ReceiveImageAsync(_clientServerSide, _token);
                 vehicleToAdd.ImageAllocatedAtServer = imageAllocatedAtServer;
-
                 _userRepository.AddVehicle(userId, vehicleToAdd);
+
+                await responseSent;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception exceptionCaught)
             {
@@ -143,13 +144,13 @@ namespace Server.Controllers
                 }
 
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
 
 
 
-        public void GetUserById(string[] messageArray)
+        public async Task GetUserByIdAsync(string[] messageArray)
         {
             try
             {
@@ -180,20 +181,15 @@ namespace Server.Controllers
 
                 }
 
-                NetworkHelper.SendMessage(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                NetworkHelper.SendMessage(_clientServerSide, excepetionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
-
-
-
-
-
-
+        
         #endregion
 
 
