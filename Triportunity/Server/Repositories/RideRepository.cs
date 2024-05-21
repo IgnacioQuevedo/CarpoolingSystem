@@ -21,7 +21,6 @@ namespace Server.Repositories
             LockManager.StartWriting();
             rideToAdd.DepartureTime = rideToAdd.DepartureTime.ToUniversalTime();
             MemoryDatabase.GetInstance().Rides.Add(rideToAdd);
-
             LockManager.StopWriting();
         }
 
@@ -60,20 +59,23 @@ namespace Server.Repositories
 
             var rideToFind = MemoryDatabase.GetInstance().Rides.FirstOrDefault(ride => ride.Id == rideId);
 
-            LockManager.StopReading();
-
-
-            if (rideToFind != null)
-            {
-                LockManager.StartWriting();
-                rideToFind.DepartureTime = rideToFind.DepartureTime.ToLocalTime();
-                LockManager.StopWriting();
-            }
+            string exceptionMessage = "";
 
             if (rideToFind == null)
             {
-                throw new RideException("Ride not found");
+                exceptionMessage = "Ride not found";
             }
+
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
+            }
+
+            LockManager.StartWriting();
+            rideToFind.DepartureTime = rideToFind.DepartureTime.ToLocalTime();
+            LockManager.StopWriting();
 
             return rideToFind;
         }
@@ -82,15 +84,25 @@ namespace Server.Repositories
         {
             Ride rideToQuit = GetRideById(rideId);
 
+            string exceptionMessage = "";
+
+            LockManager.StartReading();
 
             if (rideToQuit.DriverId.Equals(userId))
             {
-                throw new RideException("You are the driver, you must disable or delete the ride in order to quit");
+                exceptionMessage = "Cannot quit the ride as you are the driver.";
             }
 
             if (rideToQuit.DepartureTime <= DateTime.Now)
             {
-                throw new RideException("Cannot quit the ride as the departure time has passed.");
+                exceptionMessage = "Cannot quit a ride that has already departed";
+            }
+
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
             }
 
             LockManager.StartWriting();
@@ -102,6 +114,11 @@ namespace Server.Repositories
         public ICollection<Ride> GetRides()
         {
             ICollection<Ride> rides = new List<Ride>();
+
+            string exceptionMessage = "";
+
+            LockManager.StartReading();
+
             rides = MemoryDatabase.GetInstance().Rides;
 
             ICollection<Ride> availableRides = new List<Ride>();
@@ -117,7 +134,14 @@ namespace Server.Repositories
 
             if (availableRides.Count == 0)
             {
-                throw new RideException("No rides found");
+                exceptionMessage = "No rides found";
+            }
+
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
             }
 
             return availableRides;
@@ -146,16 +170,26 @@ namespace Server.Repositories
         public ICollection<Ride> FilterByPrice(double minPrice, double maxPrice)
         {
             ICollection<Ride> filteredRides = new List<Ride>();
+
+            string exceptionMessage = "";
+
+            LockManager.StartReading();
+
             var rides = MemoryDatabase.GetInstance().Rides;
 
-            filteredRides = rides.Where(ride =>
-                    ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice && ride.Published &&
-                    ride.DepartureTime > DateTime.Now)
+            filteredRides = rides.Where(ride => ride.PricePerPerson >= minPrice && ride.PricePerPerson <= maxPrice)
                 .ToList();
 
             if (filteredRides.Count == 0)
             {
-                throw new RideException("No rides were found in the specified range");
+                exceptionMessage = "No rides found";
+            }
+
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
             }
 
             return filteredRides;
@@ -179,17 +213,29 @@ namespace Server.Repositories
         {
             Ride ride = GetRideById(rideId);
             User driver = _userRepository.GetUserById(ride.DriverId);
-            LockManager.StartWriting();
+
+            string exceptionMessage = "";
+
+            LockManager.StartReading();
+
             if (actualUserId.Equals(driver.Id))
             {
-                throw new RideException("You can't review your own ride");
+                exceptionMessage = "You can't review your own ride";
             }
 
             if (ride.DepartureTime > DateTime.Now)
             {
-                throw new RideException("You can't review a ride that hasn't happened yet");
+                exceptionMessage = "You can't review a ride that hasn't happened yet";
             }
 
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
+            }
+
+            LockManager.StartWriting();
             driver.DriverAspects.Reviews.Add(review);
             LockManager.StopWriting();
         }
@@ -204,11 +250,14 @@ namespace Server.Repositories
         public ICollection<Ride> GetRidesByUser(Guid userId)
         {
             ICollection<Ride> rides = new List<Ride>();
-            rides = MemoryDatabase.GetInstance().Rides;
 
             ICollection<Ride> userRides = new List<Ride>();
 
+            string exceptionMessage = "";
+
             LockManager.StartReading();
+
+            rides = MemoryDatabase.GetInstance().Rides;
 
             foreach (var ride in rides)
             {
@@ -219,11 +268,16 @@ namespace Server.Repositories
                 }
             }
 
-            LockManager.StopReading();
-
             if (userRides.Count == 0)
             {
-                throw new RideException("No rides found");
+                exceptionMessage = "No rides found";
+            }
+
+            LockManager.StopReading();
+
+            if (exceptionMessage != "")
+            {
+                throw new RideException(exceptionMessage);
             }
 
             return userRides;
