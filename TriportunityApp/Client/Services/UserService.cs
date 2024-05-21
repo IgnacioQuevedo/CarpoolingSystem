@@ -52,7 +52,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -122,11 +122,11 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
-        public async Task CreateDriverAsync(TcpClient client, Guid userId, string carModel, string path,CancellationToken token)
+        public async Task CreateDriverAsync(TcpClient client, Guid userId, string carModel, string path, CancellationToken token)
         {
             try
             {
@@ -145,12 +145,12 @@ namespace Client.Services
                     throw new Exception(messageArray[2]);
                 }
 
-                await AddVehicleAsync(client, userId, carModel, path,token);
+                await AddVehicleAsync(client, userId, carModel, path, token);
                 Console.WriteLine("You are now a driver");
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -170,12 +170,13 @@ namespace Client.Services
                 {
                     throw new Exception(vehicleInfoArray[2]);
                 }
-                
+
                 await NetworkHelper.SendImageAsync(client, path, token);
             }
             catch (Exception exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -260,7 +261,8 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -274,7 +276,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -287,8 +289,9 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
+
     }
 }

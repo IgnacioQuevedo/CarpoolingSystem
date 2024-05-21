@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,20 +13,20 @@ namespace Server.Controllers
 {
     public class UserController
     {
-        private static UserRepository _userRepository = new UserRepository();
-        private static TcpClient _clientServerSide;
+        private static UserRepository _userRepository;
         private static CancellationToken _token;
 
-        public UserController(TcpClient clientServer, CancellationToken token)
+        public UserController(CancellationToken token)
         {
-            _clientServerSide = clientServer;
+            _userRepository = new UserRepository();
             _token = token;
         }
 
         #region COMPLETADOS
 
-        public async Task RegisterUserAsync(string[] requestArray)
-        {
+        public async Task RegisterUserAsync(string[] requestArray, TcpClient _clientServerSide)
+
+    {
             try
             {
                 string ci = requestArray[2];
@@ -37,7 +38,7 @@ namespace Server.Controllers
 
                 _userRepository.RegisterUser(userToRegister);
 
-                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; 
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exception)
@@ -46,16 +47,15 @@ namespace Server.Controllers
                 await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
-        
-        public async Task LoginUserAsync(string[] requestArray) 
+
+        public async Task LoginUserAsync(string[] requestArray, TcpClient _clientServerSide)
         {
             try
             {
                 string username = requestArray[2];
                 string password = requestArray[3];
 
-                User userLogged = _userRepository.Login(username, password); 
-      
+                User userLogged = _userRepository.Login(username, password);
                 string messageLogin = ProtocolConstants.Response + ";" + CommandsConstraints.Login + ";" +
                                       userLogged.Id + ";" +
                                       userLogged.Ci + ";" + userLogged.Username + ";" + userLogged.Password;
@@ -87,7 +87,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task CreateDriverAsync(string[] messageArray)
+        public async Task CreateDriverAsync(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task AddVehicleAsync(string[] messageArray)
+        public async Task AddVehicleAsync(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace Server.Controllers
 
 
 
-        public async Task GetUserByIdAsync(string[] messageArray)
+        public async Task GetUserByIdAsync(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -189,7 +189,7 @@ namespace Server.Controllers
                 await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
-        
+
         #endregion
 
 
