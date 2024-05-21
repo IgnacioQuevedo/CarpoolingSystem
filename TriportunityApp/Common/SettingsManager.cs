@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public class SettingsManager
+    public class SettingsManager : ISettingsManager
     {
         public string ReadSettings(string key)
         {

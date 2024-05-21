@@ -17,10 +17,11 @@ namespace Server
         private static UserController _userController;
         private static RideController _rideController;
 
+        private static object _lock = new object();
+
         private static ConcurrentBag<TcpClient> _clientsConnected = new ConcurrentBag<TcpClient>();
         private static CancellationTokenSource _cancellationToken = new CancellationTokenSource();
         private static CancellationToken _token = _cancellationToken.Token;
-
 
         public static async Task Main(string[] args)
         {
@@ -38,8 +39,7 @@ namespace Server
 
                     _clientsConnected.Add(clientServerSide);
 
-                    _userController = new UserController(clientServerSide, _token);
-                    _rideController = new RideController(clientServerSide, _token);
+             
 
                     int actualUser = users;
                     if (_token.IsCancellationRequested) break;
@@ -49,10 +49,18 @@ namespace Server
                 }
             }
 
+            catch (OperationCanceledException)
+            {
+                ShutdownOperations();
+                _serverListener.Stop();
+                Console.WriteLine("Server shutdown");
+            }
+
             catch (ObjectDisposedException)
             {
                 Console.WriteLine("Server shutdown");
             }
+           
 
             catch (Exception exception)
             {
@@ -80,8 +88,6 @@ namespace Server
                     if (!string.IsNullOrEmpty(response) && response.Equals("X"))
                     {
                         _cancellationToken.Cancel();
-                        ShutdownOperations();
-                        _serverListener.Stop();
                     }
                 }
             });
@@ -110,9 +116,14 @@ namespace Server
                 else if (response.Equals("Y"))
                 {
                     Console.WriteLine("Waiting for clients to end their petitions");
-                    //Close all connections after they end their petition
-                    while (_clientsConnected.Count > 0)
+
+                    //While por despertares espurios
+                    lock (_lock)
                     {
+                        while (_clientsConnected.Count > 0)
+                        {
+                            Monitor.Wait(_lock);
+                        }
                     }
                 }
                 else
@@ -130,6 +141,9 @@ namespace Server
             await NetworkHelper.SendMessageAsync(clientServerSide, connectedMsg);
             bool clientWantsToContinueSendingData = true;
 
+            _userController = new UserController(_token);
+            _rideController = new RideController(_token);
+
             while (clientWantsToContinueSendingData && !_token.IsCancellationRequested)
             {
                 try
@@ -143,84 +157,84 @@ namespace Server
                     switch (command)
                     {
                         case CommandsConstraints.Login:
-                            await _userController.LoginUserAsync(messageArray);
+                            await _userController.LoginUserAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.Register:
 
-                            await _userController.RegisterUserAsync(messageArray);
+                            await _userController.RegisterUserAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.CreateDriver:
 
-                            await _userController.CreateDriverAsync(messageArray);
+                            await _userController.CreateDriverAsync(messageArray, clientServerSide);
                             break;
                         case CommandsConstraints.GetUserById:
 
-                            await _userController.GetUserByIdAsync(messageArray);
+                            await _userController.GetUserByIdAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.AddVehicle:
 
-                            await _userController.AddVehicleAsync(messageArray);
+                            await _userController.AddVehicleAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.CreateRide:
 
-                            await _rideController.CreateRide(messageArray);
+                            await _rideController.CreateRide(messageArray, clientServerSide);
 
                             break;
 
                         case CommandsConstraints.JoinRide:
 
-                            await _rideController.JoinRide(messageArray);
+                            await _rideController.JoinRide(messageArray, clientServerSide);
 
                             break;
 
                         case CommandsConstraints.EditRide:
-                            await _rideController.EditRide(messageArray);
+                            await _rideController.EditRide(messageArray, clientServerSide);
 
                             break;
 
                         case CommandsConstraints.DeleteRide:
-                            await _rideController.DeleteRide(messageArray);
+                            await _rideController.DeleteRide(messageArray, clientServerSide);
 
                             break;
 
                         case CommandsConstraints.QuitRide:
-                            await _rideController.QuitRide(messageArray);
+                            await _rideController.QuitRide(messageArray, clientServerSide);
 
                             break;
 
                         case CommandsConstraints.FilterRidesByPrice:
-                            await _rideController.FilterRidesByPrice(messageArray);
+                            await _rideController.FilterRidesByPrice(messageArray, clientServerSide);
                             break;
                         case CommandsConstraints.GetAllRides:
-                            await _rideController.GetAllRides();
+                            await _rideController.GetAllRides(clientServerSide);
                             break;
 
                         case CommandsConstraints.GetCarImage:
-                            await _rideController.GetCarImage(messageArray);
+                            await _rideController.GetCarImage(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.GetDriverReviews:
-                            await _rideController.GetDriverReviews(messageArray);
+                            await _rideController.GetDriverReviews(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.DisableRide:
-                            await _rideController.DisableRide(messageArray);
+                            await _rideController.DisableRide(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.GetRideById:
-                            await _rideController.GetRideById(messageArray);
+                            await _rideController.GetRideById(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.AddReview:
-                            await _rideController.AddReview(messageArray);
+                            await _rideController.AddReview(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.GetRidesByUser:
-                            await _rideController.GetRidesByUser(messageArray);
+                            await _rideController.GetRidesByUser(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.CloseApp:
@@ -241,15 +255,27 @@ namespace Server
                 }
             }
 
-            foreach (TcpClient client in _clientsConnected)
+            TcpClient someClient = new TcpClient();
+            bool clientNotFound = true;
+            while (clientNotFound)
             {
-                if (client == clientServerSide)
+
+                _clientsConnected.TryTake(out someClient);
+
+                if (someClient != clientServerSide)
                 {
-                    _clientsConnected.TryTake(out _); // Vaciar la referencia del cliente
-                    break;
+                    _clientsConnected.Add(someClient);
+                }
+                else
+                {
+                    lock (_lock)
+                    {
+                        if (_clientsConnected.IsEmpty) { Monitor.PulseAll(_lock); }
+                    }
+                    clientNotFound = false;
                 }
             }
 
         }
     }
-}
+    }

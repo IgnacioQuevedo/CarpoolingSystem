@@ -42,9 +42,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -66,9 +66,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -93,9 +93,9 @@ namespace Client.Services
                     Console.WriteLine("Ride deleted successfully");
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -103,8 +103,8 @@ namespace Client.Services
         {
             try
             {
-                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" + 
-                                 request.UserToExit.Id+ ";" + request.RideId;
+                string message = ProtocolConstants.Request + ";" + CommandsConstraints.QuitRide + ";" +
+                                 request.UserToExit.Id + ";" + request.RideId;
 
                 await NetworkHelper.SendMessageAsync(client, message);
                 string messageReceived = await NetworkHelper.ReceiveMessageAsync(client);
@@ -119,7 +119,7 @@ namespace Client.Services
             }
             catch (Exception exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -144,9 +144,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -168,9 +168,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -180,7 +180,7 @@ namespace Client.Services
             {
                 string message = ProtocolConstants.Request + ";" + CommandsConstraints.GetRideById + ";" +
                                    id;
-                await NetworkHelper.SendMessageAsync(client , message);
+                await NetworkHelper.SendMessageAsync(client, message);
 
                 string response = await NetworkHelper.ReceiveMessageAsync(client);
 
@@ -217,9 +217,9 @@ namespace Client.Services
                 };
                 return ride;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -274,9 +274,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -330,9 +330,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -390,9 +390,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -417,9 +417,9 @@ namespace Client.Services
 
                 return imagePath;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -440,14 +440,14 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
 
-        public async Task<ICollection<ReviewClient>> GetDriverReviews(TcpClient client ,Guid rideId)
+        public async Task<ICollection<ReviewClient>> GetDriverReviews(TcpClient client, Guid rideId)
         {
             try
             {
@@ -482,9 +482,9 @@ namespace Client.Services
 
                 return reviews;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 

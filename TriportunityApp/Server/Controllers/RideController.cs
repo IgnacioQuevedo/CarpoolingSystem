@@ -14,18 +14,16 @@ namespace Server.Controllers
 {
     public class RideController
     {
-        private static TcpClient _clientServerSide;
         private static RideRepository _rideRepository = new RideRepository();
         private static UserRepository _userRepository = new UserRepository();
         private static CancellationToken _token = new CancellationToken();
         
-        public RideController(TcpClient clientServerSide, CancellationToken token)
+        public RideController(CancellationToken token)
         {
-            _clientServerSide = clientServerSide;
             _token = token;
         }
 
-        public async Task CreateRide(string[] messageArray)
+        public async Task CreateRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -60,7 +58,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task GetRidesByUser(string[] messageArray)
+        public async Task GetRidesByUser(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -93,7 +91,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task JoinRide(string[] messageArray)
+        public async Task JoinRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -114,7 +112,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task EditRide(string[] messageArray)
+        public async Task EditRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -149,7 +147,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task DeleteRide(string[] messageArray)
+        public async Task DeleteRide(string[] messageArray,TcpClient _clientServerSide)
         {
             try
             {
@@ -168,7 +166,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task QuitRide(string[] messageArray)
+        public async Task QuitRide(string[] messageArray,TcpClient _clientServerSide)
         {
             try
             {
@@ -188,7 +186,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task GetAllRides()
+        public async Task GetAllRides(TcpClient _clientServerSide)
         {
             try
             {
@@ -221,7 +219,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task GetCarImage(string[] messageArray)
+        public async Task GetCarImage(string[] messageArray,TcpClient _clientServerSide)
         {
             try
             {
@@ -242,7 +240,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task DisableRide(string[] messageArray)
+        public async Task DisableRide(string[] messageArray,TcpClient _clientServerSide)
         {
             try
             {
@@ -259,7 +257,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task FilterRidesByPrice(string[] messageArray)
+        public async Task FilterRidesByPrice(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -301,7 +299,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task GetDriverReviews(string[] messageArray)
+        public async Task GetDriverReviews(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -328,7 +326,7 @@ namespace Server.Controllers
         }
 
 
-        public async Task GetRideById(string[] messageArray)
+        public async Task GetRideById(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -359,7 +357,7 @@ namespace Server.Controllers
             }
         }
 
-        public async Task AddReview(string[] messageArray)
+        public async Task AddReview(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {

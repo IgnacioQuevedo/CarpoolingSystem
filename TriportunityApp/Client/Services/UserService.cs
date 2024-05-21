@@ -52,7 +52,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -122,7 +122,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -150,7 +150,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -175,7 +175,8 @@ namespace Client.Services
             }
             catch (Exception exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -260,7 +261,8 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -274,7 +276,7 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -287,8 +289,9 @@ namespace Client.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new Exception(e.Message, e);
             }
         }
+
     }
 }

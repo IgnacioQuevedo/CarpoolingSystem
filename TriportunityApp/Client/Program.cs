@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,70 +34,64 @@ namespace Client
 
         #endregion
 
-        #region Socket
-
-        public static TcpClient client;
-
-        #endregion
-
         public static async Task Main(string[] args)
         {
-            client = NetworkHelper.ConnectWithServer();
-            _userService = new UserService();
-            _rideService = new RideService();
-
-            Console.WriteLine("Waiting for the server to be ready");
-            Console.WriteLine("");
-
-            _closeApp = !await NetworkHelper.IsClientConnectedAsync(client);
-
-            _ = CheckIfClientShutdown();
-
-            while (!_closeApp)
+            try
             {
-                if (_userLogged is null)
+                TcpClient client = await NetworkHelper.ConnectWithServerAsync();
+                _userService = new UserService();
+                _rideService = new RideService();
+
+                Console.WriteLine("Waiting for the server to be ready");
+                Console.WriteLine("");
+
+                string welcomeMessage = await NetworkHelper.ReceiveMessageAsync(client);
+
+                _closeApp = string.IsNullOrEmpty(welcomeMessage);
+
+
+                while (!_closeApp)
                 {
-                    MainMenuOptions();
-
-                    _optionSelected = Console.ReadLine();
-                    switch (_optionSelected)
+                    if (_userLogged is null)
                     {
-                        case "1":
-                            await LoginOptionAsync();
-                            break;
+                        MainMenuOptions();
 
-                        case "2":
-                            await RegisterOptionAsync();
-                            break;
+                        _optionSelected = Console.ReadLine();
+                        switch (_optionSelected)
+                        {
+                            case "1":
+                                await LoginOptionAsync(client);
+                                break;
 
-                        case "3":
-                            AboutUsOption();
-                            break;
-                        case "4":
-                            await CloseAppOptionAsync();
-                            break;
-                        default:
-                            WrongDigitInserted();
-                            break;
+                            case "2":
+                                await RegisterOptionAsync(client);
+                                break;
+
+                            case "3":
+                                AboutUsOption();
+                                break;
+                            case "4":
+                                await CloseAppOptionAsync(client);
+                                break;
+                            default:
+                                WrongDigitInserted();
+                                break;
+                        }
+                    }
+
+                    else
+                    {
+                        await PossibleActionsToBeDoneByLoggedUser(client);
                     }
                 }
 
-                else
-                {
-                    await PossibleActionsToBeDoneByLoggedUser();
-                }
             }
-        }
-
-        private static async Task CheckIfClientShutdown()
-        {
-            await Task.Run(() =>
+            catch (Exception)
             {
-                while (_token.IsCancellationRequested == false && client.Connected)
-                {
-                }
-                _closeApp = true;
-            });
+                Console.WriteLine(
+                    "The communication with the server is closed, try again later. Thanks for using our app");
+                _closeApp = true; Console.WriteLine();
+            }
         }
 
         #region Main Menu Options
@@ -116,7 +111,7 @@ namespace Client
             Console.WriteLine("Insert a valid digit, please.");
         }
 
-        private static async Task CloseAppOptionAsync()
+        private static async Task CloseAppOptionAsync(TcpClient client)
         {
             try
             {
@@ -163,7 +158,7 @@ namespace Client
             }
         }
 
-        private static async Task RegisterOptionAsync()
+        private static async Task RegisterOptionAsync(TcpClient client)
         {
             try
             {
@@ -187,11 +182,12 @@ namespace Client
             }
             catch (Exception exception)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exception);
                 Console.WriteLine("Redo all again but without this error: " + exception.Message);
             }
         }
 
-        private static async Task LoginOptionAsync()
+        private static async Task LoginOptionAsync(TcpClient client)
         {
             try
             {
@@ -205,8 +201,8 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Console.WriteLine();
-                Console.WriteLine(exception.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exception);
+                Console.WriteLine("Redo all again but without this error: " + exception.Message);
             }
         }
 
@@ -214,7 +210,7 @@ namespace Client
 
         #region Logged Options
 
-        public static async Task PossibleActionsToBeDoneByLoggedUser()
+        public static async Task PossibleActionsToBeDoneByLoggedUser(TcpClient client)
         {
             string _optionSelected = "";
             if (_userLogged.DriverAspects != null)
@@ -251,49 +247,49 @@ namespace Client
             {
                 case 1:
                     if (_userLogged.DriverAspects != null)
-                        await CreateRideAsync();
+                        await CreateRideAsync(client);
                     else
-                        await CreateDriverAsync(_userLogged.Id);
+                        await CreateDriverAsync(client, _userLogged.Id);
                     break;
 
                 case 2:
-                    await JoinRideAsync();
+                    await JoinRideAsync(client);
                     break;
 
                 case 3:
-                    await QuitRideAsync();
+                    await QuitRideAsync(client);
                     break;
 
                 case 4:
                     if (_userLogged.DriverAspects != null)
-                        await ViewYourRidesAsync();
+                        await ViewYourRidesAsync(client);
                     else
-                        await AddReviewAsync();
+                        await AddReviewAsync(client);
                     break;
 
                 case 5:
                     if (_userLogged.DriverAspects != null)
-                        await AddReviewAsync();
+                        await AddReviewAsync(client);
                     else
                     {
-                        await GetRidesByPriceAsync();
+                        await GetRidesByPriceAsync(client);
                     }
 
                     break;
                 case 6:
                     if (_userLogged.DriverAspects != null)
                     {
-                        await GetRidesByPriceAsync();
+                        await GetRidesByPriceAsync(client);
                     }
                     else
                     {
-                        await CloseAppOptionAsync();
+                        await CloseAppOptionAsync(client);
                     }
 
                     break;
                 case 7:
                     if (_userLogged.DriverAspects != null)
-                        await CloseAppOptionAsync();
+                        await CloseAppOptionAsync(client);
                     break;
                 default:
                     WrongDigitInserted();
@@ -305,7 +301,7 @@ namespace Client
 
         #region Driver creation
 
-        private static async Task CreateDriverAsync(Guid userRegisteredId)
+        private static async Task CreateDriverAsync(TcpClient client, Guid userRegisteredId)
         {
             try
             {
@@ -343,9 +339,10 @@ namespace Client
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine("");
                 Console.WriteLine(e.Message);
-                await CreateDriverAsync(userRegisteredId);
+                await CreateDriverAsync(client, userRegisteredId);
             }
         }
 
@@ -353,7 +350,7 @@ namespace Client
 
         #region Create Ride
 
-        private static async Task CreateRideAsync()
+        private static async Task CreateRideAsync(TcpClient client)
         {
             try
             {
@@ -362,7 +359,7 @@ namespace Client
 
                 List<Guid> passengers = new List<Guid>();
 
-                Guid vehicleIdSelected = Guid.Parse(await PickVehicleAsync());
+                Guid vehicleIdSelected = Guid.Parse(await PickVehicleAsync(client));
 
                 string locationMode = "initial";
                 CitiesEnum initialLocation = PickLocation(locationMode);
@@ -388,8 +385,9 @@ namespace Client
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
+                Console.WriteLine("Error :" + e.Message);
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -432,7 +430,7 @@ namespace Client
             return IntroducePricePerPerson();
         }
 
-        private static async Task<string> PickVehicleAsync()
+        private static async Task<string> PickVehicleAsync(TcpClient client)
         {
             Console.WriteLine("Select the vehicle you will use for this ride");
 
@@ -452,7 +450,7 @@ namespace Client
             }
 
             Console.WriteLine("Please introduce a valid digit for the vehicle");
-            return await PickVehicleAsync();
+            return await PickVehicleAsync(client);
         }
 
         private static int PickAmountOfAvailableSeats()
@@ -583,12 +581,12 @@ namespace Client
 
         #region Join Ride
 
-        private static async Task JoinRideAsync()
+        private static async Task JoinRideAsync(TcpClient client)
         {
             try
             {
                 ICollection<RideClient> rides = await _rideService.GetAllRidesAsync(client);
-                RideClient selectedRide = await SelectRideFromListAsync(rides.ToList());
+                RideClient selectedRide = await SelectRideFromListAsync(client, rides.ToList());
 
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
@@ -597,12 +595,13 @@ namespace Client
             }
             catch (Exception exceptionCaught)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
-        private static async Task<RideClient> SelectRideFromListAsync(List<RideClient> rides)
+        private static async Task<RideClient> SelectRideFromListAsync(TcpClient client, List<RideClient> rides)
         {
             try
             {
@@ -651,12 +650,13 @@ namespace Client
                 }
 
                 Console.WriteLine("Introduce a valid number");
-                return await SelectRideFromListAsync(rides);
+                return await SelectRideFromListAsync(client, rides);
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
-                return await SelectRideFromListAsync(rides);
+                return await SelectRideFromListAsync(client, rides);
             }
         }
 
@@ -679,6 +679,7 @@ namespace Client
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
                 DisplayAllRides(rides);
             }
@@ -688,7 +689,7 @@ namespace Client
 
         #region View Your Rides
 
-        private static async Task ViewYourRidesAsync()
+        private static async Task ViewYourRidesAsync(TcpClient client)
         {
             try
             {
@@ -719,22 +720,24 @@ namespace Client
                     Console.WriteLine("4- Get Ride Info");
                     Console.WriteLine("5- Go back to the main menu");
 
-                    await ViewFunctionsAsync(rideSelected);
+                    await ViewFunctionsAsync(client, rideSelected);
                 }
                 else
                 {
                     Console.WriteLine("Please introduce a valid digit");
-                    await ViewYourRidesAsync();
+                    await ViewYourRidesAsync(client);
                 }
             }
             catch (Exception exceptionCaught)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
-        private static async Task ViewFunctionsAsync(RideClient rideSelected)
+        private static async Task ViewFunctionsAsync(TcpClient client, RideClient rideSelected)
         {
             _optionSelected = Console.ReadLine();
             if (int.TryParse(_optionSelected, out int optionToDo) && optionToDo >= 1 && optionToDo <= 5)
@@ -742,26 +745,26 @@ namespace Client
                 switch (optionToDo)
                 {
                     case 1:
-                        await ModifyRideAsync(rideSelected);
+                        await ModifyRideAsync(client, rideSelected);
                         break;
                     case 2:
-                        await DeleteRideAsync(rideSelected);
+                        await DeleteRideAsync(client, rideSelected);
                         break;
                     case 3:
-                        await DisableRideAsync(rideSelected);
+                        await DisableRideAsync(client, rideSelected);
                         break;
                     case 4:
-                        await GetRideInfoAsync(rideSelected);
+                        await GetRideInfoAsync(client, rideSelected);
                         break;
                     case 5:
-                        await PossibleActionsToBeDoneByLoggedUser();
+                        await PossibleActionsToBeDoneByLoggedUser(client);
                         break;
                 }
             }
             else
             {
                 Console.WriteLine("Please introduce a valid digit");
-                await ViewFunctionsAsync(rideSelected);
+                await ViewFunctionsAsync(client, rideSelected);
             }
         }
 
@@ -769,7 +772,7 @@ namespace Client
 
         #region Modify Ride
 
-        public static async Task ModifyRideAsync(RideClient rideSelected)
+        public static async Task ModifyRideAsync(TcpClient client, RideClient rideSelected)
         {
             try
             {
@@ -789,7 +792,7 @@ namespace Client
 
                 bool petsAllowed = DecideIfPetsAreAllowed();
 
-                Guid vehicleId = Guid.Parse(await PickVehicleAsync());
+                Guid vehicleId = Guid.Parse(await PickVehicleAsync(client));
 
 
                 ModifyRideRequest modifyRideReq = new ModifyRideRequest(rideSelected.Id,
@@ -802,8 +805,10 @@ namespace Client
 
             catch (Exception e)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -811,13 +816,13 @@ namespace Client
 
         #region Quit Ride
 
-        private static async Task QuitRideAsync()
+        private static async Task QuitRideAsync(TcpClient client)
         {
             try
             {
                 ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
 
-                RideClient rideSelected = await SelectRideFromListAsync(rides.ToList());
+                RideClient rideSelected = await SelectRideFromListAsync(client, rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
@@ -826,8 +831,10 @@ namespace Client
             }
             catch (Exception e)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -835,7 +842,7 @@ namespace Client
 
         #region Delete Ride
 
-        private static async Task DeleteRideAsync(RideClient rideSelected)
+        private static async Task DeleteRideAsync(TcpClient client, RideClient rideSelected)
         {
             try
             {
@@ -843,8 +850,10 @@ namespace Client
             }
             catch (Exception exceptionCaught)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -852,7 +861,7 @@ namespace Client
 
         #region Disable Ride
 
-        private static async Task DisableRideAsync(RideClient rideSelected)
+        private static async Task DisableRideAsync(TcpClient client, RideClient rideSelected)
         {
             try
             {
@@ -862,8 +871,10 @@ namespace Client
             }
             catch (Exception e)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -871,7 +882,7 @@ namespace Client
 
         #region Get Ride Info
 
-        private static async Task GetRideInfoAsync(RideClient rideSelected)
+        private static async Task GetRideInfoAsync(TcpClient client, RideClient rideSelected)
         {
             try
             {
@@ -882,7 +893,7 @@ namespace Client
 
                 await _rideService.GetRideByIdAsync(client, rideSelected.Id);
 
-                await DisplayRideAsync(rideSelected);
+                await DisplayRideAsync(client, rideSelected);
 
                 Console.WriteLine("Do you want to see the car image?");
                 Console.WriteLine("Y - If yes or Any other key for No");
@@ -896,12 +907,14 @@ namespace Client
             }
             catch (Exception e)
             {
+
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
-        private static async Task DisplayRideAsync(RideClient ride)
+        private static async Task DisplayRideAsync(TcpClient client, RideClient ride)
         {
             Console.WriteLine($"\nInitial Location: {ride.InitialLocation}");
             Console.WriteLine($"Ending Location: {ride.EndingLocation}");
@@ -911,7 +924,7 @@ namespace Client
             Console.WriteLine($"Pets Allowed: {ride.PetsAllowed}");
             Console.WriteLine($"Vehicle ID: {ride.VehicleId}");
             Console.WriteLine("");
-            await GetDriverReviewsAsync(ride.Id);
+            await GetDriverReviewsAsync(client, ride.Id);
             Console.WriteLine("");
         }
 
@@ -919,7 +932,7 @@ namespace Client
 
         #region Get Rides By Price
 
-        private static async Task GetRidesByPriceAsync()
+        private static async Task GetRidesByPriceAsync(TcpClient client)
         {
             try
             {
@@ -956,9 +969,10 @@ namespace Client
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -966,12 +980,12 @@ namespace Client
 
         #region Add Review
 
-        public static async Task AddReviewAsync()
+        public static async Task AddReviewAsync(TcpClient client)
         {
             try
             {
                 ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
-                RideClient rideClient = await SelectRideFromListAsync(rides.ToList());
+                RideClient rideClient = await SelectRideFromListAsync(client, rides.ToList());
 
 
                 Console.WriteLine("\nIntroduce the rating you want to give to the driver");
@@ -994,9 +1008,10 @@ namespace Client
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
@@ -1004,7 +1019,7 @@ namespace Client
 
         #region GetDriverReview
 
-        public static async Task GetDriverReviewsAsync(Guid rideId)
+        public static async Task GetDriverReviewsAsync(TcpClient client, Guid rideId)
         {
             try
             {
@@ -1016,9 +1031,10 @@ namespace Client
             }
             catch (Exception e)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(e);
                 Console.WriteLine(e.Message);
                 Console.WriteLine("");
-                await PossibleActionsToBeDoneByLoggedUser();
+                await PossibleActionsToBeDoneByLoggedUser(client);
             }
         }
 
