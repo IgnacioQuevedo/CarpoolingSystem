@@ -121,14 +121,13 @@ namespace Server.Controllers
 
                 string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
                                                  + vehicleToAdd.Id;
-                Task responseSent = NetworkHelper.SendMessageAsync(_clientServerSide, responseVehicleModelMsg);
+                  await NetworkHelper.SendMessageAsync(_clientServerSide, responseVehicleModelMsg);
 
                 _token.ThrowIfCancellationRequested();
                 string imageAllocatedAtServer = await NetworkHelper.ReceiveImageAsync(_clientServerSide, _token);
                 vehicleToAdd.ImageAllocatedAtServer = imageAllocatedAtServer;
                 _userRepository.AddVehicle(userId, vehicleToAdd);
-
-                await responseSent;
+                
             }
             catch (OperationCanceledException)
             {

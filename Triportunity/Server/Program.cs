@@ -34,7 +34,7 @@ namespace Server
                 while (!_token.IsCancellationRequested)
                 {
                     TcpClient clientServerSide =
-                        await _serverListener.AcceptTcpClientAsync(_token);
+                        await _serverListener.AcceptTcpClientAsync();
 
                     _clientsConnected.Add(clientServerSide);
 

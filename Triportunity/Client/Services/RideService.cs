@@ -42,9 +42,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -66,9 +66,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -93,9 +93,9 @@ namespace Client.Services
                     Console.WriteLine("Ride deleted successfully");
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Client.Services
             }
             catch (Exception exceptionCaught)
             {
-                throw new Exception(exceptionCaught.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -144,9 +144,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -168,9 +168,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -217,9 +217,9 @@ namespace Client.Services
                 };
                 return ride;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -274,9 +274,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -330,9 +330,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -390,9 +390,9 @@ namespace Client.Services
 
                 return rides;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -417,9 +417,9 @@ namespace Client.Services
 
                 return imagePath;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -440,9 +440,9 @@ namespace Client.Services
                     throw new Exception(messageArrayResponse[2]);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 
@@ -482,9 +482,9 @@ namespace Client.Services
 
                 return reviews;
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                throw new Exception(e.Message);
+                throw new Exception(exceptionCaught.Message,exceptionCaught);
             }
         }
 

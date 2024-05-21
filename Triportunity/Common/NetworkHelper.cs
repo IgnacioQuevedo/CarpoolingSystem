@@ -96,14 +96,12 @@ namespace Common
             }
             catch (IOException ex) when (ex.InnerException is SocketException)
             {
-                client.Close();
+                throw new OperationCanceledException("Connection has been turn off", ex);
             }
             catch (Exception exceptionCaught)
             {
-                throw new Exception();
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
-         
-        
         }
 
         public static async Task<string> ReceiveMessageAsync(TcpClient clientReceiver)
@@ -121,13 +119,11 @@ namespace Common
             }
             catch (IOException ex) when (ex.InnerException is SocketException)
             {
-                clientReceiver.Close();
-                throw;
+                throw new OperationCanceledException("Connection has been turn off", ex);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                throw new Exception(e.Message, e);
             }
         }
 
@@ -183,7 +179,7 @@ namespace Common
                 byte[] fileLengthInBytes = BitConverter.GetBytes(fileLength);
 
                 await SendMessageAsync(client, fileInfo.Name);
-                await stream.WriteAsync(fileLengthInBytes, 0, fileLengthInBytes.Length,token);
+                await stream.WriteAsync(fileLengthInBytes, 0, fileLengthInBytes.Length, token);
 
 
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
@@ -197,10 +193,10 @@ namespace Common
                         bool isLastPart = (currentPart == amountOfParts);
                         int byteAmountToSend = isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
                         byte[] buffer = new byte[byteAmountToSend];
-                        
-                        int readBytes = await fileStream.ReadAsync(buffer, 0, byteAmountToSend,token);
-                        
-                         await stream.WriteAsync(buffer, 0, readBytes,token);
+
+                        int readBytes = await fileStream.ReadAsync(buffer, 0, byteAmountToSend, token);
+
+                        await stream.WriteAsync(buffer, 0, readBytes, token);
 
                         offset += readBytes;
                     }
@@ -210,7 +206,7 @@ namespace Common
             {
                 Console.WriteLine("Operation cancelled, deleting the remaining parts of the file");
                 string fileName = Path.GetFileName(filePath);
-                if(File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
+                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
                 {
                     File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName));
                 }
@@ -225,8 +221,8 @@ namespace Common
 
         public static async Task<string> ReceiveImageAsync(TcpClient client, CancellationToken token)
         {
+            
             string fileName = "";
-            token.ThrowIfCancellationRequested();
             byte[] bufferFileConstantLength = BitConverter.GetBytes(8);
             try
             {
@@ -238,13 +234,10 @@ namespace Common
                 }
 
                 NetworkStream stream = client.GetStream();
-                Task<string> receiveFileName = ReceiveMessageAsync(client);
-                Task<byte[]> receiveBufferFileLength = ReceiveAsync(stream, bufferFileConstantLength);
-
-                fileName = await receiveFileName;
+                fileName = await ReceiveMessageAsync(client);
+                byte[] bufferFileLength = await ReceiveAsync(stream, bufferFileConstantLength);
                 string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
-                byte[] bufferFileLength = await receiveBufferFileLength;
                 long fileLength = BitConverter.ToInt64(bufferFileLength, 0);
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
 
@@ -277,15 +270,25 @@ namespace Common
             catch (OperationCanceledException)
             {
                 Console.WriteLine("Operation cancelled, deleting the remaining parts of the file");
-                if(File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
+                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
                 {
                     File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName));
                 }
+
                 throw new OperationCanceledException();
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error: {ex.Message}");
+            }
+        }
+
+        public static void CheckIfExceptionIsOperationCanceled(Exception ex)
+        {
+            if (ex is OperationCanceledException ||
+                ex.InnerException is OperationCanceledException || ex.InnerException is SocketException)
+            {
+                throw new OperationCanceledException();
             }
         }
     }

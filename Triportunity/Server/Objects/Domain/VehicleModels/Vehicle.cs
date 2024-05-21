@@ -19,7 +19,20 @@ namespace Server.Objects.Domain.VehicleModels
         
         private void VehicleValidations()
         {
-            if (string.IsNullOrEmpty(VehicleModel)) throw new VehicleException("Vehicle model must not be empty");
+            if (string.IsNullOrEmpty(VehicleModel) || !IsValidDigit(VehicleModel)) throw new VehicleException("Vehicle model must not be empty");
+        }
+
+        private bool IsValidDigit(string input)
+        {
+            foreach (char c in input)
+            {
+                if (!Char.IsLetterOrDigit(c))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
     }

@@ -41,63 +41,60 @@ namespace Client
 
         public static async Task Main(string[] args)
         {
-            client = NetworkHelper.ConnectWithServer();
-            _userService = new UserService();
-            _rideService = new RideService();
-
-            Console.WriteLine("Waiting for the server to be ready");
-            Console.WriteLine("");
-
-            _closeApp = !await NetworkHelper.IsClientConnectedAsync(client);
-
-            _ = CheckIfClientShutdown();
-
-            while (!_closeApp)
+            try
             {
-                if (_userLogged is null)
+                client = NetworkHelper.ConnectWithServer();
+                _userService = new UserService();
+                _rideService = new RideService();
+
+                Console.WriteLine("Waiting for the server to be ready");
+                Console.WriteLine("");
+
+                _closeApp = !await NetworkHelper.IsClientConnectedAsync(client);
+
+                while (!_closeApp)
                 {
-                    MainMenuOptions();
-
-                    _optionSelected = Console.ReadLine();
-                    switch (_optionSelected)
+                    if (_userLogged is null)
                     {
-                        case "1":
-                            await LoginOptionAsync();
-                            break;
+                        MainMenuOptions();
 
-                        case "2":
-                            await RegisterOptionAsync();
-                            break;
+                        _optionSelected = Console.ReadLine();
+                        switch (_optionSelected)
+                        {
+                            case "1":
+                                await LoginOptionAsync();
+                                break;
 
-                        case "3":
-                            AboutUsOption();
-                            break;
-                        case "4":
-                            await CloseAppOptionAsync();
-                            break;
-                        default:
-                            WrongDigitInserted();
-                            break;
+                            case "2":
+                                await RegisterOptionAsync();
+                                break;
+
+                            case "3":
+                                AboutUsOption();
+                                break;
+                            case "4":
+                                await CloseAppOptionAsync();
+                                break;
+                            default:
+                                WrongDigitInserted();
+                                break;
+                        }
+                    }
+
+                    else
+                    {
+                        await PossibleActionsToBeDoneByLoggedUser();
                     }
                 }
-
-                else
-                {
-                    await PossibleActionsToBeDoneByLoggedUser();
-                }
+            }
+            catch (Exception exceptionCaught)
+            {
+                Console.WriteLine(
+                    "The communication with the server is closed, try again later. Thanks for using our app");
+                _closeApp = true;
             }
         }
 
-        private static async Task CheckIfClientShutdown()
-        {
-            await Task.Run(() =>
-            {
-                while (_token.IsCancellationRequested == false && client.Connected)
-                {
-                }
-                _closeApp = true;
-            });
-        }
 
         #region Main Menu Options
 
@@ -187,6 +184,7 @@ namespace Client
             }
             catch (Exception exception)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exception);
                 Console.WriteLine("Redo all again but without this error: " + exception.Message);
             }
         }
@@ -203,10 +201,11 @@ namespace Client
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
                 _userLogged = await _userService.LoginClientAsync(client, loginUserRequest);
             }
+
             catch (Exception exception)
             {
-                Console.WriteLine();
-                Console.WriteLine(exception.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exception);
+                Console.WriteLine("Redo all again but without this error: " + exception.Message);
             }
         }
 
@@ -216,88 +215,95 @@ namespace Client
 
         public static async Task PossibleActionsToBeDoneByLoggedUser()
         {
-            string _optionSelected = "";
-            if (_userLogged.DriverAspects != null)
-
+            try
             {
-                Console.WriteLine("Select 1 - To create a Ride");
-                Console.WriteLine("Select 2 - To join a Ride");
-                Console.WriteLine("Select 3 - To Quit a Ride");
-                Console.WriteLine("Select 4 - To view, edit and delete your created rides");
-                Console.WriteLine("Select 5 - To add a review");
-                Console.WriteLine("Select 6 - To filter rides per price");
-                Console.WriteLine("Select 7 - To close the app");
+                string _optionSelected = "";
+                if (_userLogged.DriverAspects != null)
 
-                _optionSelected = Console.ReadLine();
-            }
-            else
-            {
-                Console.WriteLine("Select 1 - If you want to be registered as a driver");
-                Console.WriteLine("Select 2 - To join a Ride");
-                Console.WriteLine("Select 3 - To Quit a Ride");
-                Console.WriteLine("Select 4 - To add a review");
-                Console.WriteLine("Select 5 - To filter rides per price");
-                Console.WriteLine("Select 6 - To close the app");
-                _optionSelected = Console.ReadLine();
-            }
+                {
+                    Console.WriteLine("Select 1 - To create a Ride");
+                    Console.WriteLine("Select 2 - To join a Ride");
+                    Console.WriteLine("Select 3 - To Quit a Ride");
+                    Console.WriteLine("Select 4 - To view, edit and delete your created rides");
+                    Console.WriteLine("Select 5 - To add a review");
+                    Console.WriteLine("Select 6 - To filter rides per price");
+                    Console.WriteLine("Select 7 - To close the app");
 
-            if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 7)
-            {
-                WrongDigitInserted();
-                return;
-            }
+                    _optionSelected = Console.ReadLine();
+                }
+                else
+                {
+                    Console.WriteLine("Select 1 - If you want to be registered as a driver");
+                    Console.WriteLine("Select 2 - To join a Ride");
+                    Console.WriteLine("Select 3 - To Quit a Ride");
+                    Console.WriteLine("Select 4 - To add a review");
+                    Console.WriteLine("Select 5 - To filter rides per price");
+                    Console.WriteLine("Select 6 - To close the app");
+                    _optionSelected = Console.ReadLine();
+                }
 
-            switch (optionParsed)
-            {
-                case 1:
-                    if (_userLogged.DriverAspects != null)
-                        await CreateRideAsync();
-                    else
-                        await CreateDriverAsync(_userLogged.Id);
-                    break;
-
-                case 2:
-                    await JoinRideAsync();
-                    break;
-
-                case 3:
-                    await QuitRideAsync();
-                    break;
-
-                case 4:
-                    if (_userLogged.DriverAspects != null)
-                        await ViewYourRidesAsync();
-                    else
-                        await AddReviewAsync();
-                    break;
-
-                case 5:
-                    if (_userLogged.DriverAspects != null)
-                        await AddReviewAsync();
-                    else
-                    {
-                        await GetRidesByPriceAsync();
-                    }
-
-                    break;
-                case 6:
-                    if (_userLogged.DriverAspects != null)
-                    {
-                        await GetRidesByPriceAsync();
-                    }
-                    else
-                    {
-                        await CloseAppOptionAsync();
-                    }
-
-                    break;
-                case 7:
-                    if (_userLogged.DriverAspects != null)
-                        await CloseAppOptionAsync();
-                    break;
-                default:
+                if (!int.TryParse(_optionSelected, out int optionParsed) || optionParsed < 1 || optionParsed > 7)
+                {
                     WrongDigitInserted();
-                    break;
+                    return;
+                }
+
+                switch (optionParsed)
+                {
+                    case 1:
+                        if (_userLogged.DriverAspects != null)
+                            await CreateRideAsync();
+                        else
+                            await CreateDriverAsync(_userLogged.Id);
+                        break;
+
+                    case 2:
+                        await JoinRideAsync();
+                        break;
+
+                    case 3:
+                        await QuitRideAsync();
+                        break;
+
+                    case 4:
+                        if (_userLogged.DriverAspects != null)
+                            await ViewYourRidesAsync();
+                        else
+                            await AddReviewAsync();
+                        break;
+
+                    case 5:
+                        if (_userLogged.DriverAspects != null)
+                            await AddReviewAsync();
+                        else
+                        {
+                            await GetRidesByPriceAsync();
+                        }
+
+                        break;
+                    case 6:
+                        if (_userLogged.DriverAspects != null)
+                        {
+                            await GetRidesByPriceAsync();
+                        }
+                        else
+                        {
+                            await CloseAppOptionAsync();
+                        }
+
+                        break;
+                    case 7:
+                        if (_userLogged.DriverAspects != null)
+                            await CloseAppOptionAsync();
+                        break;
+                    default:
+                        WrongDigitInserted();
+                        break;
+                }
+            }
+            catch (Exception exceptionCaught)
+            {
+                throw new Exception(exceptionCaught.Message, exceptionCaught);
             }
         }
 
@@ -341,10 +347,11 @@ namespace Client
 
                 _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine("");
-                Console.WriteLine(e.Message);
+                Console.WriteLine(exceptionCaught.Message);
                 await CreateDriverAsync(userRegisteredId);
             }
         }
@@ -386,9 +393,10 @@ namespace Client
                 await _rideService.CreateRideAsync(client, rideReq);
                 Console.WriteLine("Ride created successfully");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine("Error : " + exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -596,7 +604,9 @@ namespace Client
                 Console.WriteLine("Join Successfully");
             }
             catch (Exception exceptionCaught)
+
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
@@ -653,9 +663,10 @@ namespace Client
                 Console.WriteLine("Introduce a valid number");
                 return await SelectRideFromListAsync(rides);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 return await SelectRideFromListAsync(rides);
             }
         }
@@ -677,9 +688,10 @@ namespace Client
                         $"{actualRide.DepartureTime.ToShortDateString()} and with a Price per person of : ${actualRide.PricePerPerson}");
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 DisplayAllRides(rides);
             }
         }
@@ -729,6 +741,7 @@ namespace Client
             }
             catch (Exception exceptionCaught)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
@@ -800,9 +813,10 @@ namespace Client
                 Console.WriteLine("Ride modified successfully");
             }
 
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -824,9 +838,10 @@ namespace Client
                 await _rideService.QuitRideAsync(client, quitRideReq);
                 Console.WriteLine("Quit from ride successfully");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -843,6 +858,7 @@ namespace Client
             }
             catch (Exception exceptionCaught)
             {
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
                 Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
@@ -860,9 +876,10 @@ namespace Client
 
                 Console.WriteLine("Ride has been disabled");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -894,9 +911,10 @@ namespace Client
                     await _rideService.GetCarImageByIdAsync(client, _userLogged.Id, rideData.Id, _token);
                 }
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 await PossibleActionsToBeDoneByLoggedUser();
             }
         }
@@ -954,9 +972,10 @@ namespace Client
                 DisplayAllRides(rides.ToList());
                 Console.WriteLine("");
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 Console.WriteLine("");
                 await PossibleActionsToBeDoneByLoggedUser();
             }
@@ -992,9 +1011,10 @@ namespace Client
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
                 await _rideService.AddReviewAsync(client, _userLogged.Id, reviewRequest);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 Console.WriteLine("");
                 await PossibleActionsToBeDoneByLoggedUser();
             }
@@ -1014,9 +1034,10 @@ namespace Client
 
                 DisplayAllReviews(reviewsList);
             }
-            catch (Exception e)
+            catch (Exception exceptionCaught)
             {
-                Console.WriteLine(e.Message);
+                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
+                Console.WriteLine(exceptionCaught.Message);
                 Console.WriteLine("");
                 await PossibleActionsToBeDoneByLoggedUser();
             }
