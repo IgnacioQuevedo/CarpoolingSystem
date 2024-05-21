@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System;
 using Server.Objects.DTOs.RideModelDtos;
 using System.Linq;
-using Client.Services;
 using Server.Exceptions;
 using Server.Objects.Domain.UserModels;
 using Server.Objects.Domain.Enums;

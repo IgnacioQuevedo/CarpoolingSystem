@@ -37,7 +37,7 @@ namespace Server.Controllers
 
                 _userRepository.RegisterUser(userToRegister);
 
-                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id; 
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exception)
@@ -46,16 +46,16 @@ namespace Server.Controllers
                 await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
-        
-        public async Task LoginUserAsync(string[] requestArray) 
+
+        public async Task LoginUserAsync(string[] requestArray)
         {
             try
             {
                 string username = requestArray[2];
                 string password = requestArray[3];
 
-                User userLogged = _userRepository.Login(username, password); 
-      
+                User userLogged = _userRepository.Login(username, password);
+
                 string messageLogin = ProtocolConstants.Response + ";" + CommandsConstraints.Login + ";" +
                                       userLogged.Id + ";" +
                                       userLogged.Ci + ";" + userLogged.Username + ";" + userLogged.Password;
@@ -189,7 +189,7 @@ namespace Server.Controllers
                 await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
-        
+
         #endregion
 
 

@@ -126,7 +126,7 @@ namespace Client.Services
             }
         }
 
-        public async Task CreateDriverAsync(TcpClient client, Guid userId, string carModel, string path,CancellationToken token)
+        public async Task CreateDriverAsync(TcpClient client, Guid userId, string carModel, string path, CancellationToken token)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace Client.Services
                     throw new Exception(messageArray[2]);
                 }
 
-                await AddVehicleAsync(client, userId, carModel, path,token);
+                await AddVehicleAsync(client, userId, carModel, path, token);
                 Console.WriteLine("You are now a driver");
             }
             catch (Exception e)
@@ -170,7 +170,7 @@ namespace Client.Services
                 {
                     throw new Exception(vehicleInfoArray[2]);
                 }
-                
+
                 await NetworkHelper.SendImageAsync(client, path, token);
             }
             catch (Exception exceptionCaught)

@@ -242,6 +242,12 @@ namespace Common
                 Task<byte[]> receiveBufferFileLength = ReceiveAsync(stream, bufferFileConstantLength);
 
                 fileName = await receiveFileName;
+
+                if (string.IsNullOrEmpty(fileName) || fileName.IndexOf('\0') >= 0)
+                {
+                    throw new Exception("Invalid file name received.");
+                }
+
                 string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
                 byte[] bufferFileLength = await receiveBufferFileLength;
@@ -249,15 +255,13 @@ namespace Common
                 long amountOfParts = ProtocolConstants.AmountOfParts(fileLength);
 
                 token.ThrowIfCancellationRequested();
-                using (FileStream fileNetworkStream =
-                       new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
+                using (FileStream fileNetworkStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
                 {
                     int offset = 0;
                     for (int currentPart = 1; currentPart <= amountOfParts; currentPart++)
                     {
                         bool isLastPart = (currentPart == amountOfParts);
-                        int byteAmountToReceive =
-                            isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
+                        int byteAmountToReceive = isLastPart ? (int)(fileLength - offset) : ProtocolConstants.MaxPartSize;
 
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
                         token.ThrowIfCancellationRequested();
@@ -269,15 +273,14 @@ namespace Common
                     }
                 }
 
-                Console.WriteLine(
-                    $"Completed sending {fileName}, of  {fileLength} length in bytes, allocated en {destinationFilePath}");
+                Console.WriteLine($"Completed sending {fileName}, of {fileLength} length in bytes, allocated in {destinationFilePath}");
 
                 return destinationFilePath;
             }
             catch (OperationCanceledException)
             {
                 Console.WriteLine("Operation cancelled, deleting the remaining parts of the file");
-                if(File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
+                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName)))
                 {
                     File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName));
                 }
@@ -288,5 +291,6 @@ namespace Common
                 throw new Exception($"Error: {ex.Message}");
             }
         }
+
     }
 }
