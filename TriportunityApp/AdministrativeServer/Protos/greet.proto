@@ -4,18 +4,15 @@ option csharp_namespace = "AdministrativeServer";
 
 package greet;
 
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply);
+service HandlerOfRequests {
+  rpc ProcessAdminRequest (AdministrativeRequest) returns (ServerResponse);
 }
 
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
+message AdministrativeRequest {
+  int32 command = 1;
+  string body = 2;
 }
 
-// The response message containing the greetings.
-message HelloReply {
+message ServerResponse {
   string message = 1;
 }
