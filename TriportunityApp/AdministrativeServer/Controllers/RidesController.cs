@@ -9,7 +9,7 @@ namespace AdministrativeServer.Controllers
     [Route("administrative/rides")]
     public class RidesController : Controller
     {
-        private HandlerOfRequests _handlerOfRequests; 
+        //private HandlerOfRequests _handlerOfRequests; 
         // I Believe we should create a general domain out of this folder on the folder were we have all the servers
         // So that we can share the same domain between the servers
         private readonly IConfiguration _configuration;
