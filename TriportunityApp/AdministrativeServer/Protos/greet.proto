@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "AdministrativeServer";
+
+package greet;
+
+service HandlerOfRequests {
+  rpc ProcessAdminRequest (AdministrativeRequest) returns (ServerResponse);
+}
+
+message AdministrativeRequest {
+  int32 command = 1;
+  string body = 2;
+}
+
+message ServerResponse {
+  string message = 1;
+}
