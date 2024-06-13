@@ -1,4 +1,7 @@
-﻿namespace MainServer.DataContext
+﻿using MainServer.Objects.Domain.UserModels;
+using Trip;
+
+namespace MainServer.DataContext
 {
     public class MemoryDatabase
     {

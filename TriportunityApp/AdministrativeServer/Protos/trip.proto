@@ -3,42 +3,62 @@ syntax = "proto3";
 package trip;
 
 service AdministrativeService {
-    rpc AddTrip (TripRequest) returns (TripResponse);
-    rpc DeleteTrip (TripRequest) returns (TripResponse);
-    rpc UpdateTrip (TripRequest) returns (TripResponse);
-    rpc GetTripRatings (TripRequest) returns (TripRatingsResponse);
-    rpc GetNextTrips (TripsRequest) returns (TripsResponse);
+    rpc AddRide (RideRequest) returns (RideResponse);
+    rpc DeleteRide (RideRequest) returns (RideResponse);
+    rpc UpdateRide (RideRequest) returns (RideResponse);
+    rpc GetRideRatings (RideRequest) returns (RideRatingsResponse);
+    rpc GetNextRides (RidesRequest) returns (RidesResponse);
+    rpc GetAllRides (Empty) returns (RidesResponse);
 }
 
-message TripRequest {
-    int32 tripId = 1;
-    string destination = 2;
-    double price = 3;
+message RideRequest {
+    string rideId = 1;
+    string driverId = 2;
+    bool published = 3;
+    repeated string passengers = 4;
+    int32 initialLocation = 5;
+    int32 endingLocation = 6;
+    string departureTime = 7;
+    int32 availableSeats = 8;
+    double pricePerPerson = 9;
+    bool petsAllowed = 10;
+    string vehicleId = 11;
 }
 
-message TripResponse {
+message RideResponse {
     string status = 1;
 }
 
-message TripRatingsResponse {
+message RideRatingsResponse {
     repeated Rating ratings = 1;
 }
 
-message TripsRequest {
+message RidesRequest {
     int32 count = 1;
 }
 
-message TripsResponse {
-    repeated Trip trips = 1;
+message RidesResponse {
+    repeated Ride rides = 1;
 }
 
 message Rating {
-    int32 rating = 1;
-    string comment = 2;
+    string id = 1;
+    double punctuation = 2;
+    string comment = 3;
 }
 
-message Trip {
-    int32 tripId = 1;
-    string destination = 2;
-    double price = 3;
+message Ride {
+    string rideId = 1;
+    string driverId = 2;
+    bool published = 3;
+    repeated string passengers = 4;
+    int32 initialLocation = 5;
+    int32 endingLocation = 6;
+    string departureTime = 7;
+    int32 availableSeats = 8;
+    double pricePerPerson = 9;
+    bool petsAllowed = 10;
+    string vehicleId = 11;
 }
+
+message Empty {}
