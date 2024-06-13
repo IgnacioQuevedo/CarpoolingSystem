@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package trip;
+
+service AdministrativeService {
+    rpc AddTrip (TripRequest) returns (TripResponse);
+    rpc DeleteTrip (TripRequest) returns (TripResponse);
+    rpc UpdateTrip (TripRequest) returns (TripResponse);
+    rpc GetTripRatings (TripRequest) returns (TripRatingsResponse);
+    rpc GetNextTrips (TripsRequest) returns (TripsResponse);
+}
+
+message TripRequest {
+    int32 tripId = 1;
+    string destination = 2;
+    double price = 3;
+}
+
+message TripResponse {
+    string status = 1;
+}
+
+message TripRatingsResponse {
+    repeated Rating ratings = 1;
+}
+
+message TripsRequest {
+    int32 count = 1;
+}
+
+message TripsResponse {
+    repeated Trip trips = 1;
+}
+
+message Rating {
+    int32 rating = 1;
+    string comment = 2;
+}
+
+message Trip {
+    int32 tripId = 1;
+    string destination = 2;
+    double price = 3;
+}
