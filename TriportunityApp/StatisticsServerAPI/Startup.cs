@@ -1,13 +1,9 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using StatisticsServerAPI.DataAccess.MemoryDatabase;
 using StatisticsServerAPI.DataAccess.Repositories;
+using StatisticsServerAPI.MQServices;
 using StatisticsServerAPI.Services;
 
-namespace WebApiRabbitMQ
+namespace StatisticsServerAPI
 {
     public class Startup
     {
@@ -25,8 +21,11 @@ namespace WebApiRabbitMQ
             services.AddSingleton<MQRideService>();
             services.AddSingleton<Database>();
 
-            services.AddScoped<ILoginEventRepository, LoginEventRepository>();
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRideEventRepository, RideEventRepository>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -43,7 +42,7 @@ namespace WebApiRabbitMQ
             {
                 endpoints.MapControllers();
             });
-            
+
             var serviceProvider = app.ApplicationServices;
             serviceProvider.GetRequiredService<MQUserService>();
             serviceProvider.GetRequiredService<MQRideService>();

@@ -2,19 +2,18 @@ using System.Text.Json;
 using Common;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using StatisticsServerAPI.DataAccess.MemoryDatabase;
 using StatisticsServerAPI.DataAccess.Repositories;
 using StatisticsServerAPI.MqDomain;
 
-namespace StatisticsServerAPI.Services;
+namespace StatisticsServerAPI.MQServices;
 
-public class MQUserService : IDisposable
+public class MQRideService : IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public MQUserService(IServiceScopeFactory scopeFactory)
+    public MQRideService(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         
@@ -22,37 +21,38 @@ public class MQUserService : IDisposable
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
 
-        MomHelper.EstablishExchangeAndQueue(MomConstraints.userQueueName, MomConstraints.exchangeName,
-            MomConstraints.userQueueRoutingKey, _channel);
+        MomHelper.EstablishExchangeAndQueue(MomConstraints.rideQueueName, MomConstraints.exchangeName,
+            MomConstraints.rideQueueRoutingKey, _channel);
 
-        AddLoginEvent();
+        AddRideEvent();
     }
 
-    private void AddLoginEvent()
+    private void AddRideEvent()
     {
         var consumer = new EventingBasicConsumer(_channel);
 
         consumer.Received += (model, ea) =>
         {
             var body = ea.Body.ToArray();
-            LoginEvent LoginEvent = JsonSerializer.Deserialize<LoginEvent>(body);
-            
+            RideEvent rideEvent = JsonSerializer.Deserialize<RideEvent>(body);
+
+            if (rideEvent is null)
+            {
+                Console.WriteLine("An error has being produced while trying to get the ride event. Call a programmer.");
+            }
             
             // Create a new scope to resolve scoped services
             using (var scope = _scopeFactory.CreateScope())
             {
-                var loginEventRepository = scope.ServiceProvider.GetRequiredService<ILoginEventRepository>();
-                loginEventRepository.AddLoginEvent(LoginEvent);
+                var rideEventRepository = scope.ServiceProvider.GetRequiredService<IRideEventRepository>();
+                rideEventRepository.AddRideEvent(rideEvent);
             }
         };
 
-        _channel.BasicConsume(queue: MomConstraints.userQueueName, autoAck: true, consumer: consumer);
+        _channel.BasicConsume(queue: MomConstraints.rideQueueName, autoAck: true, consumer: consumer);
         
     }
-
-    private readonly MQUserService _mqUserService;
-
-
+    
     public void Dispose()
     {
         _connection?.Close();

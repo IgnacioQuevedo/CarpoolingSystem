@@ -3,9 +3,9 @@ using StatisticsServerAPI.MqDomain;
 
 namespace StatisticsServerAPI.DataAccess.Repositories;
 
-public class LoginEventRepository : ILoginEventRepository
+public class UserRepository : IUserRepository
 {
-    public LoginEventRepository()
+    public UserRepository()
     {
         
     }
@@ -13,5 +13,10 @@ public class LoginEventRepository : ILoginEventRepository
     public void AddLoginEvent(LoginEvent loginEvent)
     {
         Database.GetInstance().UserLoginEvents.Add(loginEvent);
+    }
+
+    public int GetLoginEvents()
+    {
+        return Database.GetInstance().UserLoginEvents.Count();
     }
 }

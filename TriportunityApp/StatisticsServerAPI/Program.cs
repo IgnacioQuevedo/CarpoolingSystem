@@ -1,5 +1,3 @@
-using StatisticsServerAPI.Services;
-using WebApiRabbitMQ;
 
 namespace StatisticsServerAPI;
 
