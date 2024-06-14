@@ -1,4 +1,11 @@
-﻿namespace MainServer.Repositories
+﻿using MainServer.DataContext;
+using MainServer.Exceptions;
+using MainServer.Objects.Domain;
+using MainServer.Objects.Domain.Enums;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Objects.Domain.VehicleModels;
+
+namespace MainServer.Repositories
 {
     public class UserRepository
     {

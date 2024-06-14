@@ -1,4 +1,6 @@
-﻿namespace MainServer.Objects.Domain
+﻿using MainServer.Exceptions;
+
+namespace MainServer.Objects.Domain
 {
     public class Review
     {

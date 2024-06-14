@@ -1,4 +1,7 @@
 ﻿using Common;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Objects.Domain.VehicleModels;
+using MainServer.Repositories;
 using System.Net.Sockets;
 
 namespace MainServer.Controllers

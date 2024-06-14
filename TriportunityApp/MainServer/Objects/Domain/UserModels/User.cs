@@ -1,4 +1,6 @@
-﻿namespace MainServer.Objects.Domain.UserModels
+﻿using MainServer.Exceptions;
+
+namespace MainServer.Objects.Domain.UserModels
 {
     public class User
     {

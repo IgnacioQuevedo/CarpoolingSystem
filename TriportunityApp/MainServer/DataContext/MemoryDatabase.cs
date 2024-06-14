@@ -1,5 +1,5 @@
-﻿using MainServer.Objects.Domain.UserModels;
-using Trip;
+﻿using MainServer.Objects.Domain;
+using MainServer.Objects.Domain.UserModels;
 
 namespace MainServer.DataContext
 {

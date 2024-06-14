@@ -1,4 +1,6 @@
-﻿namespace MainServer.Objects.Domain.UserModels
+﻿using MainServer.Objects.Domain.VehicleModels;
+
+namespace MainServer.Objects.Domain.UserModels
 {
     public class DriverInfo
     {

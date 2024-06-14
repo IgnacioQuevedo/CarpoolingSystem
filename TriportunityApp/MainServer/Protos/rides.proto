@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package trip;
+option csharp_namespace = "GrpcService";
 
 service AdministrativeService {
     rpc AddRide (RideRequest) returns (RideResponse);
@@ -8,7 +8,7 @@ service AdministrativeService {
     rpc UpdateRide (RideRequest) returns (RideResponse);
     rpc GetRideRatings (RideRequest) returns (RideRatingsResponse);
     rpc GetNextRides (RidesRequest) returns (RidesResponse);
-    rpc GetAllRides (Empty) returns (RidesResponse);
+    rpc StreamRides (StreamRidesRequest) returns (stream Ride);
 }
 
 message RideRequest {
@@ -61,4 +61,6 @@ message Ride {
     string vehicleId = 11;
 }
 
-message Empty {}
+message StreamRidesRequest {
+    int32 count = 1;
+}

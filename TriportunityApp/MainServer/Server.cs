@@ -1,7 +1,6 @@
 ﻿using Common;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-using Trip;
 using MainServer.Services;
 using MainServer.Controllers;
 
@@ -13,7 +12,7 @@ namespace MainServer
         private static TcpListener _serverListener;
 
         private static UserController _userController;
-        private static AdminClient _adminClient; 
+        //private static AdminClient _adminClient; 
 
         private static object _lock = new object();
 
@@ -29,7 +28,7 @@ namespace MainServer
                 _serverListener.Start(ProtocolConstants.MaxUsersInBackLog);
                 _ = WaitUntilAdminShutdownServer();
 
-                _adminClient = new AdminClient("https://localhost:5001"); 
+                //_adminClient = new AdminClient("https://localhost:5001"); 
 
                 int users = 1;
 
@@ -168,27 +167,27 @@ namespace MainServer
                             await _userController.AddVehicleAsync(messageArray, clientServerSide);
                             break;
 
-                        case CommandsConstraints.CreateRide:
-                            var createRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
-                            var createRideResponse = await _adminClient.AddTripAsync(createRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, createRideResponse.Status);
-                            break;
+                        //case CommandsConstraints.CreateRide:
+                        //    var createRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
+                        //    var createRideResponse = await _adminClient.AddTripAsync(createRideRequest);
+                        //    await NetworkHelper.SendMessageAsync(clientServerSide, createRideResponse.Status);
+                        //    break;
 
                         case CommandsConstraints.JoinRide:
                             // Similar logic for other CRUD operations
                             break;
 
-                        case CommandsConstraints.EditRide:
-                            var editRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
-                            var editRideResponse = await _adminClient.UpdateTripAsync(editRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, editRideResponse.Status);
-                            break;
+                        //case CommandsConstraints.EditRide:
+                        //    var editRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
+                        //    var editRideResponse = await _adminClient.UpdateTripAsync(editRideRequest);
+                        //    await NetworkHelper.SendMessageAsync(clientServerSide, editRideResponse.Status);
+                        //    break;
 
-                        case CommandsConstraints.DeleteRide:
-                            var deleteRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]) };
-                            var deleteRideResponse = await _adminClient.DeleteTripAsync(deleteRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, deleteRideResponse.Status);
-                            break;
+                        //case CommandsConstraints.DeleteRide:
+                        //    var deleteRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]) };
+                        //    var deleteRideResponse = await _adminClient.DeleteTripAsync(deleteRideRequest);
+                        //    await NetworkHelper.SendMessageAsync(clientServerSide, deleteRideResponse.Status);
+                        //    break;
 
                         // Add cases for other commands...
 

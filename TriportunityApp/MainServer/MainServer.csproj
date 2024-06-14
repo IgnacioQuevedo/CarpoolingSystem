@@ -9,17 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-    <Protobuf Include="Protos\trip.proto" GrpcServices="Server" />
+    <Protobuf Include="Protos\rides.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\StatisticsServerAPI\StatisticsServerAPI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Objects\Domain\Enums\" />
-    <Folder Include="Objects\Domain\VehicleModels\" />
   </ItemGroup>
 
 </Project>
