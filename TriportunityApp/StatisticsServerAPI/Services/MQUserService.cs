@@ -22,7 +22,7 @@ public class MQUserService : IDisposable
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
 
-        MomHelper.EstablishExchangeAndQueue(MomConstraints.exchangeName, MomConstraints.userQueueName,
+        MomHelper.EstablishExchangeAndQueue(MomConstraints.userQueueName, MomConstraints.exchangeName,
             MomConstraints.userQueueRoutingKey, _channel);
 
         AddLoginEvent();

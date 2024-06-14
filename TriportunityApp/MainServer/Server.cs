@@ -2,6 +2,7 @@
 using MainServer.Controllers;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
+using RabbitMQ.Client;
 
 namespace MainServer
 {
@@ -27,21 +28,25 @@ namespace MainServer
                 _serverListener.Start(ProtocolConstants.MaxUsersInBackLog);
                 _ = WaitUntilAdminShutdownServer();
                 int users = 1;
-
-                while (!_token.IsCancellationRequested)
+                
+                var factory = new ConnectionFactory();
+                using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel())
                 {
-                    TcpClient clientServerSide =
-                        await _serverListener.AcceptTcpClientAsync(_token);
+                    MomHelper.EstablishExchangeAndQueue(MomConstraints.userQueueName,MomConstraints.exchangeName, MomConstraints.userQueueRoutingKey, channel);
+                    MomHelper.EstablishExchangeAndQueue(MomConstraints.rideQueueName,MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, channel);
+                    
+                    while (!_token.IsCancellationRequested)
+                    {
+                        TcpClient clientServerSide = await _serverListener.AcceptTcpClientAsync(_token);
+                        _clientsConnected.Add(clientServerSide);
 
-                    _clientsConnected.Add(clientServerSide);
-
-
-
-                    int actualUser = users;
-                    if (_token.IsCancellationRequested) break;
-                    _ = ManageUserAsync(clientServerSide, actualUser);
-
-                    users++;
+                        int actualUser = users;
+                        if (_token.IsCancellationRequested) break;
+                        
+                        _ = ManageUserAsync(clientServerSide, actualUser, channel);
+                        users++;
+                    }
                 }
             }
 
@@ -130,7 +135,7 @@ namespace MainServer
             }
         }
 
-        private static async Task ManageUserAsync(TcpClient clientServerSide, int actualUser)
+        private static async Task ManageUserAsync(TcpClient clientServerSide, int actualUser, IModel channel)
         {
             string connectedMsg = "Welcome to Triportunity!! Your user is " + actualUser + "!";
             Console.WriteLine(connectedMsg);
@@ -153,7 +158,7 @@ namespace MainServer
                     switch (command)
                     {
                         case CommandsConstraints.Login:
-                            await _userController.LoginUserAsync(messageArray, clientServerSide);
+                            await _userController.LoginUserAsync(messageArray, clientServerSide,channel);
                             break;
 
                         case CommandsConstraints.Register:

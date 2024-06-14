@@ -22,7 +22,7 @@ public class MQRideService : IDisposable
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
 
-        MomHelper.EstablishExchangeAndQueue(MomConstraints.exchangeName, MomConstraints.rideQueueName,
+        MomHelper.EstablishExchangeAndQueue(MomConstraints.rideQueueName, MomConstraints.exchangeName,
             MomConstraints.rideQueueRoutingKey, _channel);
 
         AddRideEvent();
