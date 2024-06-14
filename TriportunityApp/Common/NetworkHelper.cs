@@ -84,26 +84,30 @@ namespace Common
             {
                 NetworkStream stream = client.GetStream();
 
-                byte[] bufferLength = BitConverter.GetBytes(message.Length);
-
-                await stream.WriteAsync(bufferLength, 0, ProtocolConstants.DataLengthSize);
-
-                byte[] buffer = EncodeMsgIntoBytes(message);
-                int size = buffer.Length;
-                int offSet = 0;
-
-                await stream.WriteAsync(buffer, offSet, size);
+                byte[] buffer = Encoding.UTF8.GetBytes(message);
+                byte[] bufferLength = BitConverter.GetBytes(buffer.Length);
+                
+                await stream.WriteAsync(bufferLength, 0, bufferLength.Length);
+                
+                int totalSent = 0;
+                while (totalSent < buffer.Length)
+                {
+                    int toSend = buffer.Length - totalSent;
+                    await stream.WriteAsync(buffer, totalSent, toSend);
+                    totalSent += toSend;
+                }
             }
             catch (IOException ex) when (ex.InnerException is SocketException)
             {
-                throw new OperationCanceledException("Connection has been turn off", ex);
+                throw new OperationCanceledException("Connection has been turned off", ex);
             }
-            catch (Exception exceptionCaught)
+            catch (Exception ex)
             {
-                NetworkHelper.CheckIfExceptionIsOperationCanceled(exceptionCaught);
-                throw new Exception(exceptionCaught.Message, exceptionCaught);
+                throw new Exception("Error while sending message", ex);
             }
         }
+
+
 
         public static async Task<string> ReceiveMessageAsync(TcpClient clientReceiver)
         {
