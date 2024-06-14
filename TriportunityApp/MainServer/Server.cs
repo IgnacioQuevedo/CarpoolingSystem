@@ -182,7 +182,7 @@ namespace MainServer
 
                         case CommandsConstraints.CreateRide:
 
-                            await _rideController.CreateRide(messageArray, clientServerSide);
+                            await _rideController.CreateRide(messageArray, clientServerSide,channel);
 
                             break;
 
