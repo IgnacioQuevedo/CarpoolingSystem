@@ -47,11 +47,10 @@ public class MQRideService : IDisposable
             {
                 var rideEventRepository = scope.ServiceProvider.GetRequiredService<IRideEventRepository>();
                 rideEventRepository.AddRideEvent(rideEvent);
-                Console.WriteLine(Database.GetInstance().RideEvents.Count());
             }
         };
 
-        _channel.BasicConsume(queue: MomConstraints.userQueueName, autoAck: true, consumer: consumer);
+        _channel.BasicConsume(queue: MomConstraints.rideQueueName, autoAck: true, consumer: consumer);
         
     }
     

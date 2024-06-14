@@ -13,7 +13,6 @@ public class Database
 
     public Database()
     {
-        UserLoginEvents = new List<LoginEvent>();
     }
 
     public static Database GetInstance()

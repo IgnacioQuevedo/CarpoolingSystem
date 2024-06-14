@@ -43,7 +43,6 @@ public class MQUserService : IDisposable
             {
                 var loginEventRepository = scope.ServiceProvider.GetRequiredService<ILoginEventRepository>();
                 loginEventRepository.AddLoginEvent(LoginEvent);
-                Console.WriteLine(Database.GetInstance().UserLoginEvents.Count);
             }
         };
 
