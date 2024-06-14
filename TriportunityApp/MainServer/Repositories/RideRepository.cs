@@ -217,11 +217,6 @@ namespace Server.Repositories
                 exceptionMessage = "You can't review your own ride";
             }
 
-            if (ride.DepartureTime > DateTime.Now)
-            {
-                exceptionMessage = "You can't review a ride that hasn't happened yet";
-            }
-
             LockManager.StopReading();
 
             if (exceptionMessage != "")
