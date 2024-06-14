@@ -22,9 +22,10 @@ namespace StatisticsServerAPI
             services.AddSingleton<Database>();
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRideService, RideService>();
 
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IRideEventRepository, RideEventRepository>();
+            services.AddScoped<IRideRepository, RideRepository>();
 
         }
 

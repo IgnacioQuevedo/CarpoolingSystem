@@ -44,7 +44,7 @@ public class MQRideService : IDisposable
             // Create a new scope to resolve scoped services
             using (var scope = _scopeFactory.CreateScope())
             {
-                var rideEventRepository = scope.ServiceProvider.GetRequiredService<IRideEventRepository>();
+                var rideEventRepository = scope.ServiceProvider.GetRequiredService<IRideRepository>();
                 rideEventRepository.AddRideEvent(rideEvent);
             }
         };

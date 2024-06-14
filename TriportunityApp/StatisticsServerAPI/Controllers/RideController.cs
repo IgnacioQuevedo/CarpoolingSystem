@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StatisticsServerAPI.MqDomain;
 using StatisticsServerAPI.Services;
+using StatisticsServerAPI.WebModels.Requests;
 
 namespace StatisticsServerAPI.Controllers
 {
@@ -17,11 +19,18 @@ namespace StatisticsServerAPI.Controllers
 
 
         [HttpGet]
-        public IActionResult GetRidesFiltered()
+        public IActionResult GetRidesFiltered([FromBody] RideFilterRequest filters)
         {
             try
             {
-                return Ok(_rideService.GetRidesFiltered());
+                RideFilterDto filtersToApply = new RideFilterDto
+                {
+                    PetsAllowed = filters.PetsAllowed,
+                    PricePerPerson = filters.PricePerPerson,
+                    AvailableSeats = filters.AvailableSeats
+                };
+                
+                return Ok(_rideService.GetRidesFiltered(filtersToApply));
             }
             catch (Exception)
             {

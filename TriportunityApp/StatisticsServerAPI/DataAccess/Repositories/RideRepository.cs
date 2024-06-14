@@ -3,9 +3,9 @@ using StatisticsServerAPI.MqDomain;
 
 namespace StatisticsServerAPI.DataAccess.Repositories;
 
-public class RideEventRepository : IRideEventRepository
+public class RideRepository : IRideRepository
 {
-    public RideEventRepository()
+    public RideRepository()
     {
         
     }
@@ -13,5 +13,10 @@ public class RideEventRepository : IRideEventRepository
     public void AddRideEvent(RideEvent rideEvent)
     {
         Database.GetInstance().RideEvents.Add(rideEvent);
+    }
+
+    public IEnumerable<RideEvent> GetRides()
+    {
+        return Database.GetInstance().RideEvents.ToList();
     }
 }
