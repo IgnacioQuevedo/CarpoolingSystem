@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{BF2861D6-A1AF-436B-895E-D0447C809012}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeprecatedServer", "DeprecatedServer\DeprecatedServer.csproj", "{BF2861D6-A1AF-436B-895E-D0447C809012}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{2BF6DDEE-F740-4F9F-85DD-623486BF1D10}"
 EndProject

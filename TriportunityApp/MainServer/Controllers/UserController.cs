@@ -1,5 +1,8 @@
 ﻿using Common;
 using System.Net.Sockets;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Repositories;
+using Server.Objects.Domain.VehicleModels;
 
 namespace MainServer.Controllers
 {
@@ -13,9 +16,7 @@ namespace MainServer.Controllers
             _userRepository = new UserRepository();
             _token = token;
         }
-
-        #region COMPLETADOS
-
+        
         public async Task RegisterUserAsync(string[] requestArray, TcpClient _clientServerSide)
 
         {
@@ -181,9 +182,6 @@ namespace MainServer.Controllers
                 await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
-
-        #endregion
-
-
+        
     }
 }

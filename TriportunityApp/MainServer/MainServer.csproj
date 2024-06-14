@@ -14,12 +14,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\DeprecatedServer\DeprecatedServer.csproj" />
     <ProjectReference Include="..\StatisticsServerAPI\StatisticsServerAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Objects\Domain\Enums\" />
     <Folder Include="Objects\Domain\VehicleModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
 
 </Project>
