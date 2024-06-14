@@ -1,5 +1,13 @@
-﻿using Common;
+using System;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
+using Common;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Objects.Domain.VehicleModels;
+using MainServer.Repositories;
+
 
 namespace MainServer.Controllers
 {
@@ -18,7 +26,7 @@ namespace MainServer.Controllers
 
         public async Task RegisterUserAsync(string[] requestArray, TcpClient _clientServerSide)
 
-        {
+    {
             try
             {
                 string ci = requestArray[2];

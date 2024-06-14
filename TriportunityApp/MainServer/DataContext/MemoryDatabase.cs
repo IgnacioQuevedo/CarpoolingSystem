@@ -1,5 +1,8 @@
-﻿using MainServer.Objects.Domain.UserModels;
-using Trip;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MainServer.Objects.Domain;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Objects.Domain.VehicleModels;
 
 namespace MainServer.DataContext
 {
@@ -27,7 +30,7 @@ namespace MainServer.DataContext
 
                 return _database;
             }
-
+          
         }
     }
 }

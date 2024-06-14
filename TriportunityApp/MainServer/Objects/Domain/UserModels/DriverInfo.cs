@@ -1,4 +1,8 @@
-﻿namespace MainServer.Objects.Domain.UserModels
+using System.Collections.Generic;
+using MainServer.Exceptions;
+using MainServer.Objects.Domain.VehicleModels;
+
+namespace MainServer.Objects.Domain.UserModels
 {
     public class DriverInfo
     {

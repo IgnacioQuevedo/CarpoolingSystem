@@ -1,19 +1,17 @@
 ﻿using Common;
+using MainServer.Controllers;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-using Trip;
-using MainServer.Services;
-using MainServer.Controllers;
 
 namespace MainServer
 {
-    public class Server
+    internal class Server
     {
         private static bool _listenToNewClients = true;
         private static TcpListener _serverListener;
 
         private static UserController _userController;
-        private static AdminClient _adminClient; 
+        private static RideController _rideController;
 
         private static object _lock = new object();
 
@@ -21,23 +19,23 @@ namespace MainServer
         private static CancellationTokenSource _cancellationToken = new CancellationTokenSource();
         private static CancellationToken _token = _cancellationToken.Token;
 
-        public static async Task Main(string[] args)
+        public static async Task LaunchServerAsync()
         {
             try
             {
                 _serverListener = NetworkHelper.DeployServerListener();
                 _serverListener.Start(ProtocolConstants.MaxUsersInBackLog);
                 _ = WaitUntilAdminShutdownServer();
-
-                _adminClient = new AdminClient("https://localhost:5001"); 
-
                 int users = 1;
 
                 while (!_token.IsCancellationRequested)
                 {
-                    TcpClient clientServerSide = await _serverListener.AcceptTcpClientAsync(_token);
+                    TcpClient clientServerSide =
+                        await _serverListener.AcceptTcpClientAsync(_token);
 
                     _clientsConnected.Add(clientServerSide);
+
+
 
                     int actualUser = users;
                     if (_token.IsCancellationRequested) break;
@@ -46,16 +44,20 @@ namespace MainServer
                     users++;
                 }
             }
+
             catch (OperationCanceledException)
             {
                 ShutdownOperations();
                 _serverListener.Stop();
                 Console.WriteLine("Server shutdown");
             }
+
             catch (ObjectDisposedException)
             {
                 Console.WriteLine("Server shutdown");
             }
+
+
             catch (Exception exception)
             {
                 Console.WriteLine($"Error not expected : {exception.Message} - shutting down server");
@@ -97,7 +99,7 @@ namespace MainServer
 
                 if (response.Equals("X"))
                 {
-                   
+                    //Close all connections right now
                     while (!_clientsConnected.IsEmpty)
                     {
                         if (_clientsConnected.TryTake(out TcpClient client))
@@ -106,11 +108,12 @@ namespace MainServer
                         }
                     }
                 }
+
                 else if (response.Equals("Y"))
                 {
                     Console.WriteLine("Waiting for clients to end their petitions");
 
-                   
+                    //While por despertares espurios
                     lock (_lock)
                     {
                         while (_clientsConnected.Count > 0)
@@ -121,7 +124,7 @@ namespace MainServer
                 }
                 else
                 {
-                    Console.WriteLine("Invalid option, insert X or Y");
+                    Console.WriteLine("Invalid option, insert X or Z");
                     ShutdownOperations();
                 }
             }
@@ -135,6 +138,7 @@ namespace MainServer
             bool clientWantsToContinueSendingData = true;
 
             _userController = new UserController(_token);
+            _rideController = new RideController(_token);
 
             while (clientWantsToContinueSendingData && !_token.IsCancellationRequested)
             {
@@ -153,44 +157,81 @@ namespace MainServer
                             break;
 
                         case CommandsConstraints.Register:
+
                             await _userController.RegisterUserAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.CreateDriver:
+
                             await _userController.CreateDriverAsync(messageArray, clientServerSide);
                             break;
-
                         case CommandsConstraints.GetUserById:
+
                             await _userController.GetUserByIdAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.AddVehicle:
+
                             await _userController.AddVehicleAsync(messageArray, clientServerSide);
                             break;
 
                         case CommandsConstraints.CreateRide:
-                            var createRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
-                            var createRideResponse = await _adminClient.AddTripAsync(createRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, createRideResponse.Status);
+
+                            await _rideController.CreateRide(messageArray, clientServerSide);
+
                             break;
 
                         case CommandsConstraints.JoinRide:
-                            // Similar logic for other CRUD operations
+
+                            await _rideController.JoinRide(messageArray, clientServerSide);
+
                             break;
 
                         case CommandsConstraints.EditRide:
-                            var editRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]), Destination = messageArray[3], Price = double.Parse(messageArray[4]) };
-                            var editRideResponse = await _adminClient.UpdateTripAsync(editRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, editRideResponse.Status);
+                            await _rideController.EditRide(messageArray, clientServerSide);
+
                             break;
 
                         case CommandsConstraints.DeleteRide:
-                            var deleteRideRequest = new TripRequest { TripId = int.Parse(messageArray[2]) };
-                            var deleteRideResponse = await _adminClient.DeleteTripAsync(deleteRideRequest);
-                            await NetworkHelper.SendMessageAsync(clientServerSide, deleteRideResponse.Status);
+                            await _rideController.DeleteRide(messageArray, clientServerSide);
+
                             break;
 
-                        // Add cases for other commands...
+                        case CommandsConstraints.QuitRide:
+                            await _rideController.QuitRide(messageArray, clientServerSide);
+
+                            break;
+
+                        case CommandsConstraints.FilterRidesByPrice:
+                            await _rideController.FilterRidesByPrice(messageArray, clientServerSide);
+                            break;
+                        case CommandsConstraints.GetAllRides:
+                            await _rideController.GetAllRides(clientServerSide);
+                            break;
+
+                        case CommandsConstraints.GetCarImage:
+                            await _rideController.GetCarImage(messageArray, clientServerSide);
+                            break;
+
+                        case CommandsConstraints.GetDriverReviews:
+                            await _rideController.GetDriverReviews(messageArray, clientServerSide);
+                            break;
+
+                        case CommandsConstraints.DisableRide:
+                            await _rideController.DisableRide(messageArray, clientServerSide);
+                            break;
+
+                        case CommandsConstraints.GetRideById:
+                            await _rideController.GetRideById(messageArray, clientServerSide);
+                            break;
+
+                        case CommandsConstraints.AddReview:
+                            await _rideController.AddReview(messageArray, clientServerSide);
+                            break;
+
+                        case CommandsConstraints.GetRidesByUser:
+                            await _rideController.GetRidesByUser(messageArray, clientServerSide);
+                            break;
 
                         case CommandsConstraints.CloseApp:
                             clientWantsToContinueSendingData = false;
@@ -201,6 +242,8 @@ namespace MainServer
                 {
                     throw;
                 }
+
+
                 catch (Exception exceptionNotExpected)
                 {
                     Console.WriteLine("Error: " + exceptionNotExpected.Message);
@@ -212,6 +255,7 @@ namespace MainServer
             bool clientNotFound = true;
             while (clientNotFound)
             {
+
                 _clientsConnected.TryTake(out someClient);
 
                 if (someClient != clientServerSide)
@@ -227,6 +271,7 @@ namespace MainServer
                     clientNotFound = false;
                 }
             }
+
         }
     }
 }

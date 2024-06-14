@@ -1,4 +1,9 @@
-﻿namespace MainServer.Objects.Domain.UserModels
+#nullable enable
+using System;
+using System.Text.RegularExpressions;
+using MainServer.Exceptions;
+
+namespace MainServer.Objects.Domain.UserModels
 {
     public class User
     {

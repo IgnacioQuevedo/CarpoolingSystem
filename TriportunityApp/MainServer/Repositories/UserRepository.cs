@@ -1,4 +1,12 @@
-﻿namespace MainServer.Repositories
+﻿using MainServer.DataContext;
+using System.Linq;
+using MainServer.Objects.Domain.UserModels;
+using MainServer.Objects.Domain;
+using MainServer.Exceptions;
+using System;
+using MainServer.Objects.Domain.VehicleModels;
+
+namespace MainServer.Repositories
 {
     public class UserRepository
     {
@@ -223,5 +231,7 @@
 
             return vehicle;
         }
+
+
     }
 }

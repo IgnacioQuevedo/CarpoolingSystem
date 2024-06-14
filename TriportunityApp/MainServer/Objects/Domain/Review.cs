@@ -1,4 +1,7 @@
-﻿namespace MainServer.Objects.Domain
+using MainServer.Exceptions;
+using System;
+
+namespace MainServer.Objects.Domain
 {
     public class Review
     {
@@ -24,8 +27,8 @@
         public Review(double punctuation, string comment)
         {
             Id = Guid.NewGuid();
-            Punctuation = punctuation;
-            Comment = comment;
+            Punctuation = punctuation; 
+            Comment = comment; 
         }
     }
 }
