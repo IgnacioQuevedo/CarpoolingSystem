@@ -51,7 +51,6 @@ public class RideService : IRideService
 
         return rideResponses;
     }
-
     private IEnumerable<RideEvent> ApplyFilter(IEnumerable<RideEvent> rides, PropertyInfo rideProperty, object filterValue)
     {
         return rides.Where(ride => 
