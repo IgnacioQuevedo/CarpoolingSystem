@@ -82,7 +82,6 @@ public class RideService : IRideService
         RidesSummarizedReport summarizedReport = new RidesSummarizedReport
         {
             AmountOfNextRidesToSummarize = amountOfNextRidesToSummarize,
-            IndexOfRideToStartWith = ridesAtTheMoment.Count() + 1
         };
 
         _rideRepository.AddSummarizedReport(summarizedReport);
