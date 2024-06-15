@@ -69,7 +69,21 @@ namespace StatisticsServerAPI.Controllers
             try
             {
                 RidesSummarizedReport report = _rideService.GetRidesSummarizedReportById(id);
-                return Ok(report);
+                
+                GetRidesSummarizedReportResponse reportResponse = new GetRidesSummarizedReportResponse
+                {
+                    RidesSummarized = report.RidesSummarized.Select(ride => new GetRideSummarizedResponse
+                    {
+                        Published = ride.Published,
+                        Passengers = ride.Passengers,
+                        InitialLocation = (CitiesEnumEventResponse) ride.InitialLocation,
+                        DepartureTime = ride.DepartureTime,
+                        AvailableSeats = ride.AvailableSeats,
+                        PricePerPerson = ride.PricePerPerson
+                    }).ToList()
+                };
+                
+                return Ok(reportResponse);
             }
             catch (InvalidReportException exception)
             {
