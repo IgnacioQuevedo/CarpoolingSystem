@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainServer", "MainServer\MainServer.csproj", "{AB57118C-A4CB-45D1-8AA3-9309D6743F7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdministrativeServer", "..\..\Users\Gonzalo Camejo\Downloads\AdministrativeServer\AdministrativeServer.csproj", "{10F00238-5C41-4812-BEBD-AE749A5B34B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdministrativeServer", "AdministrativeServer\AdministrativeServer.csproj", "{289A6F4D-E88B-472F-B172-3A56EACAD1BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{AB57118C-A4CB-45D1-8AA3-9309D6743F7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB57118C-A4CB-45D1-8AA3-9309D6743F7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB57118C-A4CB-45D1-8AA3-9309D6743F7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10F00238-5C41-4812-BEBD-AE749A5B34B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10F00238-5C41-4812-BEBD-AE749A5B34B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10F00238-5C41-4812-BEBD-AE749A5B34B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10F00238-5C41-4812-BEBD-AE749A5B34B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
