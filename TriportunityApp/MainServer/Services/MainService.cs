@@ -9,12 +9,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using MainServer.Objects.Domain.VehicleModels;
 
 namespace MainServer.Services
 {
     public class MainService : AdministrativeService.AdministrativeServiceBase
     {
         private readonly RideRepository _rideRepository;
+        private readonly UserRepository _userRepository;
         private static readonly List<IServerStreamWriter<GrpcService.Ride>> _streamWriters = new List<IServerStreamWriter<GrpcService.Ride>>();
 
         public MainService()
@@ -216,6 +218,32 @@ namespace MainServer.Services
             }
             catch (Exception ex)
             {
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+        public override Task<UsersResponse> GetAllUsers(Empty request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new UsersResponse();
+                var users = _userRepository.GetUsers();
+
+                response.Users.AddRange(users.Select(u =>
+                {
+                    var user = new GrpcService.User
+                    {
+                        Id = u.Id.ToString(),
+                        Ci = u.Ci,
+                        Username = u.Username
+                    };
+                    return user;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }

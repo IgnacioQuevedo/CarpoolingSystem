@@ -13,6 +13,7 @@ service AdministrativeService {
     rpc StreamRides (StreamRidesRequest) returns (stream Ride);
     rpc GetNextRides (RidesRequest) returns (RidesResponse);
     rpc GetAllRides (google.protobuf.Empty) returns (RidesResponse);
+    rpc GetAllUsers (google.protobuf.Empty) returns (UsersResponse);
 }
 
 message RideRequest {
@@ -68,3 +69,14 @@ message RidesRequest {
 message RidesResponse {
     repeated Ride rides = 1;
 }
+
+message User {
+    string id = 1;
+    string ci = 2;
+    string username = 3;
+}
+
+message UsersResponse {
+    repeated User users = 1;
+}
+
