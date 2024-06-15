@@ -16,6 +16,7 @@ namespace MainServer.Services
     {
         private readonly RideRepository _rideRepository;
         private static readonly List<IServerStreamWriter<GrpcService.Ride>> _streamWriters = new List<IServerStreamWriter<GrpcService.Ride>>();
+        private static readonly object _lock = new object();
 
         public MainService()
         {
@@ -24,40 +25,25 @@ namespace MainServer.Services
 
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)
         {
-            _streamWriters.Add(responseStream);
+            lock (_lock)
+            {
+                _streamWriters.Add(responseStream);
+            }
 
             try
             {
-                var rides = _rideRepository.GetNextRides(request.Count);
-                foreach (var ride in rides)
-                {
-                    var grpcRide = new GrpcService.Ride
-                    {
-                        RideId = ride.Id.ToString(),
-                        DriverId = ride.DriverId.ToString(),
-                        Published = ride.Published,
-                        InitialLocation = (int)ride.InitialLocation,
-                        EndingLocation = (int)ride.EndingLocation,
-                        DepartureTime = ride.DepartureTime.ToString("o"),
-                        AvailableSeats = ride.AvailableSeats,
-                        PricePerPerson = ride.PricePerPerson,
-                        PetsAllowed = ride.PetsAllowed,
-                        VehicleId = ride.VehicleId.ToString()
-                    };
-                    grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
-
-                    await responseStream.WriteAsync(grpcRide);
-                }
-
-                await Task.Delay(-1);
+                await Task.Delay(-1, context.CancellationToken);
             }
-            catch (Exception ex)
+            catch (TaskCanceledException)
             {
-                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+                // Handle stream cancellation
             }
             finally
             {
-                _streamWriters.Remove(responseStream);
+                lock (_lock)
+                {
+                    _streamWriters.Remove(responseStream);
+                }
             }
         }
 
@@ -83,16 +69,29 @@ namespace MainServer.Services
                 };
                 grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
 
-                foreach (var streamWriter in _streamWriters)
+                List<IServerStreamWriter<GrpcService.Ride>> streamWritersCopy;
+                lock (_lock)
                 {
-                    await streamWriter.WriteAsync(grpcRide);
+                    streamWritersCopy = new List<IServerStreamWriter<GrpcService.Ride>>(_streamWriters);
+                }
+
+                foreach (var streamWriter in streamWritersCopy)
+                {
+                    try
+                    {
+                        await streamWriter.WriteAsync(grpcRide);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error writing to stream: {ex.Message}");
+                    }
                 }
 
                 return new RideResponse { Status = "Ride added successfully" };
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
             }
         }
 
