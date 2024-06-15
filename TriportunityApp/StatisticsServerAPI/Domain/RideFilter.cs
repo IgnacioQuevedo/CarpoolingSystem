@@ -1,14 +1,13 @@
-namespace StatisticsServerAPI.MqDomain;
+using StatisticsServerAPI.MqDomain;
 
-public class RideFilterDto
+namespace StatisticsServerAPI.Domain;
+
+public class RideFilter
 {
     public Guid? Id { get; set; }
     
     public Guid? DriverId { get; set; }
-    
     public bool? Published { get; set; }
-    
-    public List<Guid>? Passengers { get; set; }
     
     public CitiesEnumEvent? InitialLocation { get; set; }
     
@@ -19,5 +18,5 @@ public class RideFilterDto
     public int? PricePerPerson { get; set; }
     public bool? PetsAllowed { get; set; }
     
-    public Guid VehicleId { get; set; }
+    public Guid? VehicleId { get; set; }
 }

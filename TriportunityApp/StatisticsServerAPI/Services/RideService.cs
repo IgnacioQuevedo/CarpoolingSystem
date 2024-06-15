@@ -1,5 +1,6 @@
 using System.Reflection;
 using StatisticsServerAPI.DataAccess.Repositories;
+using StatisticsServerAPI.Domain;
 using StatisticsServerAPI.MqDomain;
 using StatisticsServerAPI.WebModels.Requests;
 using StatisticsServerAPI.WebModels.Responses;
@@ -14,11 +15,11 @@ public class RideService : IRideService
         _rideRepository = rideRepository;
     }
   
-    public IEnumerable<GetRidesFilteredResponse> GetRidesFiltered(RideFilterDto filters)
+    public IEnumerable<GetRidesFilteredResponse> GetRidesFiltered(RideFilter filters)
     {
         IEnumerable<RideEvent> rides = _rideRepository.GetRides();
         
-        foreach (PropertyInfo filterProperty in typeof(RideFilterDto).GetProperties())
+        foreach (PropertyInfo filterProperty in typeof(RideFilter).GetProperties())
         {
             object filterValue = filterProperty.GetValue(filters);
 
@@ -32,7 +33,6 @@ public class RideService : IRideService
                 }
             }
         }
-
         
         IEnumerable<GetRidesFilteredResponse> rideResponses = rides.Select(ride => new GetRidesFilteredResponse
         {
