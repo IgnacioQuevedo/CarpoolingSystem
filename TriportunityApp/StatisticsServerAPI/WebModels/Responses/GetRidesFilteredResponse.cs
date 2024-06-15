@@ -2,7 +2,7 @@ using StatisticsServerAPI.MqDomain;
 
 namespace StatisticsServerAPI.WebModels.Responses;
 
-public class GetRidesFilteredResponse
+public class GetRideFilteredResponse
 {
     public Guid Id { get; set; }
     public Guid DriverId { get; set; }

@@ -1,6 +1,7 @@
 using System.Reflection;
 using StatisticsServerAPI.DataAccess.Repositories;
 using StatisticsServerAPI.Domain;
+using StatisticsServerAPI.Domain.Exceptions;
 using StatisticsServerAPI.MqDomain;
 using StatisticsServerAPI.WebModels.Requests;
 using StatisticsServerAPI.WebModels.Responses;
@@ -15,7 +16,7 @@ public class RideService : IRideService
         _rideRepository = rideRepository;
     }
   
-    public IEnumerable<GetRidesFilteredResponse> GetRidesFiltered(RideFilter filters)
+    public IEnumerable<GetRideFilteredResponse> GetRidesFiltered(RideFilter filters)
     {
         IEnumerable<RideEvent> rides = _rideRepository.GetRides();
         
@@ -34,7 +35,7 @@ public class RideService : IRideService
             }
         }
         
-        IEnumerable<GetRidesFilteredResponse> rideResponses = rides.Select(ride => new GetRidesFilteredResponse
+        IEnumerable<GetRideFilteredResponse> rideResponses = rides.Select(ride => new GetRideFilteredResponse
         {
             Id = ride.Id,
             DriverId = ride.DriverId,
@@ -51,6 +52,7 @@ public class RideService : IRideService
 
         return rideResponses;
     }
+    
     private IEnumerable<RideEvent> ApplyFilter(IEnumerable<RideEvent> rides, PropertyInfo rideProperty, object filterValue)
     {
         return rides.Where(ride => 
@@ -72,5 +74,47 @@ public class RideService : IRideService
         });
     }
 
+    
+    public CreateRidesSummarizedReportResponse CreateRidesSummarizedReport(int amountOfNextRidesToSummarize)
+    {
+        IEnumerable<RideEvent> ridesAtTheMoment = _rideRepository.GetRides();
+        
+        RidesSummarizedReport summarizedReport = new RidesSummarizedReport
+        {
+            AmountOfNextRidesToSummarize = amountOfNextRidesToSummarize,
+            IndexOfRideToStartWith = ridesAtTheMoment.Count() + 1
+        };
 
+        _rideRepository.AddSummarizedReport(summarizedReport);
+        
+        return new CreateRidesSummarizedReportResponse
+        {
+            Id = summarizedReport.Id
+        };
+    }
+    
+    
+    public bool AskForCompleteness(Guid id)
+    {
+        RidesSummarizedReport reportFound = _rideRepository.GetRidesSummarizedReportById(id);
+
+        bool isComplete = reportFound.AmountOfNextRidesToSummarize == 0;
+        return isComplete;
+    }
+
+    
+
+    public RidesSummarizedReport GetRidesSummarizedReportById(Guid idOfReportToGet)
+    {
+        if (AskForCompleteness(idOfReportToGet))
+        {
+            RidesSummarizedReport reportFound = _rideRepository.GetRidesSummarizedReportById(idOfReportToGet);
+            return reportFound;
+        }
+        else
+        {
+            throw new InvalidReportException("Report is not done yet.");
+        }
+    }
+    
 }
