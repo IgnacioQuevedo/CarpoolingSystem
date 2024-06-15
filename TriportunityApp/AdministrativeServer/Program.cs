@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Grpc.Core;
 using AdministrativeServer.EnumsModels;
 using Google.Protobuf.WellKnownTypes;
+using System.Net.Sockets;
 
 namespace AdministrativeServer
 {
@@ -36,7 +37,7 @@ namespace AdministrativeServer
                 switch (option)
                 {
                     case "1":
-                        CreateRide();
+                        CreateRideAsync();
                         break;
                     case "2":
                         EditRide();
@@ -66,16 +67,68 @@ namespace AdministrativeServer
             }
         }
 
-        static void CreateRide()
+        private static async Task<string> PickUserAsync()
+        {
+            Console.WriteLine("Select the user");
+
+            var request = new Empty();
+
+            try
+            {
+                var usersResponse = _client.GetAllUsers(request);
+
+                if (usersResponse.Users.Count == 0)
+                {
+                    Console.WriteLine("No users found.");
+                    return null;
+                }
+
+                // Iteramos a través de los usuarios y los mostramos
+                int i = 0;
+                foreach (var user in usersResponse.Users)
+                {
+                    Console.WriteLine($"{i++} - User ID: {user.Id}, CI: {user.Ci}, Username: {user.Username}");
+                }
+
+                Console.WriteLine("Select an option:");
+                string optionSelected = Console.ReadLine();
+
+                if (int.TryParse(optionSelected, out int optionValue) && optionValue >= 0 && optionValue < usersResponse.Users.Count)
+                {
+                    Console.WriteLine($"{usersResponse.Users[optionValue].Id} has been selected");
+                    return usersResponse.Users[optionValue].Id.ToString();
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid user number.");
+                    return await PickUserAsync(); // Recursión si la opción seleccionada no es válida
+                }
+            }
+            catch (RpcException ex)
+            {
+                Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return null;
+            }
+        }
+
+
+
+        static async Task CreateRideAsync()
         {
             Console.Clear();
             Console.WriteLine("Create Ride");
-            // Collect ride details from the user
-            Console.Write("Driver ID: ");
-            string driverId = Console.ReadLine();
+
+            // List users and select one
+            Console.WriteLine("Fetching users...");
+            string driverId = await PickUserAsync();
+
             int initialLocation = SelectCity("Initial Location");
             int endingLocation = SelectCity("Ending Location");
-
             string departureTime = InputDepartureTime();
 
             Console.Write("Available Seats: ");
@@ -103,7 +156,7 @@ namespace AdministrativeServer
 
             try
             {
-                var response = _client.AddRide(request);
+                var response = await _client.AddRideAsync(request);
                 Console.WriteLine($"Ride creation status: {response.Status}");
             }
             catch (RpcException ex)
