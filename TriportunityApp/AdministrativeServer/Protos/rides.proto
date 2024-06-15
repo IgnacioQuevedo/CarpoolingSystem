@@ -67,3 +67,35 @@ message RidesRequest {
 message RidesResponse {
     repeated Ride rides = 1;
 }
+
+message Review {
+    string id = 1;
+    string comment = 2;
+    double punctuation = 3;
+}
+
+message Vehicle {
+    string id = 1; 
+    string vehicleModel = 2;
+    string imageAllocatedAtServer = 3;
+}
+
+message DriverInfo {
+    double puntuation = 1;
+    Review reviews = 2;
+    Vehicle vehicles = 3;
+}
+
+message User {
+    string id = 1;
+    string ci = 2;
+    string username = 3;
+    string password = 4;
+    string passwordRepeated = 5;
+    DriverInfo driverAspects = 6;
+}
+
+message UserResponse{
+    repeated User users = 1;
+
+}
