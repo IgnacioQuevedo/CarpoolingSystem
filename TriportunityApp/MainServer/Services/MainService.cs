@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 
 namespace MainServer.Services
 {
@@ -27,7 +28,6 @@ namespace MainServer.Services
 
             try
             {
-                // Send the initial rides available
                 var rides = _rideRepository.GetNextRides(request.Count);
                 foreach (var ride in rides)
                 {
@@ -49,12 +49,11 @@ namespace MainServer.Services
                     await responseStream.WriteAsync(grpcRide);
                 }
 
-                // Keep the stream open
                 await Task.Delay(-1);
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
             finally
             {
@@ -84,7 +83,6 @@ namespace MainServer.Services
                 };
                 grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
 
-                // Notify all connected clients
                 foreach (var streamWriter in _streamWriters)
                 {
                     await streamWriter.WriteAsync(grpcRide);
@@ -94,7 +92,7 @@ namespace MainServer.Services
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
 
@@ -108,7 +106,7 @@ namespace MainServer.Services
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
 
@@ -123,7 +121,7 @@ namespace MainServer.Services
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
 
@@ -132,7 +130,7 @@ namespace MainServer.Services
             try
             {
                 var response = new RideRatingsResponse();
-                var ratings = _rideRepository.GetDriverReviews(Guid.Parse(request.DriverId));
+                var ratings = _rideRepository.GetDriverReviews(Guid.Parse(request.RideId));
 
                 response.Ratings.AddRange(ratings.Select(r => new Rating
                 {
@@ -145,7 +143,80 @@ namespace MainServer.Services
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+        public override Task<RidesResponse> GetNextRides(RidesRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new RidesResponse();
+                var nextRides = _rideRepository.GetNextRides(request.Count);
+
+                response.Rides.AddRange(nextRides.Select(r =>
+                {
+                    var ride = new GrpcService.Ride
+                    {
+                        RideId = r.Id.ToString(),
+                        DriverId = r.DriverId.ToString(),
+                        Published = r.Published,
+                        InitialLocation = (int)r.InitialLocation,
+                        EndingLocation = (int)r.EndingLocation,
+                        DepartureTime = r.DepartureTime.ToString("o"),
+                        AvailableSeats = r.AvailableSeats,
+                        PricePerPerson = r.PricePerPerson,
+                        PetsAllowed = r.PetsAllowed,
+                        VehicleId = r.VehicleId.ToString()
+                    };
+                    ride.Passengers.AddRange(r.Passengers.Select(p => p.ToString()));
+                    return ride;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+        public override Task<RidesResponse> GetAllRides(Empty request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new RidesResponse();
+                var rides = _rideRepository.GetRides();
+
+                if (!rides.Any())
+                {
+                    throw new RpcException(new Status(StatusCode.NotFound, "No rides found"));
+                }
+
+                response.Rides.AddRange(rides.Select(r =>
+                {
+                    var ride = new GrpcService.Ride
+                    {
+                        RideId = r.Id.ToString(),
+                        DriverId = r.DriverId.ToString(),
+                        Published = r.Published,
+                        InitialLocation = (int)r.InitialLocation,
+                        EndingLocation = (int)r.EndingLocation,
+                        DepartureTime = r.DepartureTime.ToString("o"),
+                        AvailableSeats = r.AvailableSeats,
+                        PricePerPerson = r.PricePerPerson,
+                        PetsAllowed = r.PetsAllowed,
+                        VehicleId = r.VehicleId.ToString()
+                    };
+                    ride.Passengers.AddRange(r.Passengers.Select(p => p.ToString()));
+                    return ride;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
 

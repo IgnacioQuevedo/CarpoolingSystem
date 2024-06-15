@@ -2,6 +2,9 @@ syntax = "proto3";
 
 option csharp_namespace = "GrpcService";
 
+
+import "google/protobuf/empty.proto";
+
 service AdministrativeService {
     rpc AddRide (RideRequest) returns (RideResponse);
     rpc DeleteRide (RideRequest) returns (RideResponse);
@@ -9,6 +12,7 @@ service AdministrativeService {
     rpc GetRideRatings (RideRequest) returns (RideRatingsResponse);
     rpc StreamRides (StreamRidesRequest) returns (stream Ride);
     rpc GetNextRides (RidesRequest) returns (RidesResponse);
+    rpc GetAllRides (google.protobuf.Empty) returns (RidesResponse);
 }
 
 message RideRequest {
