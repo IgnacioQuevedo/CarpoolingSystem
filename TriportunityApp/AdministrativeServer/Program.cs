@@ -19,11 +19,15 @@ namespace AdministrativeServer
             using var channel = GrpcChannel.ForAddress("https://localhost:7142");
             _client = new AdministrativeService.AdministrativeServiceClient(channel);
 
+            MainMenuOptions();
+        }
+
+        private static void MainMenuOptions()
+        {
             bool keepRunning = true;
 
             while (keepRunning)
             {
-                Console.Clear();
                 Console.WriteLine("Administrative Server Menu");
                 Console.WriteLine("1. Create Ride");
                 Console.WriteLine("2. Edit Ride");
@@ -69,12 +73,12 @@ namespace AdministrativeServer
 
         private static async Task<string> PickUserAsync()
         {
-            Console.WriteLine("Select the user");
-
-            var request = new Empty();
-
             try
             {
+                Console.WriteLine("Select the user");
+
+                var request = new Empty();
+
                 var usersResponse = _client.GetAllUsers(request);
 
                 if (usersResponse.Users.Count == 0)
@@ -107,11 +111,13 @@ namespace AdministrativeServer
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
+                MainMenuOptions();
                 return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+                MainMenuOptions();
                 return null;
             }
         }
@@ -120,48 +126,51 @@ namespace AdministrativeServer
 
         static async Task CreateRideAsync()
         {
-            Console.Clear();
-            Console.WriteLine("Create Ride");
-
-            // List users and select one
-            Console.WriteLine("Fetching users...");
-            string driverId = await PickUserAsync();
-
-            int initialLocation = SelectCity("Initial Location");
-            int endingLocation = SelectCity("Ending Location");
-            string departureTime = InputDepartureTime();
-
-            Console.Write("Available Seats: ");
-            int availableSeats = int.Parse(Console.ReadLine());
-            Console.Write("Price Per Person: ");
-            double pricePerPerson = double.Parse(Console.ReadLine());
-            Console.Write("Pets Allowed (Y/N): ");
-            bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
-            Console.Write("Vehicle ID: ");
-            string vehicleId = Console.ReadLine();
-
-            var request = new RideRequest
-            {
-                RideId = Guid.NewGuid().ToString(),
-                DriverId = driverId,
-                InitialLocation = initialLocation,
-                EndingLocation = endingLocation,
-                DepartureTime = departureTime,
-                AvailableSeats = availableSeats,
-                PricePerPerson = pricePerPerson,
-                PetsAllowed = petsAllowed,
-                Published = true,
-                VehicleId = vehicleId
-            };
-
             try
             {
+                Console.Clear();
+                Console.WriteLine("Create Ride");
+
+                // List users and select one
+                Console.WriteLine("Fetching users...");
+                string driverId = await PickUserAsync();
+
+                int initialLocation = SelectCity("Initial Location");
+                int endingLocation = SelectCity("Ending Location");
+                string departureTime = InputDepartureTime();
+
+                Console.Write("Available Seats: ");
+                int availableSeats = int.Parse(Console.ReadLine());
+                Console.Write("Price Per Person: ");
+                double pricePerPerson = double.Parse(Console.ReadLine());
+                Console.Write("Pets Allowed (Y/N): ");
+                bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
+                Console.Write("Vehicle ID: ");
+                string vehicleId = Console.ReadLine();
+
+                var request = new RideRequest
+                {
+                    RideId = Guid.NewGuid().ToString(),
+                    DriverId = driverId,
+                    InitialLocation = initialLocation,
+                    EndingLocation = endingLocation,
+                    DepartureTime = departureTime,
+                    AvailableSeats = availableSeats,
+                    PricePerPerson = pricePerPerson,
+                    PetsAllowed = petsAllowed,
+                    Published = true,
+                    VehicleId = vehicleId
+                };
+
                 var response = await _client.AddRideAsync(request);
                 Console.WriteLine($"Ride creation status: {response.Status}");
+
             }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error creating ride: {ex.Status.Detail}");
+                CreateRideAsync();
+
             }
         }
 
