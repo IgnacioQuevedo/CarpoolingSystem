@@ -34,32 +34,44 @@ namespace AdministrativeServer
                 Console.Write("Select an option: ");
                 var option = Console.ReadLine();
 
-                switch (option)
+                try
                 {
-                    case "1":
-                        await CreateRide();
-                        break;
-                    case "2":
-                        await EditRide();
-                        break;
-                    case "3":
-                        await DeleteRide();
-                        break;
-                    case "4":
-                        await ViewRideRatings();
-                        break;
-                    case "5":
-                        await ViewNextNRides();
-                        break;
-                    case "6":
-                        keepRunning = false;
-                        break;
-                    default:
-                        Console.WriteLine("Invalid option. Please try again.");
-                        break;
+                    switch (option)
+                    {
+                        case "1":
+                            await CreateRide();
+                            break;
+                        case "2":
+                            await EditRide();
+                            break;
+                        case "3":
+                            await DeleteRide();
+                            break;
+                        case "4":
+                            await ViewRideRatings();
+                            break;
+                        case "5":
+                            await ViewNextNRides();
+                            break;
+                        case "6":
+                            keepRunning = false;
+                            break;
+                        default:
+                            Console.WriteLine("Invalid option. Please try again.");
+                            break;
+                    }
+                }
+                catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+                {
+                    Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                    keepRunning = false;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
                 }
 
-                if (keepRunning)
+                if (keepRunning && option != "5")
                 {
                     Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
@@ -73,7 +85,6 @@ namespace AdministrativeServer
             Console.WriteLine("Create Ride");
             try
             {
-                // Collect ride details from the user
                 Console.Write("Driver ID: ");
                 string driverId = Console.ReadLine();
                 int initialLocation = SelectCity("Initial Location");
@@ -104,9 +115,17 @@ namespace AdministrativeServer
                 var response = await _client.AddRideAsync(request);
                 Console.WriteLine($"Ride creation status: {response.Status}");
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+            }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error creating ride: {ex.Status.Detail}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
 
@@ -116,9 +135,15 @@ namespace AdministrativeServer
             Console.WriteLine("Edit Ride");
             try
             {
-                // Collect ride details from the user
-                string rideId = SelectRide("Edit");
-                if (rideId == null) return; // Return to main menu if no rides are available
+                string rideId;
+                while (true)
+                {
+                    rideId = SelectRide("Edit");
+                    if (rideId != null)
+                        break;
+                    else
+                        Console.WriteLine("Invalid selection. Please try again.");
+                }
 
                 Console.Write("Driver ID: ");
                 string driverId = Console.ReadLine();
@@ -149,11 +174,21 @@ namespace AdministrativeServer
                 var response = await _client.UpdateRideAsync(request);
                 Console.WriteLine($"Ride update status: {response.Status}");
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+            }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error updating ride: {ex.Status.Detail}");
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
         }
+
+
 
         static async Task DeleteRide()
         {
@@ -161,20 +196,36 @@ namespace AdministrativeServer
             Console.WriteLine("Delete Ride");
             try
             {
-                // Collect ride ID from the user
-                string rideId = SelectRide("Delete");
-                if (rideId == null) return; // Return to main menu if no rides are available
+                string rideId;
+                while (true)
+                {
+                    rideId = SelectRide("Delete");
+                    if (rideId != null)
+                        break;
+                    else
+                        Console.WriteLine("Invalid selection. Please try again.");
+                }
 
                 var request = new RideRequest { RideId = rideId };
 
                 var response = await _client.DeleteRideAsync(request);
                 Console.WriteLine($"Ride deletion status: {response.Status}");
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+            }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error deleting ride: {ex.Status.Detail}");
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
         }
+
+
 
         static async Task ViewRideRatings()
         {
@@ -182,9 +233,8 @@ namespace AdministrativeServer
             Console.WriteLine("View Ride Ratings");
             try
             {
-                // Collect ride ID from the user
                 string rideId = SelectRide("View Ratings");
-                if (rideId == null) return; // Return to main menu if no rides are available
+                if (rideId == null) return;
 
                 var request = new RideRequest { RideId = rideId };
 
@@ -194,9 +244,17 @@ namespace AdministrativeServer
                     Console.WriteLine($"Rating: {rating.Punctuation}, Comment: {rating.Comment}");
                 }
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+            }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error retrieving ride ratings: {ex.Status.Detail}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
 
@@ -206,9 +264,11 @@ namespace AdministrativeServer
             Console.WriteLine("View Next N Rides");
             try
             {
-                // Collect number of rides from the user
-                Console.Write("Enter the number of rides to view: ");
-                int n = int.Parse(Console.ReadLine());
+                int n;
+                do
+                {
+                    Console.Write("Enter the number of rides to view : ");
+                } while (!int.TryParse(Console.ReadLine(), out n) || n < 1);
 
                 var request = new StreamRidesRequest { Count = n };
 
@@ -217,25 +277,36 @@ namespace AdministrativeServer
                 await foreach (var ride in call.ResponseStream.ReadAllAsync())
                 {
                     rideCount++;
-                    DisplayRide(ride);
+                    DisplayRide(ride, rideCount);
 
                     if (rideCount == n)
                     {
-                        Console.WriteLine("Press any key to return to the main menu...");
-                        Console.ReadKey();
                         break;
                     }
                 }
+
+                Console.WriteLine("You have seen the next {0} rides.", n);
+            }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
             }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error retrieving next rides: {ex.Status.Detail}");
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            }
         }
 
-        static void DisplayRide(Ride ride)
+
+
+        static void DisplayRide(Ride ride, int index)
         {
             Console.WriteLine("==================================================");
+            Console.WriteLine($"Ride {index}:");
             Console.WriteLine($"Ride ID: {ride.RideId}");
             Console.WriteLine($"Driver ID: {ride.DriverId}");
             Console.WriteLine($"Published: {ride.Published}");
@@ -249,6 +320,7 @@ namespace AdministrativeServer
             Console.WriteLine("Passengers: " + string.Join(", ", ride.Passengers));
             Console.WriteLine("==================================================");
         }
+
 
         static string SelectRide(string action)
         {
@@ -266,14 +338,6 @@ namespace AdministrativeServer
                 return null;
             }
 
-            if (!response.Rides.Any())
-            {
-                Console.WriteLine("No rides found.");
-                Console.WriteLine("Press any key to return to the main menu...");
-                Console.ReadKey();
-                return null;
-            }
-
             int startIndex = 0;
 
             while (true)
@@ -282,13 +346,12 @@ namespace AdministrativeServer
                 if (!ridesToShow.Any())
                 {
                     Console.WriteLine("No more rides to show.");
-                    break;
+                    return null; // No rides to show, exit the loop
                 }
 
                 for (int i = 0; i < ridesToShow.Count; i++)
                 {
-                    Console.WriteLine($"Ride {startIndex + i + 1}");
-                    DisplayRide(ridesToShow[i]);
+                    DisplayRide(ridesToShow[i], startIndex + i + 1);
                 }
 
                 if (ridesToShow.Count < 10)
@@ -305,127 +368,136 @@ namespace AdministrativeServer
                 startIndex += 10;
             }
 
-            Console.Write("Enter the number of the ride: ");
-            if (!int.TryParse(Console.ReadLine(), out int rideIndex) || rideIndex <= 0 || rideIndex > response.Rides.Count)
+            while (true)
             {
-                Console.WriteLine("Invalid ride number selected.");
-                return null;
+                Console.Write("Enter the number of the ride: ");
+                if (int.TryParse(Console.ReadLine(), out int rideIndex) && rideIndex > 0 && rideIndex <= response.Rides.Count)
+                {
+                    return response.Rides[rideIndex - 1].RideId;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid ride number selected. Please try again.");
+                }
             }
-
-            return response.Rides[rideIndex - 1].RideId;
         }
+
+
 
         static int SelectCity(string cityType)
         {
-            Console.WriteLine($"Select {cityType}");
-            var cities = System.Enum.GetValues(typeof(CitiesEnum)).Cast<CitiesEnum>().ToList();
-
-            for (int i = 0; i < cities.Count; i++)
+            while (true)
             {
-                Console.WriteLine($"{i + 1}. {cities[i]}");
-            }
+                Console.WriteLine($"Select {cityType}");
+                var cities = System.Enum.GetValues(typeof(CitiesEnum)).Cast<CitiesEnum>().ToList();
 
-            Console.Write("Enter the number of the city: ");
-            if (!int.TryParse(Console.ReadLine(), out int cityIndex) || cityIndex <= 0 || cityIndex > cities.Count)
-            {
-                Console.WriteLine("Invalid city number selected.");
-                return SelectCity(cityType);
-            }
+                for (int i = 0; i < cities.Count; i++)
+                {
+                    Console.WriteLine($"{i + 1}. {cities[i]}");
+                }
 
-            return (int)cities[cityIndex - 1];
+                Console.Write("Enter the number of the city: ");
+                if (int.TryParse(Console.ReadLine(), out int cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count)
+                {
+                    return cityIndex - 1;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid city number selected. Please try again.");
+                }
+            }
         }
 
         static string InputDepartureTime()
         {
-            Console.Write("Enter Year of Departure: ");
-            if (!int.TryParse(Console.ReadLine(), out int year))
+            while (true)
             {
-                Console.WriteLine("Invalid year entered.");
-                return InputDepartureTime();
-            }
+                try
+                {
+                    Console.Write("Enter Year of Departure: ");
+                    int year = int.Parse(Console.ReadLine());
+                    Console.Write("Enter Month of Departure: ");
+                    int month = int.Parse(Console.ReadLine());
+                    Console.Write("Enter Day of Departure: ");
+                    int day = int.Parse(Console.ReadLine());
+                    Console.Write("Enter Hour of Departure (24-hour format): ");
+                    int hour = int.Parse(Console.ReadLine());
 
-            Console.Write("Enter Month of Departure: ");
-            if (!int.TryParse(Console.ReadLine(), out int month) || month < 1 || month > 12)
-            {
-                Console.WriteLine("Invalid month entered.");
-                return InputDepartureTime();
+                    DateTime departureTime = new DateTime(year, month, day, hour, 0, 0, DateTimeKind.Utc);
+                    return departureTime.ToString("o");
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Invalid date or time entered. Please try again.");
+                }
             }
-
-            Console.Write("Enter Day of Departure: ");
-            if (!int.TryParse(Console.ReadLine(), out int day) || day < 1 || day > DateTime.DaysInMonth(year, month))
-            {
-                Console.WriteLine("Invalid day entered.");
-                return InputDepartureTime();
-            }
-
-            Console.Write("Enter Hour of Departure (24-hour format): ");
-            if (!int.TryParse(Console.ReadLine(), out int hour) || hour < 0 || hour > 23)
-            {
-                Console.WriteLine("Invalid hour entered.");
-                return InputDepartureTime();
-            }
-
-            DateTime departureTime = new DateTime(year, month, day, hour, 0, 0, DateTimeKind.Utc);
-            return departureTime.ToString("o");
         }
 
         static int PickAmountOfAvailableSeats()
         {
-            Console.WriteLine("Introduce the number of seats available on your vehicle");
-
-            Console.WriteLine("1");
-            Console.WriteLine("2");
-            Console.WriteLine("3");
-            Console.WriteLine("4");
-            Console.WriteLine("5");
-            Console.WriteLine("6");
-
-            string optionSelected = Console.ReadLine();
-
-            if (int.TryParse(optionSelected, out int optionValue))
+            while (true)
             {
-                if (optionValue > 0 && optionValue <= 6)
+                Console.WriteLine("Introduce the number of seats available on your vehicle");
+
+                Console.WriteLine("1");
+                Console.WriteLine("2");
+                Console.WriteLine("3");
+                Console.WriteLine("4");
+                Console.WriteLine("5");
+                Console.WriteLine("6");
+
+                if (int.TryParse(Console.ReadLine(), out int optionValue) && optionValue > 0 && optionValue <= 6)
                 {
                     return optionValue;
                 }
+                else
+                {
+                    Console.WriteLine("Please introduce a valid number of seats (1-6).");
+                }
             }
-
-            Console.WriteLine("Please introduce a valid number of seats (1-6).");
-            return PickAmountOfAvailableSeats();
         }
 
         static double IntroducePricePerPerson()
         {
-            Console.WriteLine("Introduce the price per person of your ride");
-
-            string priceSet = Console.ReadLine();
-
-            if (double.TryParse(priceSet, out var pricePerPerson) && pricePerPerson >= 0)
+            while (true)
             {
-                return pricePerPerson;
-            }
+                Console.WriteLine("Introduce the price per person of your ride");
 
-            Console.WriteLine("Please introduce a correct numeric value for the price, try again.");
-            return IntroducePricePerPerson();
+                if (double.TryParse(Console.ReadLine(), out double pricePerPerson) && pricePerPerson >= 0)
+                {
+                    return pricePerPerson;
+                }
+                else
+                {
+                    Console.WriteLine("Please introduce a correct numeric value for the price, try again.");
+                }
+            }
         }
 
         static bool DecideIfPetsAreAllowed()
         {
-            Console.WriteLine("Do you want to allow pets in your vehicle?");
-            Console.WriteLine("Y - If yes");
-            Console.WriteLine("Another key - If not");
-
-            string optionSelected = Console.ReadLine().ToUpper();
-
-            if (optionSelected != null && optionSelected.Equals("Y"))
+            while (true)
             {
-                Console.WriteLine("You have allowed pets on your vehicle");
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("You have not allowed pets on your vehicle");
-                return false;
+                Console.WriteLine("Do you want to allow pets in your vehicle?");
+                Console.WriteLine("Y - If yes");
+                Console.WriteLine("Another key - If not");
+
+                string optionSelected = Console.ReadLine().ToUpper();
+
+                if (optionSelected != null && optionSelected.Equals("Y"))
+                {
+                    Console.WriteLine("You have allowed pets on your vehicle");
+                    return true;
+                }
+                else if (optionSelected != null && !optionSelected.Equals("Y"))
+                {
+                    Console.WriteLine("You have not allowed pets on your vehicle");
+                    return false;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid option. Please try again.");
+                }
             }
         }
     }

@@ -9,43 +9,74 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using MainServer.Exceptions;
 
 namespace MainServer.Services
 {
     public class MainService : AdministrativeService.AdministrativeServiceBase
     {
         private readonly RideRepository _rideRepository;
-        private static readonly List<IServerStreamWriter<GrpcService.Ride>> _streamWriters = new List<IServerStreamWriter<GrpcService.Ride>>();
-        private static readonly object _lock = new object();
+        private readonly List<IServerStreamWriter<GrpcService.Ride>> _subscribers = new List<IServerStreamWriter<GrpcService.Ride>>();
 
         public MainService()
         {
             _rideRepository = new RideRepository();
         }
 
+
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)
         {
-            lock (_lock)
-            {
-                _streamWriters.Add(responseStream);
-            }
+            int remainingRides = request.Count;
+            int lastRideCount = 0;
 
-            try
+            while (remainingRides > 0)
             {
-                await Task.Delay(-1, context.CancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                // Handle stream cancellation
-            }
-            finally
-            {
-                lock (_lock)
+                List<Objects.Domain.Ride> newRides = null;
+                try
                 {
-                    _streamWriters.Remove(responseStream);
+                    var currentRides = _rideRepository.GetRides();
+                    if (currentRides.Count > lastRideCount)
+                    {
+                        newRides = currentRides.Skip(lastRideCount).Take(currentRides.Count - lastRideCount).ToList();
+                        lastRideCount = currentRides.Count;
+                    }
+                }
+                catch (RideException)
+                {
+                    
+                }
+
+                if (newRides != null && newRides.Any())
+                {
+                    foreach (var ride in newRides)
+                    {
+                        var grpcRide = new GrpcService.Ride
+                        {
+                            RideId = ride.Id.ToString(),
+                            DriverId = ride.DriverId.ToString(),
+                            Published = ride.Published,
+                            InitialLocation = (int)ride.InitialLocation,
+                            EndingLocation = (int)ride.EndingLocation,
+                            DepartureTime = ride.DepartureTime.ToString("o"),
+                            AvailableSeats = ride.AvailableSeats,
+                            PricePerPerson = ride.PricePerPerson,
+                            PetsAllowed = ride.PetsAllowed,
+                            VehicleId = ride.VehicleId.ToString()
+                        };
+                        grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
+
+                        await responseStream.WriteAsync(grpcRide);
+                        remainingRides--;
+
+                        if (remainingRides <= 0)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
         }
+
 
         public override async Task<RideResponse> AddRide(RideRequest request, ServerCallContext context)
         {
@@ -69,23 +100,6 @@ namespace MainServer.Services
                 };
                 grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
 
-                List<IServerStreamWriter<GrpcService.Ride>> streamWritersCopy;
-                lock (_lock)
-                {
-                    streamWritersCopy = new List<IServerStreamWriter<GrpcService.Ride>>(_streamWriters);
-                }
-
-                foreach (var streamWriter in streamWritersCopy)
-                {
-                    try
-                    {
-                        await streamWriter.WriteAsync(grpcRide);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error writing to stream: {ex.Message}");
-                    }
-                }
 
                 return new RideResponse { Status = "Ride added successfully" };
             }
