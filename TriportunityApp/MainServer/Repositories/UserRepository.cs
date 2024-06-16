@@ -232,6 +232,49 @@ namespace MainServer.Repositories
             return vehicle;
         }
 
+        public ICollection<User> GetUsers()
+        {
+            Console.WriteLine("Getting users from the database...");
+
+            ICollection<User> users = new List<User>();
+
+            try
+            {
+                LockManager.StartReading();
+
+                // Assumming MemoryDatabase.GetInstance() returns a valid instance
+                var memoryDatabase = MemoryDatabase.GetInstance();
+
+                if (memoryDatabase == null || memoryDatabase.Users == null)
+                {
+                    throw new UserException("Memory database instance or users collection is null");
+                }
+
+                users = memoryDatabase.Users;
+
+                if (users.Count == 0)
+                {
+                    throw new UserException("No users found");
+                }
+            }
+            catch (UserException)
+            {
+                throw; // Re-throw UserException to be handled higher up
+            }
+            catch (Exception ex)
+            {
+                throw new UserException($"Error retrieving users: {ex.Message}");
+            }
+            finally
+            {
+                LockManager.StopReading();
+            }
+
+            return users;
+        }
+
+
+
 
     }
 }

@@ -2,12 +2,9 @@ using MainServer.DataContext;
 using MainServer.Objects.Domain;
 using System.Collections.Generic;
 using System;
-using MainServer.Objects.DTOs.RideModelDtos;
-using System.Linq;
 using MainServer.Exceptions;
+using System.Linq;
 using MainServer.Objects.Domain.UserModels;
-using MainServer.Objects.Domain.Enums;
-using MainServer.Objects.Domain.VehicleModels;
 using MainServer.Repositories;
 
 namespace Server.Repositories
@@ -147,11 +144,9 @@ namespace Server.Repositories
             return availableRides;
         }
 
-
         public void DeleteRide(Guid rideId)
         {
-            Ride rideToDelete = new Ride();
-            rideToDelete = GetRideById(rideId);
+            Ride rideToDelete = GetRideById(rideId);
 
             LockManager.StartWriting();
             MemoryDatabase.GetInstance().Rides.Remove(rideToDelete);
@@ -165,7 +160,6 @@ namespace Server.Repositories
             rideToCancel.Published = false;
             LockManager.StopWriting();
         }
-
 
         public ICollection<Ride> FilterByPrice(double minPrice, double maxPrice)
         {
@@ -223,11 +217,6 @@ namespace Server.Repositories
                 exceptionMessage = "You can't review your own ride";
             }
 
-            if (ride.DepartureTime > DateTime.Now)
-            {
-                exceptionMessage = "You can't review a ride that hasn't happened yet";
-            }
-
             LockManager.StopReading();
 
             if (exceptionMessage != "")
@@ -281,6 +270,21 @@ namespace Server.Repositories
             }
 
             return userRides;
+        }
+
+        public ICollection<Ride> GetNextRides(int count)
+        {
+            LockManager.StartReading();
+
+            var rides = MemoryDatabase.GetInstance().Rides
+                .Where(ride => ride.Published && ride.DepartureTime > DateTime.Now && ride.AvailableSeats > 0)
+                .OrderBy(ride => ride.DepartureTime)
+                .Take(count)
+                .ToList();
+
+            LockManager.StopReading();
+
+            return rides;
         }
     }
 }
