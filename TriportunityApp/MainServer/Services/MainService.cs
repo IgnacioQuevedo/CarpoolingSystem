@@ -22,6 +22,7 @@ namespace MainServer.Services
         public MainService()
         {
             _rideRepository = new RideRepository();
+            _userRepository = new UserRepository();
         }
 
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)

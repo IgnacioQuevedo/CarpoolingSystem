@@ -79,4 +79,3 @@ message User {
 message UsersResponse {
     repeated User users = 1;
 }
-
