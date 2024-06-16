@@ -1,31 +1,31 @@
 using StatisticsServerAPI.Domain;
 using StatisticsServerAPI.MqDomain;
+using System.Collections.Concurrent;
 
 namespace StatisticsServerAPI.DataAccess.MemoryDatabase;
 
-public class Database 
+public class Database
 {
-    public ICollection<LoginEvent> UserLoginEvents = new List<LoginEvent>();
-    public ICollection<RideEvent> RideEvents = new List<RideEvent>();
-    public ICollection<RidesSummarizedReport> RidesSummarizedReports = new List<RidesSummarizedReport>();
-    
+    public ConcurrentBag<LoginEvent> UserLoginEvents = new ConcurrentBag<LoginEvent>();
+    public ConcurrentBag<RideEvent> RideEvents = new ConcurrentBag<RideEvent>();
+    public ConcurrentBag<RidesSummarizedReport> RidesSummarizedReports = new ConcurrentBag<RidesSummarizedReport>();
+
     private static Database _database;
-    private static readonly object padlock = new object();
+    private static readonly object singletonPadLock = new object();
 
-
-    public Database()
+    private Database()
     {
     }
 
     public static Database GetInstance()
     {
-        lock (padlock)
+        lock (singletonPadLock)
         {
             if (_database is null)
             {
                 _database = new Database();
             }
-    
+
             return _database;
         }
     }
