@@ -232,6 +232,80 @@ namespace MainServer.Repositories
             return vehicle;
         }
 
+        public ICollection<User> GetUsers()
+        {
+            Console.WriteLine("Getting users from the database...");
+
+            ICollection<User> users = new List<User>();
+
+            try
+            {
+                LockManager.StartReading();
+
+                var memoryDatabase = MemoryDatabase.GetInstance();
+
+                if (memoryDatabase == null || memoryDatabase.Users == null)
+                {
+                    throw new UserException("Memory database instance or users collection is null");
+                }
+
+                users = memoryDatabase.Users;
+
+                if (users.Count == 0)
+                {
+                    throw new UserException("No users found");
+                }
+            }
+            catch (UserException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new UserException($"Error retrieving users: {ex.Message}");
+            }
+            finally
+            {
+                LockManager.StopReading();
+            }
+
+            return users;
+        }
+
+
+        public ICollection<Vehicle> GetAllVehiclesByUser(Guid userId)
+        {
+            User user;
+            string exceptionMessage = "";
+            ICollection<Vehicle> vehicles = new List<Vehicle>();
+
+            user = GetUserById(userId);
+
+            LockManager.StartReading();
+
+            if (user.DriverAspects != null)
+            {
+                vehicles = user.DriverAspects.Vehicles;
+
+                if (vehicles == null || vehicles.Count == 0)
+                {
+                    exceptionMessage = "No vehicles found for the user";
+                }
+            }
+            else
+            {
+                exceptionMessage = "User is not a driver";
+            }
+
+            LockManager.StopReading();
+
+            if (!string.IsNullOrEmpty(exceptionMessage))
+            {
+                throw new UserException(exceptionMessage);
+            }
+
+            return vehicles;
+        }
 
     }
 }

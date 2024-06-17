@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainServer", "MainServer\Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdministrativeServer", "AdministrativeServer\AdministrativeServer.csproj", "{289A6F4D-E88B-472F-B172-3A56EACAD1BE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatisticsServerAPI", "StatisticsServerAPI\StatisticsServerAPI.csproj", "{519A7EA9-6138-46DB-8C7A-5B1AFDC48565}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{289A6F4D-E88B-472F-B172-3A56EACAD1BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{519A7EA9-6138-46DB-8C7A-5B1AFDC48565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{519A7EA9-6138-46DB-8C7A-5B1AFDC48565}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{519A7EA9-6138-46DB-8C7A-5B1AFDC48565}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{519A7EA9-6138-46DB-8C7A-5B1AFDC48565}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

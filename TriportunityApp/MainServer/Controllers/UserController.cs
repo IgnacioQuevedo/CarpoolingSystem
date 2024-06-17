@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Common;
 using MainServer.Objects.Domain.UserModels;
 using MainServer.Objects.Domain.VehicleModels;
+using MainServer.Objects.Events;
 using MainServer.Repositories;
+using RabbitMQ.Client;
 
 
 namespace MainServer.Controllers
@@ -22,11 +24,9 @@ namespace MainServer.Controllers
             _token = token;
         }
 
-        #region COMPLETADOS
-
         public async Task RegisterUserAsync(string[] requestArray, TcpClient _clientServerSide)
 
-    {
+        {
             try
             {
                 string ci = requestArray[2];
@@ -38,17 +38,19 @@ namespace MainServer.Controllers
 
                 _userRepository.RegisterUser(userToRegister);
 
-                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" + userToRegister.Id;
+                string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" +
+                                 userToRegister.Id;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exception)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exception.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exception.Message;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
 
-        public async Task LoginUserAsync(string[] requestArray, TcpClient _clientServerSide)
+        public async Task LoginUserAsync(string[] requestArray, TcpClient _clientServerSide, IModel channel)
         {
             try
             {
@@ -78,11 +80,19 @@ namespace MainServer.Controllers
                 }
 
                 await NetworkHelper.SendMessageAsync(_clientServerSide, messageLogin);
+                
+                LoginEventRequest userLoginEventRequest = new LoginEventRequest
+                {
+                    Username = userLogged.Username
+                };
+                MomHelper.PublishMessage(MomConstraints.exchangeName, MomConstraints.userQueueRoutingKey,
+                    userLoginEventRequest, channel);
             }
 
             catch (Exception exceptionCaught)
             {
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
@@ -96,13 +106,14 @@ namespace MainServer.Controllers
                 DriverInfo driverInfo = new DriverInfo();
                 _userRepository.RegisterDriver(userIdToCreate, driverInfo);
 
-                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" + userIdToCreate;
+                string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" +
+                                     userIdToCreate;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, responseMsg);
-
             }
             catch (Exception exceptionCaught)
             {
-                string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string excepetionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
@@ -143,11 +154,11 @@ namespace MainServer.Controllers
                     _userRepository.DeleteDriver(Guid.Parse(messageArray[2]));
                 }
 
-                string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                  CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
             }
         }
-
 
 
         public async Task GetUserByIdAsync(string[] messageArray, TcpClient _clientServerSide)
@@ -178,20 +189,16 @@ namespace MainServer.Controllers
                         message += vehicle.Id + ":" + vehicle.VehicleModel + ":" + vehicle.ImageAllocatedAtServer +
                                    ",";
                     }
-
                 }
 
                 await NetworkHelper.SendMessageAsync(_clientServerSide, message);
             }
             catch (Exception exceptionCaught)
             {
-                string excepetionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
+                string excepetionMessageToClient = ProtocolConstants.Exception + ";" +
+                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
                 await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
             }
         }
-
-        #endregion
-
-
     }
 }

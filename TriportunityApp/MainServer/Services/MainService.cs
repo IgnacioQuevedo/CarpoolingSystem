@@ -1,4 +1,4 @@
-﻿using Grpc.Core;
+using Grpc.Core;
 using GrpcService;
 using MainServer.Objects.Domain;
 using MainServer.Objects.Domain.Enums;
@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using MainServer.Exceptions;
+using MainServer.Objects.Domain.VehicleModels;
 
 namespace MainServer.Services
 {
@@ -17,10 +18,13 @@ namespace MainServer.Services
     {
         private readonly RideRepository _rideRepository;
         private readonly List<IServerStreamWriter<GrpcService.Ride>> _subscribers = new List<IServerStreamWriter<GrpcService.Ride>>();
+        private readonly UserRepository _userRepository;
+
 
         public MainService()
         {
             _rideRepository = new RideRepository();
+            _userRepository = new UserRepository();
         }
 
 
@@ -237,6 +241,61 @@ namespace MainServer.Services
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
+        public override Task<UsersResponse> GetAllUsers(Empty request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new UsersResponse();
+                var users = _userRepository.GetUsers();
+
+                response.Users.AddRange(users.Select(u =>
+                {
+                    var user = new GrpcService.User
+                    {
+                        Id = u.Id.ToString(),
+                        Ci = u.Ci,
+                        Username = u.Username
+                    };
+                    return user;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+        public override Task<VehiclesResponse> GetAllVehiclesByUser(GetAllVehiclesByUserRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new VehiclesResponse();
+                var vehicles = _userRepository.GetAllVehiclesByUser(Guid.Parse(request.UserId));
+
+                response.Vehicles.AddRange(vehicles.Select(v =>
+                {
+                    var vehicle = new GrpcService.Vehicle
+                    {
+                        Id = v.Id.ToString(),
+                        VehicleModel = v.VehicleModel
+
+                    };
+                    return vehicle;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+
 
         private MainServer.Objects.Domain.Ride ConvertToDomainRide(RideRequest request)
         {

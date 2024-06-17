@@ -8,7 +8,9 @@ using MainServer.Exceptions;
 using MainServer.Objects.Domain;
 using MainServer.Objects.Domain.Enums;
 using MainServer.Objects.Domain.VehicleModels;
+using MainServer.Objects.Events;
 using MainServer.Repositories;
+using RabbitMQ.Client;
 using Server.Repositories;
 
 namespace MainServer.Controllers
@@ -24,7 +26,7 @@ namespace MainServer.Controllers
             _token = token;
         }
 
-        public async Task CreateRide(string[] messageArray, TcpClient _clientServerSide)
+        public async Task CreateRide(string[] messageArray, TcpClient _clientServerSide, IModel channel)
         {
             try
             {
@@ -50,6 +52,25 @@ namespace MainServer.Controllers
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.CreateRide + ";" + ride.Id;
 
                 await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                
+                
+                RideEventRequest rideEventRequest = new RideEventRequest
+                {
+                    Id = ride.Id,
+                    DriverId = ride.DriverId,
+                    Published = ride.Published,
+                    Passengers = ride.Passengers,
+                    InitialLocation = (CitiesEnumEventRequest)ride.InitialLocation,
+                    EndingLocation = (CitiesEnumEventRequest)ride.EndingLocation,
+                    DepartureTime = ride.DepartureTime,
+                    AvailableSeats = ride.AvailableSeats,
+                    PricePerPerson = ride.PricePerPerson,
+                    PetsAllowed = ride.PetsAllowed,
+                    VehicleId = ride.VehicleId
+                };
+                MomHelper.PublishMessage(MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, rideEventRequest,channel);
+                
+                
             }
             catch (Exception exceptionCaught)
             {
