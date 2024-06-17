@@ -500,7 +500,7 @@ namespace AdministrativeServer
             return response.Rides[rideIndex - 1].RideId;
         }
 
-        static async Task<int> SelectCityAsync(string cityType)
+        static int SelectCity(string cityType)
         {
             bool validInput;
             int cityIndex;
@@ -517,7 +517,7 @@ namespace AdministrativeServer
 
                 Console.Write("Enter the number of the city: ");
                 validInput = int.TryParse(Console.ReadLine(), out cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count;
-              
+
                 if (!validInput)
                 {
                     Console.WriteLine("Invalid city number selected. Please try again.");
@@ -527,7 +527,7 @@ namespace AdministrativeServer
             return cityIndex - 1;
         }
 
-        static async Task<string> InputDepartureTimeAsync()
+        static string InputDepartureTime()
         {
             bool validInput;
             int year, month, day, hour;
