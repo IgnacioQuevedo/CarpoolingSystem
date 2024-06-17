@@ -7,7 +7,7 @@ namespace StatisticsServerAPI.Services;
 
 public interface IRideService
 {
-    public IEnumerable<GetRideFilteredResponse> GetRidesFiltered(RideFilter filters);
+    public IEnumerable<GetRideFilteredResponse> GenerateRidesFiltered(RideFilter filters);
     public RidesSummarizedReport GetRidesSummarizedReportById(Guid id);
     public bool AskForCompleteness(Guid id);
     public CreateRidesSummarizedReportResponse CreateRidesSummarizedReport(int amountOfNextRidesToSummarize);

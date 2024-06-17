@@ -21,7 +21,7 @@ namespace StatisticsServerAPI.Controllers
         }
 
         [HttpPost("filters")]
-        public IActionResult GetRidesFiltered([FromBody] RideFilterRequest filters)
+        public IActionResult GenerateRidesFiltered([FromBody] RideFilterRequest filters)
         {
             try
             {
