@@ -40,13 +40,13 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.Register + ";" +
                                  userToRegister.Id;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exception)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exception.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -79,8 +79,8 @@ namespace MainServer.Controllers
                     }
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, messageLogin);
-                
+                await NetworkHelper.SendMessageAsync(_clientServerSide, messageLogin, _token);
+
                 LoginEventRequest userLoginEventRequest = new LoginEventRequest
                 {
                     Username = userLogged.Username
@@ -93,7 +93,7 @@ namespace MainServer.Controllers
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -108,13 +108,13 @@ namespace MainServer.Controllers
 
                 string responseMsg = ProtocolConstants.Response + ";" + CommandsConstraints.CreateDriver + ";" +
                                      userIdToCreate;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, responseMsg);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, responseMsg, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" +
                                                    CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient, _token);
             }
         }
 
@@ -132,7 +132,7 @@ namespace MainServer.Controllers
 
                 string responseVehicleModelMsg = ProtocolConstants.Response + ";" + CommandsConstraints.AddVehicle + ";"
                                                  + vehicleToAdd.Id;
-                Task responseSent = NetworkHelper.SendMessageAsync(_clientServerSide, responseVehicleModelMsg);
+                Task responseSent = NetworkHelper.SendMessageAsync(_clientServerSide, responseVehicleModelMsg, _token);
 
                 _token.ThrowIfCancellationRequested();
                 string imageAllocatedAtServer = await NetworkHelper.ReceiveImageAsync(_clientServerSide, _token);
@@ -156,7 +156,7 @@ namespace MainServer.Controllers
 
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -191,13 +191,13 @@ namespace MainServer.Controllers
                     }
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string excepetionMessageToClient = ProtocolConstants.Exception + ";" +
                                                    CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, excepetionMessageToClient, _token);
             }
         }
     }

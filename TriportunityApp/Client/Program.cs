@@ -45,7 +45,7 @@ namespace Client
                 Console.WriteLine("Waiting for the server to be ready");
                 Console.WriteLine("");
 
-                string welcomeMessage = await NetworkHelper.ReceiveMessageAsync(client);
+                string welcomeMessage = await NetworkHelper.ReceiveMessageAsync(client, _token);
 
                 _closeApp = string.IsNullOrEmpty(welcomeMessage);
 
@@ -118,7 +118,7 @@ namespace Client
                 Console.WriteLine("");
                 Console.WriteLine("Closed App with success!");
 
-                await _userService.CloseAppAsync(client);
+                await _userService.CloseAppAsync(client, _token);
                 _closeApp = true;
             }
             catch (Exception e)
@@ -178,7 +178,7 @@ namespace Client
                 RegisterUserRequest clientToRegister =
                     new RegisterUserRequest(ci, usernameRegister, passwordRegister, repeatedPassword, null);
 
-                await _userService.RegisterClientAsync(client, clientToRegister);
+                await _userService.RegisterClientAsync(client, clientToRegister, _token);
             }
             catch (Exception exception)
             {
@@ -197,7 +197,7 @@ namespace Client
                 string password = Console.ReadLine();
 
                 LoginUserRequest loginUserRequest = new LoginUserRequest(username, password);
-                _userLogged = await _userService.LoginClientAsync(client, loginUserRequest);
+                _userLogged = await _userService.LoginClientAsync(client, loginUserRequest, _token);
             }
             catch (Exception exception)
             {
@@ -309,7 +309,7 @@ namespace Client
                 string path;
                 string addNewVehicle = "Y";
 
-                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId);
+                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId, _token);
                 bool firstVehicle = _userLogged.DriverAspects == null || _userLogged.DriverAspects.Vehicles.Count == 0;
 
                 while (addNewVehicle.Equals("Y"))
@@ -335,7 +335,7 @@ namespace Client
                     addNewVehicle = Console.ReadLine().ToUpper();
                 }
 
-                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId);
+                _userLogged = await _userService.GetUserByIdAsync(client, userRegisteredId, _token);
             }
             catch (Exception e)
             {
@@ -380,7 +380,7 @@ namespace Client
                     initialLocation, endingLocation,
                     departureDate, availableSeats, pricePerPerson, petsAllowed, vehicleIdSelected);
 
-                await _rideService.CreateRideAsync(client, rideReq);
+                await _rideService.CreateRideAsync(client, rideReq, _token);
                 Console.WriteLine("Ride created successfully");
             }
             catch (Exception e)
@@ -434,7 +434,7 @@ namespace Client
         {
             Console.WriteLine("Select the vehicle you will use for this ride");
 
-            ICollection<VehicleClient> vehicles = await _userService.GetVehiclesByUserIdAsync(client, _userLogged.Id);
+            ICollection<VehicleClient> vehicles = await _userService.GetVehiclesByUserIdAsync(client, _userLogged.Id, _token);
 
             for (int i = 0; i < vehicles.Count; i++)
             {
@@ -585,12 +585,12 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> rides = await _rideService.GetAllRidesAsync(client);
+                ICollection<RideClient> rides = await _rideService.GetAllRidesAsync(client, _token);
                 RideClient selectedRide = await SelectRideFromListAsync(client, rides.ToList());
 
                 JoinRideRequest joinReq = new JoinRideRequest(selectedRide.Id, _userLogged.Id);
 
-                await _rideService.JoinRideAsync(client, joinReq);
+                await _rideService.JoinRideAsync(client, joinReq, _token);
                 Console.WriteLine("Join Successfully");
             }
             catch (Exception exceptionCaught)
@@ -694,7 +694,7 @@ namespace Client
             try
             {
                 ICollection<RideClient> rideCollectionOfUser =
-                    await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
+                    await _rideService.GetRidesByUserAsync(client, _userLogged.Id, _token);
                 List<RideClient> rideListOfUser = rideCollectionOfUser.ToList();
 
                 DisplayAllRides(rideListOfUser.ToList());
@@ -799,7 +799,7 @@ namespace Client
                     initialLocation, endingLocation, departureDate,
                     pricePerPerson, petsAllowed, vehicleId, availableSeats, rideSelected.DriverId);
 
-                await _rideService.ModifyRideAsync(client, modifyRideReq);
+                await _rideService.ModifyRideAsync(client, modifyRideReq, _token);
                 Console.WriteLine("Ride modified successfully");
             }
 
@@ -820,13 +820,13 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
+                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id, _token);
 
                 RideClient rideSelected = await SelectRideFromListAsync(client, rides.ToList());
 
                 QuitRideRequest quitRideReq = new QuitRideRequest(rideSelected.Id, _userLogged);
 
-                await _rideService.QuitRideAsync(client, quitRideReq);
+                await _rideService.QuitRideAsync(client, quitRideReq, _token);
                 Console.WriteLine("Quit from ride successfully");
             }
             catch (Exception e)
@@ -846,7 +846,7 @@ namespace Client
         {
             try
             {
-                await _rideService.DeleteRideAsync(client, rideSelected.Id);
+                await _rideService.DeleteRideAsync(client, rideSelected.Id, _token);
             }
             catch (Exception exceptionCaught)
             {
@@ -865,7 +865,7 @@ namespace Client
         {
             try
             {
-                await _rideService.DisableRideAsync(client, rideSelected.Id);
+                await _rideService.DisableRideAsync(client, rideSelected.Id, _token);
 
                 Console.WriteLine("Ride has been disabled");
             }
@@ -886,12 +886,12 @@ namespace Client
         {
             try
             {
-                RideClient rideData = await _rideService.GetRideByIdAsync(client, rideSelected.Id);
+                RideClient rideData = await _rideService.GetRideByIdAsync(client, rideSelected.Id, _token);
 
                 Console.WriteLine("This is the information related to the ride you have selected: ");
                 Console.WriteLine();
 
-                await _rideService.GetRideByIdAsync(client, rideSelected.Id);
+                await _rideService.GetRideByIdAsync(client, rideSelected.Id, _token);
 
                 await DisplayRideAsync(client, rideSelected);
 
@@ -961,7 +961,7 @@ namespace Client
                 maxPrice = Double.Parse(maxPriceInput);
 
                 ICollection<RideClient> rides =
-                    await _rideService.GetRidesFilteredByPriceAsync(client, minPrice, maxPrice);
+                    await _rideService.GetRidesFilteredByPriceAsync(client, minPrice, maxPrice, _token);
 
                 Console.WriteLine("\nRides with price between " + minPrice + " and " + maxPrice + " are: ");
                 DisplayAllRides(rides.ToList());
@@ -984,7 +984,7 @@ namespace Client
         {
             try
             {
-                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id);
+                ICollection<RideClient> rides = await _rideService.GetRidesByUserAsync(client, _userLogged.Id, _token);
                 RideClient rideClient = await SelectRideFromListAsync(client, rides.ToList());
 
 
@@ -1004,7 +1004,7 @@ namespace Client
                 string comment = Console.ReadLine();
 
                 ReviewClient reviewRequest = new ReviewClient(rideClient.Id, rating, comment);
-                await _rideService.AddReviewAsync(client, _userLogged.Id, reviewRequest);
+                await _rideService.AddReviewAsync(client, _userLogged.Id, reviewRequest, _token);
             }
             catch (Exception e)
             {
@@ -1023,7 +1023,7 @@ namespace Client
         {
             try
             {
-                ICollection<ReviewClient> reviews = await _rideService.GetDriverReviews(client, rideId);
+                ICollection<ReviewClient> reviews = await _rideService.GetDriverReviews(client, rideId, _token);
 
                 List<ReviewClient> reviewsList = new List<ReviewClient>(reviews);
 
