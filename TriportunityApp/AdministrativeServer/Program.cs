@@ -19,11 +19,15 @@ namespace AdministrativeServer
             using var channel = GrpcChannel.ForAddress("https://localhost:7142");
             _client = new AdministrativeService.AdministrativeServiceClient(channel);
 
+            MainMenuOptions();
+        }
+
+        private static void MainMenuOptions()
+        {
             bool keepRunning = true;
 
             while (keepRunning)
             {
-                Console.Clear();
                 Console.WriteLine("Administrative Server Menu");
                 Console.WriteLine("1. Create Ride");
                 Console.WriteLine("2. Edit Ride");
@@ -69,12 +73,12 @@ namespace AdministrativeServer
 
         private static async Task<string> PickUserAsync()
         {
-            Console.WriteLine("Select the user");
-
-            var request = new Empty();
-
             try
             {
+                Console.WriteLine("Select the user");
+
+                var request = new Empty();
+
                 var usersResponse = _client.GetAllUsers(request);
 
                 if (usersResponse.Users.Count == 0)
@@ -107,11 +111,66 @@ namespace AdministrativeServer
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
+                MainMenuOptions();
                 return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+                MainMenuOptions();
+                return null;
+            }
+        }
+
+
+
+        private static async Task<string> PickVehicleAsync(string userId)
+        {
+            try
+            {
+                Console.WriteLine("Select the vehicle you will use for this ride");
+
+                GetAllVehiclesByUserRequest request = new GetAllVehiclesByUserRequest();
+                request.UserId = userId;
+
+                var vehiclesOfUser = _client.GetAllVehiclesByUser(request);
+
+                if (vehiclesOfUser.Vehicles.Count == 0)
+                {
+                    Console.WriteLine("No vehicles were found.");
+                    return null;
+                }
+
+                int i = 0;
+                foreach (var vehicle in vehiclesOfUser.Vehicles)
+                {
+                    Console.WriteLine($"{i++} - Vehicle ID: {vehicle.Id}, Model: {vehicle.VehicleModel}");
+                }
+
+                Console.WriteLine("Select an option:");
+                string optionSelected = Console.ReadLine();
+
+                if (int.TryParse(optionSelected, out int optionValue) && optionValue >= 0 && optionValue < vehiclesOfUser.Vehicles.Count)
+                {
+                    Console.WriteLine($"{vehiclesOfUser.Vehicles[optionValue].Id} has been selected");
+                    return vehiclesOfUser.Vehicles[optionValue].Id.ToString();
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid user number.");
+                    return await PickVehicleAsync(userId); // Recursión si la opción seleccionada no es válida
+                }
+            }
+            catch (RpcException ex)
+            {
+                Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
+                MainMenuOptions();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                MainMenuOptions();
                 return null;
             }
         }
@@ -120,61 +179,66 @@ namespace AdministrativeServer
 
         static async Task CreateRideAsync()
         {
-            Console.Clear();
-            Console.WriteLine("Create Ride");
-
-            // List users and select one
-            Console.WriteLine("Fetching users...");
-            string driverId = await PickUserAsync();
-
-            int initialLocation = SelectCity("Initial Location");
-            int endingLocation = SelectCity("Ending Location");
-            string departureTime = InputDepartureTime();
-
-            Console.Write("Available Seats: ");
-            int availableSeats = int.Parse(Console.ReadLine());
-            Console.Write("Price Per Person: ");
-            double pricePerPerson = double.Parse(Console.ReadLine());
-            Console.Write("Pets Allowed (Y/N): ");
-            bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
-            Console.Write("Vehicle ID: ");
-            string vehicleId = Console.ReadLine();
-
-            var request = new RideRequest
-            {
-                RideId = Guid.NewGuid().ToString(),
-                DriverId = driverId,
-                InitialLocation = initialLocation,
-                EndingLocation = endingLocation,
-                DepartureTime = departureTime,
-                AvailableSeats = availableSeats,
-                PricePerPerson = pricePerPerson,
-                PetsAllowed = petsAllowed,
-                Published = true,
-                VehicleId = vehicleId
-            };
-
             try
             {
+                Console.Clear();
+                Console.WriteLine("Create Ride");
+
+                // List users and select one
+                Console.WriteLine("Fetching users...");
+                string driverId = await PickUserAsync();
+
+                int initialLocation = SelectCity("Initial Location");
+                int endingLocation = SelectCity("Ending Location");
+                string departureTime = InputDepartureTime();
+
+                Console.Write("Available Seats: ");
+                int availableSeats = int.Parse(Console.ReadLine());
+                Console.Write("Price Per Person: ");
+                double pricePerPerson = double.Parse(Console.ReadLine());
+                Console.Write("Pets Allowed (Y/N): ");
+                bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
+                Console.Write("Vehicle ID: ");
+                string vehicleId = await PickVehicleAsync(driverId);
+
+                var request = new RideRequest
+                {
+                    RideId = Guid.NewGuid().ToString(),
+                    DriverId = driverId,
+                    InitialLocation = initialLocation,
+                    EndingLocation = endingLocation,
+                    DepartureTime = departureTime,
+                    AvailableSeats = availableSeats,
+                    PricePerPerson = pricePerPerson,
+                    PetsAllowed = petsAllowed,
+                    Published = true,
+                    VehicleId = vehicleId
+                };
+
                 var response = await _client.AddRideAsync(request);
                 Console.WriteLine($"Ride creation status: {response.Status}");
+
             }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error creating ride: {ex.Status.Detail}");
+                CreateRideAsync();
+
             }
         }
 
-        static void EditRide()
+
+        static async Task EditRide()
         {
             Console.Clear();
             Console.WriteLine("Edit Ride");
-            // Collect ride details from the user
+
             string rideId = SelectRide("Edit");
             if (rideId == null) return;
 
             Console.Write("Driver ID: ");
-            string driverId = Console.ReadLine();
+            Console.WriteLine("Fetching users...");
+            string driverId = await PickUserAsync();
             int initialLocation = SelectCity("Initial Location");
             int endingLocation = SelectCity("Ending Location");
 
@@ -187,7 +251,7 @@ namespace AdministrativeServer
             Console.Write("Pets Allowed (Y/N): ");
             bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
             Console.Write("Vehicle ID: ");
-            string vehicleId = Console.ReadLine();
+            string vehicleId = await PickUserAsync();
 
             var request = new RideRequest
             {

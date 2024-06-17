@@ -22,6 +22,7 @@ namespace MainServer.Services
         public MainService()
         {
             _rideRepository = new RideRepository();
+            _userRepository = new UserRepository();
         }
 
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)
@@ -247,6 +248,35 @@ namespace MainServer.Services
                 throw new RpcException(new Status(StatusCode.Internal, ex.Message));
             }
         }
+
+        public override Task<VehiclesResponse> GetAllVehiclesByUser(GetAllVehiclesByUserRequest request, ServerCallContext context)
+        {
+            try
+            {
+                var response = new VehiclesResponse();
+                var vehicles = _userRepository.GetAllVehiclesByUser(Guid.Parse(request.UserId));
+
+                response.Vehicles.AddRange(vehicles.Select(v =>
+                {
+                    var vehicle = new GrpcService.Vehicle
+                    {
+                        Id = v.Id.ToString(),
+                        VehicleModel = v.VehicleModel
+
+                    };
+                    return vehicle;
+                }));
+
+                return Task.FromResult(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+            }
+        }
+
+
 
         private MainServer.Objects.Domain.Ride ConvertToDomainRide(RideRequest request)
         {

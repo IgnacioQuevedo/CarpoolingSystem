@@ -242,7 +242,6 @@ namespace MainServer.Repositories
             {
                 LockManager.StartReading();
 
-                // Assumming MemoryDatabase.GetInstance() returns a valid instance
                 var memoryDatabase = MemoryDatabase.GetInstance();
 
                 if (memoryDatabase == null || memoryDatabase.Users == null)
@@ -259,7 +258,7 @@ namespace MainServer.Repositories
             }
             catch (UserException)
             {
-                throw; // Re-throw UserException to be handled higher up
+                throw;
             }
             catch (Exception ex)
             {
@@ -274,7 +273,39 @@ namespace MainServer.Repositories
         }
 
 
+        public ICollection<Vehicle> GetAllVehiclesByUser(Guid userId)
+        {
+            User user;
+            string exceptionMessage = "";
+            ICollection<Vehicle> vehicles = new List<Vehicle>();
 
+            user = GetUserById(userId);
+
+            LockManager.StartReading();
+
+            if (user.DriverAspects != null)
+            {
+                vehicles = user.DriverAspects.Vehicles;
+
+                if (vehicles == null || vehicles.Count == 0)
+                {
+                    exceptionMessage = "No vehicles found for the user";
+                }
+            }
+            else
+            {
+                exceptionMessage = "User is not a driver";
+            }
+
+            LockManager.StopReading();
+
+            if (!string.IsNullOrEmpty(exceptionMessage))
+            {
+                throw new UserException(exceptionMessage);
+            }
+
+            return vehicles;
+        }
 
     }
 }

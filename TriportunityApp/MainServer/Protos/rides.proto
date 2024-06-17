@@ -14,6 +14,7 @@ service AdministrativeService {
     rpc GetNextRides (RidesRequest) returns (RidesResponse);
     rpc GetAllRides (google.protobuf.Empty) returns (RidesResponse);
     rpc GetAllUsers (google.protobuf.Empty) returns (UsersResponse);
+    rpc GetAllVehiclesByUser (GetAllVehiclesByUserRequest) returns (VehiclesResponse);
 }
 
 message RideRequest {
@@ -80,3 +81,15 @@ message UsersResponse {
     repeated User users = 1;
 }
 
+message Vehicle {
+    string id = 1;
+    string vehicleModel = 2; 
+}
+
+message VehiclesResponse {
+    repeated Vehicle vehicles = 1;
+}
+
+message GetAllVehiclesByUserRequest {
+    string userId = 1;
+}
