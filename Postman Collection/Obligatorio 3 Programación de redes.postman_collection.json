@@ -1,0 +1,166 @@
+{
+	"info": {
+		"_postman_id": "0edf5fd0-a2e8-4cf3-b5d3-7b8066e764bc",
+		"name": "Obligatorio 3 Programación de redes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24218913",
+		"_collection_link": "https://lunar-crescent-502372.postman.co/workspace/Team-Workspace~2009ce0b-9f83-4607-82a6-d339c2ab7d2e/collection/24218913-0edf5fd0-a2e8-4cf3-b5d3-7b8066e764bc?action=share&source=collection_link&creator=24218913"
+	},
+	"item": [
+		{
+			"name": "Ride Controller",
+			"item": [
+				{
+					"name": "Create Report Of Rides Filtered",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n     \"Id\" : null,\r\n    \"DriverId\" : null,\r\n    \"Published\" : null,\r\n   \"InitialLocation\" : null,\r\n   \"EndingLocation\" :  null,\r\n    \"DepartureTime\" : null,\r\n    \"AvailableSeats\" : null,\r\n   \"PricePerPerson\" : null,\r\n    \"PetsAllowed\" : null,\r\n    \"VehicleId \": null\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/rides/filters",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"rides",
+								"filters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Report Of Rides Summarized",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"AmountOfNextRidesToSummarize\": 5\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/rides/reports",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"rides",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Rides Summarized Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/rides/reports/{{id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"rides",
+								"reports",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Completness Of Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/rides/completeness-of/reports/{{id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"rides",
+								"completeness-of",
+								"reports",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Controller",
+			"item": [
+				{
+					"name": "Get Login Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/login-events",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"login-events"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://localhost:62831/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "id",
+			"value": "00000000-0000-0000-0000-000000000000",
+			"type": "string"
+		}
+	]
+}
