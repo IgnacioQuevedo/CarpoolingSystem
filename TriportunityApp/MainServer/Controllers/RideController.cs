@@ -20,7 +20,7 @@ namespace MainServer.Controllers
         private static RideRepository _rideRepository = new RideRepository();
         private static UserRepository _userRepository = new UserRepository();
         private static CancellationToken _token = new CancellationToken();
-        
+
         public RideController(CancellationToken token)
         {
             _token = token;
@@ -51,9 +51,9 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.CreateRide + ";" + ride.Id;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
-                
-                
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
+
+
                 RideEventRequest rideEventRequest = new RideEventRequest
                 {
                     Id = ride.Id,
@@ -68,15 +68,15 @@ namespace MainServer.Controllers
                     PetsAllowed = ride.PetsAllowed,
                     VehicleId = ride.VehicleId
                 };
-                MomHelper.PublishMessage(MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, rideEventRequest,channel);
-                
-                
+                MomHelper.PublishMessage(MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, rideEventRequest, channel);
+
+
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -103,13 +103,13 @@ namespace MainServer.Controllers
                                 ride.PricePerPerson + ":" + ride.PetsAllowed + ":" + ride.VehicleId + "@";
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, response);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, response, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -124,13 +124,13 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.JoinRide;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -140,7 +140,7 @@ namespace MainServer.Controllers
             {
 
                 Guid rideId = Guid.Parse(messageArray[2]);
-      
+
                 CitiesEnum initialLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[3]);
                 CitiesEnum endingLocation = (CitiesEnum)Enum.Parse(typeof(CitiesEnum), messageArray[4]);
                 DateTime departureTime = DateTime.Parse(messageArray[5]);
@@ -159,17 +159,17 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.EditRide + ";" + ride.Id;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
-        public async Task DeleteRide(string[] messageArray,TcpClient _clientServerSide)
+        public async Task DeleteRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -178,17 +178,17 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.DeleteRide;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
-        public async Task QuitRide(string[] messageArray,TcpClient _clientServerSide)
+        public async Task QuitRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -198,13 +198,13 @@ namespace MainServer.Controllers
                 _rideRepository.QuitRide(rideId, userId);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.QuitRide;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -231,38 +231,38 @@ namespace MainServer.Controllers
                                 + ride.VehicleId + "@";
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, response);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, response, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
-        public async Task GetCarImage(string[] messageArray,TcpClient _clientServerSide)
+        public async Task GetCarImage(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
-                if(_token.IsCancellationRequested) return;
+                if (_token.IsCancellationRequested) return;
                 Guid userId = Guid.Parse(messageArray[2]);
                 Guid rideId = Guid.Parse(messageArray[3]);
                 Ride rideToFound = _rideRepository.GetRideById(rideId);
                 Guid vehicleId = rideToFound.VehicleId;
                 Vehicle vehicle = _userRepository.GetVehicleById(userId, vehicleId);
 
-                await NetworkHelper.SendImageAsync(_clientServerSide, vehicle.ImageAllocatedAtServer,_token);
+                await NetworkHelper.SendImageAsync(_clientServerSide, vehicle.ImageAllocatedAtServer, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
-        public async Task DisableRide(string[] messageArray,TcpClient _clientServerSide)
+        public async Task DisableRide(string[] messageArray, TcpClient _clientServerSide)
         {
             try
             {
@@ -270,12 +270,12 @@ namespace MainServer.Controllers
                 _rideRepository.DisablePublishedRide(rideId);
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.DisableRide;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception e)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" + CommandsConstraints.ManageException + ";" + e.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -311,13 +311,13 @@ namespace MainServer.Controllers
                                 + ride.VehicleId + "@";
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, response);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, response, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -337,13 +337,13 @@ namespace MainServer.Controllers
                     response += review.Id + ":" + review.Punctuation + ":" + review.Comment + ",";
                 }
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, response);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, response, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -369,13 +369,13 @@ namespace MainServer.Controllers
                             ride.PricePerPerson + ":" + ride.PetsAllowed + ":"
                             + ride.VehicleId;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, response);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, response, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
 
@@ -394,13 +394,13 @@ namespace MainServer.Controllers
 
                 string message = ProtocolConstants.Response + ";" + CommandsConstraints.AddReview;
 
-                await NetworkHelper.SendMessageAsync(_clientServerSide, message);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, message, _token);
             }
             catch (Exception exceptionCaught)
             {
                 string exceptionMessageToClient = ProtocolConstants.Exception + ";" +
                                                   CommandsConstraints.ManageException + ";" + exceptionCaught.Message;
-                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient);
+                await NetworkHelper.SendMessageAsync(_clientServerSide, exceptionMessageToClient, _token);
             }
         }
     }

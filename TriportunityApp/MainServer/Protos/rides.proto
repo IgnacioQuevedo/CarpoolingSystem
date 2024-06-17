@@ -1,9 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "GrpcService";
-
-
 import "google/protobuf/empty.proto";
+
+option csharp_namespace = "GrpcService";
 
 service AdministrativeService {
     rpc AddRide (RideRequest) returns (RideResponse);

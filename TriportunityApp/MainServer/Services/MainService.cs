@@ -110,7 +110,7 @@ namespace MainServer.Services
                 grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
 
 
-                return new RideResponse { Status = "Ride added successfully" };
+                return await Task.FromResult(new RideResponse { Status = "Ride added successfully" });
             }
             catch (Exception ex)
             {
@@ -203,7 +203,7 @@ namespace MainServer.Services
             }
         }
 
-        public override Task<RidesResponse> GetAllRides(Empty request, ServerCallContext context)
+        public override async Task<RidesResponse> GetAllRides(Empty request, ServerCallContext context)
         {
             try
             {
@@ -234,7 +234,7 @@ namespace MainServer.Services
                     return ride;
                 }));
 
-                return Task.FromResult(response);
+                return await Task.FromResult(response);
             }
             catch (Exception ex)
             {

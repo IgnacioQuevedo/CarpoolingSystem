@@ -30,11 +30,11 @@ namespace Common
             return client;
         }
 
-        public static async Task<bool> IsClientConnectedAsync(TcpClient client)
+        public static async Task<bool> IsClientConnectedAsync(TcpClient client, CancellationToken token)
         {
             try
             {
-                string messageReceived = await ReceiveMessageAsync(client);
+                string messageReceived = await ReceiveMessageAsync(client, token);
                 Console.WriteLine(messageReceived);
 
                 if (messageReceived.Length > 0)
@@ -78,7 +78,7 @@ namespace Common
             return Encoding.UTF8.GetString(buffer);
         }
 
-        public static async Task SendMessageAsync(TcpClient client, string message)
+        public static async Task SendMessageAsync(TcpClient client, string message, CancellationToken token)
         {
             try
             {
@@ -86,14 +86,14 @@ namespace Common
 
                 byte[] buffer = Encoding.UTF8.GetBytes(message);
                 byte[] bufferLength = BitConverter.GetBytes(buffer.Length);
-                
-                await stream.WriteAsync(bufferLength, 0, bufferLength.Length);
-                
+
+                await stream.WriteAsync(bufferLength, 0, bufferLength.Length, token);
+
                 int totalSent = 0;
                 while (totalSent < buffer.Length)
                 {
                     int toSend = buffer.Length - totalSent;
-                    await stream.WriteAsync(buffer, totalSent, toSend);
+                    await stream.WriteAsync(buffer, totalSent, toSend, token);
                     totalSent += toSend;
                 }
             }
@@ -109,7 +109,7 @@ namespace Common
 
 
 
-        public static async Task<string> ReceiveMessageAsync(TcpClient clientReceiver)
+        public static async Task<string> ReceiveMessageAsync(TcpClient clientReceiver, CancellationToken token)
         {
             try
             {
@@ -117,8 +117,8 @@ namespace Common
 
                 byte[] bufferConstantLength = BitConverter.GetBytes(ProtocolConstants.DataLengthSize);
 
-                byte[] msgLengthBuffer = await ReceiveAsync(stream, bufferConstantLength);
-                byte[] dataBuffer = await ReceiveAsync(stream, msgLengthBuffer);
+                byte[] msgLengthBuffer = await ReceiveAsync(stream, bufferConstantLength, token);
+                byte[] dataBuffer = await ReceiveAsync(stream, msgLengthBuffer, token);
 
                 return DecodeMsgFromBytes(dataBuffer);
             }
@@ -134,7 +134,7 @@ namespace Common
 
 
         public static async Task<byte[]> ReceiveAsync(NetworkStream clientNetworkStream,
-            byte[] bufferWithTheLengthNumber)
+            byte[] bufferWithTheLengthNumber, CancellationToken token)
         {
             int length = BitConverter.ToInt32(bufferWithTheLengthNumber, 0);
             byte[] responseBuffer = new byte[length];
@@ -144,7 +144,7 @@ namespace Common
 
             while (offSet < size)
             {
-                int amountByteSent = await clientNetworkStream.ReadAsync(responseBuffer, offSet, size - offSet);
+                int amountByteSent = await clientNetworkStream.ReadAsync(responseBuffer, offSet, size - offSet, token);
 
                 if (amountByteSent == 0) throw new Exception();
 
@@ -183,7 +183,7 @@ namespace Common
                 long fileLength = fileInfo.Length;
                 byte[] fileLengthInBytes = BitConverter.GetBytes(fileLength);
 
-                await SendMessageAsync(client, fileInfo.Name);
+                await SendMessageAsync(client, fileInfo.Name, token);
                 await stream.WriteAsync(fileLengthInBytes, 0, fileLengthInBytes.Length, token);
 
 
@@ -216,7 +216,7 @@ namespace Common
                     File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", fileName));
                 }
 
-                throw new OperationCanceledException("Connection has been turn off",e);
+                throw new OperationCanceledException("Connection has been turn off", e);
             }
             catch (IOException ex) when (ex.InnerException is SocketException)
             {
@@ -243,8 +243,8 @@ namespace Common
                 }
 
                 NetworkStream stream = client.GetStream();
-                fileName = await ReceiveMessageAsync(client);
-                byte[] bufferFileLength = await ReceiveAsync(stream, bufferFileConstantLength);
+                fileName = await ReceiveMessageAsync(client, token);
+                byte[] bufferFileLength = await ReceiveAsync(stream, bufferFileConstantLength, token);
                 string destinationFilePath = Path.Combine(pathDirectoryImageAllocated, fileName);
 
                 long fileLength = BitConverter.ToInt64(bufferFileLength, 0);
@@ -264,7 +264,7 @@ namespace Common
                         byte[] byteAmountToReceiveInBytes = BitConverter.GetBytes(byteAmountToReceive);
                         token.ThrowIfCancellationRequested();
                         Console.WriteLine($"Receiving part #{currentPart}, of {byteAmountToReceive} bytes");
-                        byte[] buffer = await ReceiveAsync(stream, byteAmountToReceiveInBytes);
+                        byte[] buffer = await ReceiveAsync(stream, byteAmountToReceiveInBytes, token);
                         await fileNetworkStream.WriteAsync(buffer, 0, buffer.Length, token);
 
                         offset += buffer.Length;

@@ -28,14 +28,14 @@ namespace MainServer
                 _serverListener.Start(ProtocolConstants.MaxUsersInBackLog);
                 _ = WaitUntilAdminShutdownServer();
                 int users = 1;
-                
+
                 var factory = new ConnectionFactory();
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    MomHelper.EstablishExchangeAndQueue(MomConstraints.userQueueName,MomConstraints.exchangeName, MomConstraints.userQueueRoutingKey, channel);
-                    MomHelper.EstablishExchangeAndQueue(MomConstraints.rideQueueName,MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, channel);
-                    
+                    MomHelper.EstablishExchangeAndQueue(MomConstraints.userQueueName, MomConstraints.exchangeName, MomConstraints.userQueueRoutingKey, channel);
+                    MomHelper.EstablishExchangeAndQueue(MomConstraints.rideQueueName, MomConstraints.exchangeName, MomConstraints.rideQueueRoutingKey, channel);
+
                     while (!_token.IsCancellationRequested)
                     {
                         TcpClient clientServerSide = await _serverListener.AcceptTcpClientAsync(_token);
@@ -43,7 +43,7 @@ namespace MainServer
 
                         int actualUser = users;
                         if (_token.IsCancellationRequested) break;
-                        
+
                         _ = ManageUserAsync(clientServerSide, actualUser, channel);
                         users++;
                     }
@@ -139,7 +139,7 @@ namespace MainServer
         {
             string connectedMsg = "Welcome to Triportunity!! Your user is " + actualUser + "!";
             Console.WriteLine(connectedMsg);
-            await NetworkHelper.SendMessageAsync(clientServerSide, connectedMsg);
+            await NetworkHelper.SendMessageAsync(clientServerSide, connectedMsg, _token);
             bool clientWantsToContinueSendingData = true;
 
             _userController = new UserController(_token);
@@ -149,7 +149,7 @@ namespace MainServer
             {
                 try
                 {
-                    string message = await NetworkHelper.ReceiveMessageAsync(clientServerSide);
+                    string message = await NetworkHelper.ReceiveMessageAsync(clientServerSide, _token);
                     Console.WriteLine($@"The user {actualUser} : {message}");
 
                     string[] messageArray = message.Split(new string[] { ";" }, StringSplitOptions.None);
@@ -158,7 +158,7 @@ namespace MainServer
                     switch (command)
                     {
                         case CommandsConstraints.Login:
-                            await _userController.LoginUserAsync(messageArray, clientServerSide,channel);
+                            await _userController.LoginUserAsync(messageArray, clientServerSide, channel);
                             break;
 
                         case CommandsConstraints.Register:
@@ -182,7 +182,7 @@ namespace MainServer
 
                         case CommandsConstraints.CreateRide:
 
-                            await _rideController.CreateRide(messageArray, clientServerSide,channel);
+                            await _rideController.CreateRide(messageArray, clientServerSide, channel);
 
                             break;
 

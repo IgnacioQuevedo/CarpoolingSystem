@@ -92,7 +92,7 @@ namespace AdministrativeServer
 
                 var request = new Empty();
 
-                var usersResponse = _client.GetAllUsers(request);
+                var usersResponse = await _client.GetAllUsersAsync(request);
 
                 if (usersResponse.Users.Count == 0)
                 {
@@ -105,6 +105,7 @@ namespace AdministrativeServer
                 foreach (var user in usersResponse.Users)
                 {
                     Console.WriteLine($"{i++} - User ID: {user.Id}, CI: {user.Ci}, Username: {user.Username}");
+
                 }
 
                 Console.WriteLine("Select an option:");
@@ -121,16 +122,17 @@ namespace AdministrativeServer
                     return await PickUserAsync();
                 }
             }
+
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
-                MainMenuOptions();
+                await MainMenuOptions();
                 return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                MainMenuOptions();
+                await MainMenuOptions();
                 return null;
             }
         }
@@ -146,7 +148,7 @@ namespace AdministrativeServer
                 GetAllVehiclesByUserRequest request = new GetAllVehiclesByUserRequest();
                 request.UserId = userId;
 
-                var vehiclesOfUser = _client.GetAllVehiclesByUser(request);
+                var vehiclesOfUser = await _client.GetAllVehiclesByUserAsync(request);
 
                 if (vehiclesOfUser.Vehicles.Count == 0)
                 {
@@ -174,21 +176,25 @@ namespace AdministrativeServer
                     return await PickVehicleAsync(userId); // Recursión si la opción seleccionada no es válida
                 }
             }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
+            {
+                Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
+                return null;
+            }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
-                MainMenuOptions();
+                await MainMenuOptions();
                 return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                MainMenuOptions();
+                await MainMenuOptions();
                 return null;
             }
         }
-
-
 
         static async Task CreateRideAsync()
         {
@@ -200,14 +206,16 @@ namespace AdministrativeServer
                 Console.WriteLine("Fetching users...");
                 string driverId = await PickUserAsync();
 
-                int initialLocation = await SelectCityAsync("Initial Location");
-                int endingLocation = await SelectCityAsync("Ending Location");
+                int initialLocation = SelectCity("Initial Location");
+                int endingLocation = SelectCity("Ending Location");
 
-                string departureTime = await InputDepartureTimeAsync();
 
-                int availableSeats = await PickAmountOfAvailableSeatsAsync();
-                double pricePerPerson = await IntroducePricePerPersonAsync();
-                bool petsAllowed = await DecideIfPetsAreAllowedAsync();
+                string departureTime = InputDepartureTime();
+
+                int availableSeats = PickAmountOfAvailableSeats();
+                double pricePerPerson = IntroducePricePerPerson();
+                bool petsAllowed = DecideIfPetsAreAllowed();
+
                 string vehicleId = await PickVehicleAsync(driverId);
 
                 var request = new RideRequest
@@ -231,11 +239,12 @@ namespace AdministrativeServer
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
                 Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
             }
             catch (RpcException ex)
             {
                 Console.WriteLine($"Error creating ride: {ex.Status.Detail}");
-                CreateRideAsync();
+                await CreateRideAsync();
 
             }
             catch (Exception ex)
@@ -256,14 +265,14 @@ namespace AdministrativeServer
 
                 Console.WriteLine("Fetching users...");
                 string driverId = await PickUserAsync();
-                int initialLocation = await SelectCityAsync("Initial Location");
-                int endingLocation = await SelectCityAsync("Ending Location");
+                int initialLocation = SelectCity("Initial Location");
+                int endingLocation = SelectCity("Ending Location");
 
-                string departureTime = await InputDepartureTimeAsync();
+                string departureTime = InputDepartureTime();
 
-                int availableSeats = await PickAmountOfAvailableSeatsAsync();
-                double pricePerPerson = await IntroducePricePerPersonAsync();
-                bool petsAllowed = await DecideIfPetsAreAllowedAsync();
+                int availableSeats = PickAmountOfAvailableSeats();
+                double pricePerPerson = IntroducePricePerPerson();
+                bool petsAllowed = DecideIfPetsAreAllowed();
                 string vehicleId = await PickVehicleAsync(driverId);
 
 
@@ -287,6 +296,7 @@ namespace AdministrativeServer
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
                 Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
             }
             catch (RpcException ex)
             {
@@ -319,6 +329,7 @@ namespace AdministrativeServer
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
                 Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
             }
             catch (RpcException ex)
             {
@@ -350,6 +361,7 @@ namespace AdministrativeServer
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
                 Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
             }
             catch (RpcException ex)
             {
@@ -395,6 +407,7 @@ namespace AdministrativeServer
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
                 Console.WriteLine("The server is unavailable. It has been shut down. Please try again later.");
+                await MainMenuOptions();
             }
             catch (RpcException ex)
             {
@@ -430,13 +443,11 @@ namespace AdministrativeServer
             var request = new Empty();
             RidesResponse response;
 
-            try
+            response = await _client.GetAllRidesAsync(request);
+
+            if (response.Rides.Count == 0)
             {
-                response = await _client.GetAllRidesAsync(request);
-            }
-            catch (RpcException ex)
-            {
-                Console.WriteLine($"Error retrieving rides: {ex.Status.Detail}");
+                Console.WriteLine("No rides available.");
                 return null;
             }
 
@@ -506,7 +517,7 @@ namespace AdministrativeServer
 
                 Console.Write("Enter the number of the city: ");
                 validInput = int.TryParse(Console.ReadLine(), out cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count;
-
+              
                 if (!validInput)
                 {
                     Console.WriteLine("Invalid city number selected. Please try again.");
@@ -557,7 +568,7 @@ namespace AdministrativeServer
 
 
 
-        static async Task<int> PickAmountOfAvailableSeatsAsync()
+        static int PickAmountOfAvailableSeats()
         {
             bool validInput;
             int optionValue;
@@ -584,7 +595,7 @@ namespace AdministrativeServer
             return optionValue;
         }
 
-        static async Task<double> IntroducePricePerPersonAsync()
+        static double IntroducePricePerPerson()
         {
             bool validInput;
             double pricePerPerson;
@@ -604,7 +615,7 @@ namespace AdministrativeServer
             return pricePerPerson;
         }
 
-        static async Task<bool> DecideIfPetsAreAllowedAsync()
+        static bool DecideIfPetsAreAllowed()
         {
             Console.WriteLine("Do you want to allow pets in your vehicle?");
             Console.WriteLine("Y - If yes");
