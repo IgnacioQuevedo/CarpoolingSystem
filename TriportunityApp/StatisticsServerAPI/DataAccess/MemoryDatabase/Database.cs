@@ -13,10 +13,6 @@ public class Database
     private static Database _database;
     private static readonly object singletonPadLock = new object();
 
-    private Database()
-    {
-    }
-
     public static Database GetInstance()
     {
         lock (singletonPadLock)

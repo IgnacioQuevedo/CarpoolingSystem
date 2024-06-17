@@ -15,11 +15,11 @@ public class RideService : IRideService
     {
         _rideRepository = rideRepository;
     }
-  
+
     public IEnumerable<GetRideFilteredResponse> GetRidesFiltered(RideFilter filters)
     {
         IEnumerable<RideEvent> rides = _rideRepository.GetRides();
-        
+
         foreach (PropertyInfo filterProperty in typeof(RideFilter).GetProperties())
         {
             object filterValue = filterProperty.GetValue(filters);
@@ -34,15 +34,15 @@ public class RideService : IRideService
                 }
             }
         }
-        
+
         IEnumerable<GetRideFilteredResponse> rideResponses = rides.Select(ride => new GetRideFilteredResponse
         {
             Id = ride.Id,
             DriverId = ride.DriverId,
             Published = ride.Published,
             Passengers = ride.Passengers,
-            InitialLocation = (CitiesEnumEventResponse) ride.InitialLocation,
-            EndingLocation = (CitiesEnumEventResponse) ride.EndingLocation,
+            InitialLocation = (CitiesEnumEventResponse)ride.InitialLocation,
+            EndingLocation = (CitiesEnumEventResponse)ride.EndingLocation,
             DepartureTime = ride.DepartureTime,
             AvailableSeats = ride.AvailableSeats,
             PricePerPerson = ride.PricePerPerson,
@@ -52,10 +52,10 @@ public class RideService : IRideService
 
         return rideResponses;
     }
-    
+
     private IEnumerable<RideEvent> ApplyFilter(IEnumerable<RideEvent> rides, PropertyInfo rideProperty, object filterValue)
     {
-        return rides.Where(ride => 
+        return rides.Where(ride =>
         {
             var ridePropertyValue = rideProperty.GetValue(ride);
             if (ridePropertyValue == null)
@@ -74,46 +74,56 @@ public class RideService : IRideService
         });
     }
 
-    
+
     public CreateRidesSummarizedReportResponse CreateRidesSummarizedReport(int amountOfNextRidesToSummarize)
     {
         IEnumerable<RideEvent> ridesAtTheMoment = _rideRepository.GetRides();
-        
+
         RidesSummarizedReport summarizedReport = new RidesSummarizedReport
         {
             AmountOfNextRidesToSummarize = amountOfNextRidesToSummarize,
         };
 
         _rideRepository.AddSummarizedReport(summarizedReport);
-        
+
         return new CreateRidesSummarizedReportResponse
         {
             Id = summarizedReport.Id
         };
     }
-    
-    
+
+
     public bool AskForCompleteness(Guid id)
     {
         RidesSummarizedReport reportFound = _rideRepository.GetRidesSummarizedReportById(id);
+
+        if (reportFound == null)
+        {
+            throw new NotFoundException($"RidesSummarizedReport with id {id} not found.");
+        }
 
         bool isComplete = reportFound.AmountOfNextRidesToSummarize == 0;
         return isComplete;
     }
 
-    
+
 
     public RidesSummarizedReport GetRidesSummarizedReportById(Guid idOfReportToGet)
     {
-        if (AskForCompleteness(idOfReportToGet))
+        RidesSummarizedReport reportFound = _rideRepository.GetRidesSummarizedReportById(idOfReportToGet);
+
+        if (reportFound == null)
         {
-            RidesSummarizedReport reportFound = _rideRepository.GetRidesSummarizedReportById(idOfReportToGet);
-            return reportFound;
+            throw new NotFoundException($"RidesSummarizedReport with id {idOfReportToGet} not found.");
         }
-        else
+
+        if (!AskForCompleteness(idOfReportToGet))
         {
             throw new InvalidReportException("Report is not done yet.");
         }
+
+        return reportFound;
     }
-    
+
+
 }

@@ -69,25 +69,29 @@ namespace StatisticsServerAPI.Controllers
             try
             {
                 RidesSummarizedReport report = _rideService.GetRidesSummarizedReportById(id);
-                
+
                 GetRidesSummarizedReportResponse reportResponse = new GetRidesSummarizedReportResponse
                 {
                     RidesSummarized = report.RidesSummarized.Select(ride => new GetRideSummarizedResponse
                     {
                         Published = ride.Published,
                         Passengers = ride.Passengers,
-                        InitialLocation = (CitiesEnumEventResponse) ride.InitialLocation,
+                        InitialLocation = (CitiesEnumEventResponse)ride.InitialLocation,
                         DepartureTime = ride.DepartureTime,
                         AvailableSeats = ride.AvailableSeats,
                         PricePerPerson = ride.PricePerPerson
                     }).ToList()
                 };
-                
+
                 return Ok(reportResponse);
             }
             catch (InvalidReportException exception)
             {
                 return BadRequest(exception.Message);
+            }
+            catch (NotFoundException exception)
+            {
+                return NotFound(exception.Message);
             }
             catch (Exception)
             {
@@ -114,6 +118,10 @@ namespace StatisticsServerAPI.Controllers
                 {
                     message = "The report is not done yet, it needs more time."
                 });
+            }
+            catch (NotFoundException exception)
+            {
+                return NotFound(exception.Message);
             }
             catch (Exception)
             {

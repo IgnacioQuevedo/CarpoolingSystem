@@ -2,6 +2,7 @@ using StatisticsServerAPI.DataAccess.MemoryDatabase;
 using StatisticsServerAPI.Domain;
 using StatisticsServerAPI.MqDomain;
 using System.Collections.Concurrent;
+using System.Composition;
 
 namespace StatisticsServerAPI.DataAccess.Repositories;
 
