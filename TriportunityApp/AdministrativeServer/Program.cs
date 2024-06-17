@@ -124,6 +124,59 @@ namespace AdministrativeServer
 
 
 
+        private static async Task<string> PickVehicleAsync(string userId)
+        {
+            try
+            {
+                Console.WriteLine("Select the vehicle you will use for this ride");
+
+                GetAllVehiclesByUserRequest request = new GetAllVehiclesByUserRequest();
+                request.UserId = userId;
+
+                var vehiclesOfUser = _client.GetAllVehiclesByUser(request);
+
+                if (vehiclesOfUser.Vehicles.Count == 0)
+                {
+                    Console.WriteLine("No vehicles were found.");
+                    return null;
+                }
+
+                int i = 0;
+                foreach (var vehicle in vehiclesOfUser.Vehicles)
+                {
+                    Console.WriteLine($"{i++} - Vehicle ID: {vehicle.Id}, Model: {vehicle.VehicleModel}");
+                }
+
+                Console.WriteLine("Select an option:");
+                string optionSelected = Console.ReadLine();
+
+                if (int.TryParse(optionSelected, out int optionValue) && optionValue >= 0 && optionValue < vehiclesOfUser.Vehicles.Count)
+                {
+                    Console.WriteLine($"{vehiclesOfUser.Vehicles[optionValue].Id} has been selected");
+                    return vehiclesOfUser.Vehicles[optionValue].Id.ToString();
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid user number.");
+                    return await PickVehicleAsync(userId); // Recursión si la opción seleccionada no es válida
+                }
+            }
+            catch (RpcException ex)
+            {
+                Console.WriteLine($"Error communicating with gRPC server: {ex.Status.Detail}");
+                MainMenuOptions();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                MainMenuOptions();
+                return null;
+            }
+        }
+
+
+
         static async Task CreateRideAsync()
         {
             try
@@ -146,7 +199,7 @@ namespace AdministrativeServer
                 Console.Write("Pets Allowed (Y/N): ");
                 bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
                 Console.Write("Vehicle ID: ");
-                string vehicleId = Console.ReadLine();
+                string vehicleId = await PickVehicleAsync(driverId);
 
                 var request = new RideRequest
                 {
@@ -175,16 +228,17 @@ namespace AdministrativeServer
         }
 
 
-        static void EditRide()
+        static async Task EditRide()
         {
             Console.Clear();
             Console.WriteLine("Edit Ride");
-            // Collect ride details from the user
+
             string rideId = SelectRide("Edit");
             if (rideId == null) return;
 
             Console.Write("Driver ID: ");
-            string driverId = Console.ReadLine();
+            Console.WriteLine("Fetching users...");
+            string driverId = await PickUserAsync();
             int initialLocation = SelectCity("Initial Location");
             int endingLocation = SelectCity("Ending Location");
 
@@ -197,7 +251,7 @@ namespace AdministrativeServer
             Console.Write("Pets Allowed (Y/N): ");
             bool petsAllowed = Console.ReadLine().ToUpper() == "Y";
             Console.Write("Vehicle ID: ");
-            string vehicleId = Console.ReadLine();
+            string vehicleId = await PickUserAsync();
 
             var request = new RideRequest
             {
