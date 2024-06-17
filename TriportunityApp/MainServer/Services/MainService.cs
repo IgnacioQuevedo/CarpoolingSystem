@@ -1,4 +1,4 @@
-﻿using Grpc.Core;
+using Grpc.Core;
 using GrpcService;
 using MainServer.Objects.Domain;
 using MainServer.Objects.Domain.Enums;
@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using MainServer.Exceptions;
 using MainServer.Objects.Domain.VehicleModels;
 
 namespace MainServer.Services
@@ -16,8 +17,9 @@ namespace MainServer.Services
     public class MainService : AdministrativeService.AdministrativeServiceBase
     {
         private readonly RideRepository _rideRepository;
+        private readonly List<IServerStreamWriter<GrpcService.Ride>> _subscribers = new List<IServerStreamWriter<GrpcService.Ride>>();
         private readonly UserRepository _userRepository;
-        private static readonly List<IServerStreamWriter<GrpcService.Ride>> _streamWriters = new List<IServerStreamWriter<GrpcService.Ride>>();
+
 
         public MainService()
         {
@@ -25,44 +27,65 @@ namespace MainServer.Services
             _userRepository = new UserRepository();
         }
 
+
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)
         {
-            _streamWriters.Add(responseStream);
+            int remainingRides = request.Count;
+            int initialRideCount = 0;
 
             try
             {
-                var rides = _rideRepository.GetNextRides(request.Count);
-                foreach (var ride in rides)
+                initialRideCount = _rideRepository.GetRides().Count;
+            }
+            catch (RideException) { }
+
+            while (remainingRides > 0)
+            {
+                List<Objects.Domain.Ride> newRides = null;
+                try
                 {
-                    var grpcRide = new GrpcService.Ride
+                    var currentRides = _rideRepository.GetRides();
+                    if (currentRides.Count > initialRideCount)
                     {
-                        RideId = ride.Id.ToString(),
-                        DriverId = ride.DriverId.ToString(),
-                        Published = ride.Published,
-                        InitialLocation = (int)ride.InitialLocation,
-                        EndingLocation = (int)ride.EndingLocation,
-                        DepartureTime = ride.DepartureTime.ToString("o"),
-                        AvailableSeats = ride.AvailableSeats,
-                        PricePerPerson = ride.PricePerPerson,
-                        PetsAllowed = ride.PetsAllowed,
-                        VehicleId = ride.VehicleId.ToString()
-                    };
-                    grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
-
-                    await responseStream.WriteAsync(grpcRide);
+                        newRides = currentRides.Skip(initialRideCount).Take(currentRides.Count - initialRideCount).ToList();
+                        initialRideCount = currentRides.Count;
+                    }
                 }
+                catch (RideException) { }
 
-                await Task.Delay(-1);
-            }
-            catch (Exception ex)
-            {
-                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
-            }
-            finally
-            {
-                _streamWriters.Remove(responseStream);
+                if (newRides != null && newRides.Any())
+                {
+                    foreach (var ride in newRides)
+                    {
+                        var grpcRide = new GrpcService.Ride
+                        {
+                            RideId = ride.Id.ToString(),
+                            DriverId = ride.DriverId.ToString(),
+                            Published = ride.Published,
+                            InitialLocation = (int)ride.InitialLocation,
+                            EndingLocation = (int)ride.EndingLocation,
+                            DepartureTime = ride.DepartureTime.ToString("o"),
+                            AvailableSeats = ride.AvailableSeats,
+                            PricePerPerson = ride.PricePerPerson,
+                            PetsAllowed = ride.PetsAllowed,
+                            VehicleId = ride.VehicleId.ToString()
+                        };
+                        grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
+
+                        await responseStream.WriteAsync(grpcRide);
+                        remainingRides--;
+
+                        if (remainingRides <= 0)
+                        {
+                            break;
+                        }
+                    }
+                }
             }
         }
+
+
+
 
         public override async Task<RideResponse> AddRide(RideRequest request, ServerCallContext context)
         {
@@ -86,16 +109,12 @@ namespace MainServer.Services
                 };
                 grpcRide.Passengers.AddRange(ride.Passengers.Select(p => p.ToString()));
 
-                foreach (var streamWriter in _streamWriters)
-                {
-                    await streamWriter.WriteAsync(grpcRide);
-                }
 
                 return new RideResponse { Status = "Ride added successfully" };
             }
             catch (Exception ex)
             {
-                throw new RpcException(new Status(StatusCode.Internal, ex.Message));
+                throw new RpcException(new Status(StatusCode.Internal, $"Error: {ex.Message}"));
             }
         }
 
