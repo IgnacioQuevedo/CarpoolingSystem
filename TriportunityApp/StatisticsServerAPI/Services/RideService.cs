@@ -16,7 +16,7 @@ public class RideService : IRideService
         _rideRepository = rideRepository;
     }
 
-    public IEnumerable<GetRideFilteredResponse> GetRidesFiltered(RideFilter filters)
+    public IEnumerable<GetRideFilteredResponse> GenerateRidesFiltered(RideFilter filters)
     {
         IEnumerable<RideEvent> rides = _rideRepository.GetRides();
 

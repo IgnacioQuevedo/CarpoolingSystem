@@ -39,7 +39,7 @@ namespace StatisticsServerAPI.Controllers
                     VehicleId = filters.VehicleId
                 };
 
-                return Ok(_rideService.GetRidesFiltered(filtersToApply));
+                return Ok(_rideService.GenerateRidesFiltered(filtersToApply));
             }
             catch (Exception)
             {
