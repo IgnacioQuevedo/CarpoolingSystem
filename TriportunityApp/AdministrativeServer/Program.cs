@@ -39,19 +39,19 @@ namespace AdministrativeServer
                     switch (option)
                     {
                         case "1":
-                            await CreateRide();
+                            await CreateRideAsync();
                             break;
                         case "2":
-                            await EditRide();
+                            await EditRideAsync();
                             break;
                         case "3":
-                            await DeleteRide();
+                            await DeleteRideAsync();
                             break;
                         case "4":
-                            await ViewRideRatings();
+                            await ViewRideRatingsAsync();
                             break;
                         case "5":
-                            await ViewNextNRides();
+                            await ViewNextNRidesAsync();
                             break;
                         case "6":
                             keepRunning = false;
@@ -79,7 +79,7 @@ namespace AdministrativeServer
             }
         }
 
-        static async Task CreateRide()
+        static async Task CreateRideAsync()
         {
             Console.Clear();
             Console.WriteLine("Create Ride");
@@ -87,14 +87,14 @@ namespace AdministrativeServer
             {
                 Console.Write("Driver ID: ");
                 string driverId = Console.ReadLine();
-                int initialLocation = SelectCity("Initial Location");
-                int endingLocation = SelectCity("Ending Location");
+                int initialLocation = await SelectCityAsync("Initial Location");
+                int endingLocation = await SelectCityAsync("Ending Location");
 
-                string departureTime = InputDepartureTime();
+                string departureTime = await InputDepartureTimeAsync();
 
-                int availableSeats = PickAmountOfAvailableSeats();
-                double pricePerPerson = IntroducePricePerPerson();
-                bool petsAllowed = DecideIfPetsAreAllowed();
+                int availableSeats = await PickAmountOfAvailableSeatsAsync();
+                double pricePerPerson = await IntroducePricePerPersonAsync();
+                bool petsAllowed = await DecideIfPetsAreAllowedAsync();
                 Console.Write("Vehicle ID: ");
                 string vehicleId = Console.ReadLine();
 
@@ -129,32 +129,29 @@ namespace AdministrativeServer
             }
         }
 
-        static async Task EditRide()
+        static async Task EditRideAsync()
         {
             Console.Clear();
             Console.WriteLine("Edit Ride");
             try
             {
-                string rideId;
-                while (true)
+                string rideId = await SelectRideAsync("Edit");
+                if (rideId == null)
                 {
-                    rideId = SelectRide("Edit");
-                    if (rideId != null)
-                        break;
-                    else
-                        Console.WriteLine("Invalid selection. Please try again.");
+                    Console.WriteLine("No ride selected or available. Returning to menu.");
+                    return;
                 }
 
                 Console.Write("Driver ID: ");
                 string driverId = Console.ReadLine();
-                int initialLocation = SelectCity("Initial Location");
-                int endingLocation = SelectCity("Ending Location");
+                int initialLocation = await SelectCityAsync("Initial Location");
+                int endingLocation = await SelectCityAsync("Ending Location");
 
-                string departureTime = InputDepartureTime();
+                string departureTime = await InputDepartureTimeAsync();
 
-                int availableSeats = PickAmountOfAvailableSeats();
-                double pricePerPerson = IntroducePricePerPerson();
-                bool petsAllowed = DecideIfPetsAreAllowed();
+                int availableSeats = await PickAmountOfAvailableSeatsAsync();
+                double pricePerPerson = await IntroducePricePerPersonAsync();
+                bool petsAllowed = await DecideIfPetsAreAllowedAsync();
                 Console.Write("Vehicle ID: ");
                 string vehicleId = Console.ReadLine();
 
@@ -188,22 +185,17 @@ namespace AdministrativeServer
             }
         }
 
-
-
-        static async Task DeleteRide()
+        static async Task DeleteRideAsync()
         {
             Console.Clear();
             Console.WriteLine("Delete Ride");
             try
             {
-                string rideId;
-                while (true)
+                string rideId = await SelectRideAsync("Delete");
+                if (rideId == null)
                 {
-                    rideId = SelectRide("Delete");
-                    if (rideId != null)
-                        break;
-                    else
-                        Console.WriteLine("Invalid selection. Please try again.");
+                    Console.WriteLine("No ride selected or available. Returning to menu.");
+                    return;
                 }
 
                 var request = new RideRequest { RideId = rideId };
@@ -225,15 +217,13 @@ namespace AdministrativeServer
             }
         }
 
-
-
-        static async Task ViewRideRatings()
+        static async Task ViewRideRatingsAsync()
         {
             Console.Clear();
             Console.WriteLine("View Ride Ratings");
             try
             {
-                string rideId = SelectRide("View Ratings");
+                string rideId = await SelectRideAsync("View Ratings");
                 if (rideId == null) return;
 
                 var request = new RideRequest { RideId = rideId };
@@ -258,7 +248,7 @@ namespace AdministrativeServer
             }
         }
 
-        static async Task ViewNextNRides()
+        static async Task ViewNextNRidesAsync()
         {
             Console.Clear();
             Console.WriteLine("View Next N Rides");
@@ -267,7 +257,7 @@ namespace AdministrativeServer
                 int n;
                 do
                 {
-                    Console.Write("Enter the number of rides to view : ");
+                    Console.Write("Enter the number of rides to view: ");
                 } while (!int.TryParse(Console.ReadLine(), out n) || n < 1);
 
                 var request = new StreamRidesRequest { Count = n };
@@ -286,6 +276,8 @@ namespace AdministrativeServer
                 }
 
                 Console.WriteLine("You have seen the next {0} rides.", n);
+                Console.WriteLine("Press any key to return to the main menu...");
+                Console.ReadKey();
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Unavailable)
             {
@@ -300,8 +292,6 @@ namespace AdministrativeServer
                 Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
-
-
 
         static void DisplayRide(Ride ride, int index)
         {
@@ -321,8 +311,7 @@ namespace AdministrativeServer
             Console.WriteLine("==================================================");
         }
 
-
-        static string SelectRide(string action)
+        static async Task<string> SelectRideAsync(string action)
         {
             Console.WriteLine($"Select Ride to {action}");
             var request = new Empty();
@@ -330,7 +319,7 @@ namespace AdministrativeServer
 
             try
             {
-                response = _client.GetAllRides(request);
+                response = await _client.GetAllRidesAsync(request);
             }
             catch (RpcException ex)
             {
@@ -338,15 +327,22 @@ namespace AdministrativeServer
                 return null;
             }
 
-            int startIndex = 0;
+            if (response.Rides.Count == 0)
+            {
+                Console.WriteLine("No rides available.");
+                return null;
+            }
 
-            while (true)
+            int startIndex = 0;
+            bool showMore = true;
+
+            while (showMore)
             {
                 var ridesToShow = response.Rides.Skip(startIndex).Take(10).ToList();
                 if (!ridesToShow.Any())
                 {
                     Console.WriteLine("No more rides to show.");
-                    return null; // No rides to show, exit the loop
+                    return null;
                 }
 
                 for (int i = 0; i < ridesToShow.Count; i++)
@@ -356,37 +352,36 @@ namespace AdministrativeServer
 
                 if (ridesToShow.Count < 10)
                 {
-                    break;
-                }
-
-                Console.Write("Show more rides? (Y/N): ");
-                if (Console.ReadLine().ToUpper() != "Y")
-                {
-                    break;
-                }
-
-                startIndex += 10;
-            }
-
-            while (true)
-            {
-                Console.Write("Enter the number of the ride: ");
-                if (int.TryParse(Console.ReadLine(), out int rideIndex) && rideIndex > 0 && rideIndex <= response.Rides.Count)
-                {
-                    return response.Rides[rideIndex - 1].RideId;
+                    showMore = false;
                 }
                 else
                 {
-                    Console.WriteLine("Invalid ride number selected. Please try again.");
+                    Console.Write("Show more rides? (Y/N): ");
+                    showMore = Console.ReadLine().ToUpper() == "Y";
+                    startIndex += 10;
                 }
             }
+
+            Console.Write("Enter the number of the ride: ");
+            int rideIndex;
+            bool validInput = int.TryParse(Console.ReadLine(), out rideIndex);
+
+            while (!validInput || rideIndex <= 0 || rideIndex > response.Rides.Count)
+            {
+                Console.WriteLine("Invalid ride number selected. Please try again.");
+                Console.Write("Enter the number of the ride: ");
+                validInput = int.TryParse(Console.ReadLine(), out rideIndex);
+            }
+
+            return response.Rides[rideIndex - 1].RideId;
         }
 
-
-
-        static int SelectCity(string cityType)
+        static async Task<int> SelectCityAsync(string cityType)
         {
-            while (true)
+            bool validInput;
+            int cityIndex;
+
+            do
             {
                 Console.WriteLine($"Select {cityType}");
                 var cities = System.Enum.GetValues(typeof(CitiesEnum)).Cast<CitiesEnum>().ToList();
@@ -397,45 +392,64 @@ namespace AdministrativeServer
                 }
 
                 Console.Write("Enter the number of the city: ");
-                if (int.TryParse(Console.ReadLine(), out int cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count)
-                {
-                    return cityIndex - 1;
-                }
-                else
+                validInput = int.TryParse(Console.ReadLine(), out cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count;
+
+                if (!validInput)
                 {
                     Console.WriteLine("Invalid city number selected. Please try again.");
                 }
-            }
+            } while (!validInput);
+
+            return cityIndex - 1;
         }
 
-        static string InputDepartureTime()
+        static async Task<string> InputDepartureTimeAsync()
         {
-            while (true)
+            bool validInput;
+            int year, month, day, hour;
+            DateTime departureTime = new DateTime();
+
+            do
             {
                 try
                 {
                     Console.Write("Enter Year of Departure: ");
-                    int year = int.Parse(Console.ReadLine());
-                    Console.Write("Enter Month of Departure: ");
-                    int month = int.Parse(Console.ReadLine());
-                    Console.Write("Enter Day of Departure: ");
-                    int day = int.Parse(Console.ReadLine());
-                    Console.Write("Enter Hour of Departure (24-hour format): ");
-                    int hour = int.Parse(Console.ReadLine());
+                    validInput = int.TryParse(Console.ReadLine(), out year);
+                    if (!validInput || year < DateTime.Now.Year) throw new Exception();
 
-                    DateTime departureTime = new DateTime(year, month, day, hour, 0, 0, DateTimeKind.Utc);
-                    return departureTime.ToString("o");
+                    Console.Write("Enter Month of Departure: ");
+                    validInput = int.TryParse(Console.ReadLine(), out month);
+                    if (!validInput || month < 1 || month > 12) throw new Exception();
+
+                    Console.Write("Enter Day of Departure: ");
+                    validInput = int.TryParse(Console.ReadLine(), out day);
+                    if (!validInput || day < 1 || day > DateTime.DaysInMonth(year, month)) throw new Exception();
+
+                    Console.Write("Enter Hour of Departure (24-hour format): ");
+                    validInput = int.TryParse(Console.ReadLine(), out hour);
+                    if (!validInput || hour < 0 || hour > 23) throw new Exception();
+
+                    departureTime = new DateTime(year, month, day, hour, 0, 0, DateTimeKind.Utc);
+                    validInput = true;
                 }
-                catch (Exception)
+                catch
                 {
+                    validInput = false;
                     Console.WriteLine("Invalid date or time entered. Please try again.");
                 }
-            }
+            } while (!validInput);
+
+            return departureTime.ToString("o");
         }
 
-        static int PickAmountOfAvailableSeats()
+
+
+        static async Task<int> PickAmountOfAvailableSeatsAsync()
         {
-            while (true)
+            bool validInput;
+            int optionValue;
+
+            do
             {
                 Console.WriteLine("Introduce the number of seats available on your vehicle");
 
@@ -446,59 +460,47 @@ namespace AdministrativeServer
                 Console.WriteLine("5");
                 Console.WriteLine("6");
 
-                if (int.TryParse(Console.ReadLine(), out int optionValue) && optionValue > 0 && optionValue <= 6)
-                {
-                    return optionValue;
-                }
-                else
+                validInput = int.TryParse(Console.ReadLine(), out optionValue) && optionValue > 0 && optionValue <= 6;
+
+                if (!validInput)
                 {
                     Console.WriteLine("Please introduce a valid number of seats (1-6).");
                 }
-            }
+            } while (!validInput);
+
+            return optionValue;
         }
 
-        static double IntroducePricePerPerson()
+        static async Task<double> IntroducePricePerPersonAsync()
         {
-            while (true)
+            bool validInput;
+            double pricePerPerson;
+
+            do
             {
                 Console.WriteLine("Introduce the price per person of your ride");
 
-                if (double.TryParse(Console.ReadLine(), out double pricePerPerson) && pricePerPerson >= 0)
-                {
-                    return pricePerPerson;
-                }
-                else
+                validInput = double.TryParse(Console.ReadLine(), out pricePerPerson) && pricePerPerson >= 0;
+
+                if (!validInput)
                 {
                     Console.WriteLine("Please introduce a correct numeric value for the price, try again.");
                 }
-            }
+            } while (!validInput);
+
+            return pricePerPerson;
         }
 
-        static bool DecideIfPetsAreAllowed()
+        static async Task<bool> DecideIfPetsAreAllowedAsync()
         {
-            while (true)
-            {
-                Console.WriteLine("Do you want to allow pets in your vehicle?");
-                Console.WriteLine("Y - If yes");
-                Console.WriteLine("Another key - If not");
+            Console.WriteLine("Do you want to allow pets in your vehicle?");
+            Console.WriteLine("Y - If yes");
+            Console.WriteLine("Any other key - If not");
 
-                string optionSelected = Console.ReadLine().ToUpper();
+            var optionSelected = Console.ReadKey().Key;
+            Console.WriteLine(); 
 
-                if (optionSelected != null && optionSelected.Equals("Y"))
-                {
-                    Console.WriteLine("You have allowed pets on your vehicle");
-                    return true;
-                }
-                else if (optionSelected != null && !optionSelected.Equals("Y"))
-                {
-                    Console.WriteLine("You have not allowed pets on your vehicle");
-                    return false;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid option. Please try again.");
-                }
-            }
+            return optionSelected == ConsoleKey.Y;
         }
     }
 }

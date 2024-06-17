@@ -27,7 +27,13 @@ namespace MainServer.Services
         public override async Task StreamRides(StreamRidesRequest request, IServerStreamWriter<GrpcService.Ride> responseStream, ServerCallContext context)
         {
             int remainingRides = request.Count;
-            int lastRideCount = 0;
+            int initialRideCount = 0;
+
+            try
+            {
+                initialRideCount = _rideRepository.GetRides().Count;
+            }
+            catch (RideException) { }
 
             while (remainingRides > 0)
             {
@@ -35,16 +41,13 @@ namespace MainServer.Services
                 try
                 {
                     var currentRides = _rideRepository.GetRides();
-                    if (currentRides.Count > lastRideCount)
+                    if (currentRides.Count > initialRideCount)
                     {
-                        newRides = currentRides.Skip(lastRideCount).Take(currentRides.Count - lastRideCount).ToList();
-                        lastRideCount = currentRides.Count;
+                        newRides = currentRides.Skip(initialRideCount).Take(currentRides.Count - initialRideCount).ToList();
+                        initialRideCount = currentRides.Count;
                     }
                 }
-                catch (RideException)
-                {
-                    
-                }
+                catch (RideException) { }
 
                 if (newRides != null && newRides.Any())
                 {
@@ -76,6 +79,8 @@ namespace MainServer.Services
                 }
             }
         }
+
+
 
 
         public override async Task<RideResponse> AddRide(RideRequest request, ServerCallContext context)
