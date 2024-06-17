@@ -1,4 +1,4 @@
-﻿using Grpc.Core;
+using Grpc.Core;
 using GrpcService;
 using MainServer.Objects.Domain;
 using MainServer.Objects.Domain.Enums;

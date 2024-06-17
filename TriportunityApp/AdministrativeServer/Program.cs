@@ -196,8 +196,6 @@ namespace AdministrativeServer
             }
         }
 
-
-
         static async Task CreateRideAsync()
         {
             try
@@ -217,6 +215,7 @@ namespace AdministrativeServer
                 int availableSeats = PickAmountOfAvailableSeats();
                 double pricePerPerson = IntroducePricePerPerson();
                 bool petsAllowed = DecideIfPetsAreAllowed();
+
                 string vehicleId = await PickVehicleAsync(driverId);
 
                 var request = new RideRequest
@@ -452,6 +451,12 @@ namespace AdministrativeServer
                 return null;
             }
 
+            if (response.Rides.Count == 0)
+            {
+                Console.WriteLine("No rides available.");
+                return null;
+            }
+
             int startIndex = 0;
             bool showMore = true;
 
@@ -495,7 +500,7 @@ namespace AdministrativeServer
             return response.Rides[rideIndex - 1].RideId;
         }
 
-        static int SelectCity(string cityType)
+        static async Task<int> SelectCityAsync(string cityType)
         {
             bool validInput;
             int cityIndex;
@@ -512,7 +517,7 @@ namespace AdministrativeServer
 
                 Console.Write("Enter the number of the city: ");
                 validInput = int.TryParse(Console.ReadLine(), out cityIndex) && cityIndex >= 1 && cityIndex <= cities.Count;
-
+              
                 if (!validInput)
                 {
                     Console.WriteLine("Invalid city number selected. Please try again.");
@@ -522,7 +527,7 @@ namespace AdministrativeServer
             return cityIndex - 1;
         }
 
-        static string InputDepartureTime()
+        static async Task<string> InputDepartureTimeAsync()
         {
             bool validInput;
             int year, month, day, hour;
