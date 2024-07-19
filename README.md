@@ -58,7 +58,7 @@ Welcome to **Triportunity** — your go-to solution for efficient and organized 
 - **Postman Collection**: A collection of Postman requests is included for testing server endpoints. Refer to the provided documentation for details on using these requests.
 - **Documentation**: Comprehensive documentation is available, detailing the architecture, design decisions, and setup instructions.
 
-## 🚀 Getting Started
+## 🐣 Getting Started
 1. **Clone the Repository**: `git clone <repository-url>`
 2. **Install Dependencies**: Follow the setup instructions in the `README.md` and configuration files.
 3. **Run the Application**: Start the server and client applications using the provided scripts and configurations.
